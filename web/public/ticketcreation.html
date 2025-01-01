@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Brace for Techmedic</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <link href="css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Varela&family=Lato:wght@100;300;400;700;900&display=swap" rel="stylesheet"/>
+    <link href="media/bracelogo.png" rel="shortcut icon" type="image/x-icon"/>
+</head>
+<body class="body">
+    <div class="div-block-2">
+        <div class="div-block">
+            <img src="media/bracelogo.png" class="bracelogo" alt="Brace"/>
+            <h1 class="braceh1">RACE</h1>
+        </div>
+        <div class="header-right">
+            <a href="index.html" class="back-button">
+                <img src="media/backbutton.png" alt="Back" class="back-button"/>
+            </a>
+            <div class="text-container">
+                <h1 class="login-title">Techmedic</h1>
+            </div>
+        </div>
+    </div>
+    <p class="paragraph">Enter the details of your issue to open a ticket and connect with an agent.</p>
+    <div class="form-block">
+        <form id="ticketcreation" name="ticketcreation" action="chat.html" method="get" class="form">
+            <label for="Title" class="field-label">Title</label>
+            <input class="text-field" maxlength="100" name="Title" placeholder="Enter a title for the ticket, up to 100 characters" type="text" id="Username" required=""/>
+            <label for="Desc" class="field-label-2">Description</label>
+            <textarea id="description" maxlength="600" name="description" rows="4" placeholder="Enter a description for the ticket, up to 600 characters"></textarea>
+            <label for="Ticket-type" class="field-label-2">Ticket type</label>
+            <select id="Ticket-type" name="Ticket-type">
+                <option value="" disabled selected>Select a ticket type</option>
+                <option value="pc">PC/Laptop hardware</option>
+                <option value="mobile">Mobile phone hardware</option>
+                <option value="windows">Windows</option>
+                <option value="mac">MacOS</option>
+                <option value="android/ios">Android/iOS</option>
+                <option value="application">Application</option>
+                <option value="network">Network</option>
+                <option value="miscellaneous">Miscellaneous</option>
+            </select>
+            <input type="submit" class="submit-button" value="Open ticket"/>
+        </form>
+        <div class="success-message">
+            <div class="text-block-2">
+                <br/>Details submitted. <br/><br/>Loading chat...<br/>
+            </div>
+        </div>
+        <div class="error-message">
+            <div class="text-block">
+                Unable to proceed. <br/>Error:<br/>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

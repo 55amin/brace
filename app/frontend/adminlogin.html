@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Brace</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <link href="css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Varela&family=Lato:wght@100;300;400;700;900&display=swap" rel="stylesheet"/>
+    <link href="media/bracelogo.png" rel="shortcut icon" type="image/x-icon"/>
+</head>
+<body class="body">
+    <div class="header">
+        <div class="header-left">
+            <img src="media/bracelogo.png" class="bracelogo" alt="Brace"/>
+            <h1 class="braceh1">RACE</h1>
+        </div>
+        <div class="header-right">
+            <a href="index.html" class="back-button">
+                <img src="media/backbutton.png" alt="Back" class="back-button"/>
+            </a>
+            <div class="text-container">
+                <h1 class="login-title">Admin Login</h1>
+            </div>
+        </div>
+    </div>
+    <div class="form-block">
+        <form id="adminlogin" name="adminlogin" method="get" class="form">
+            <label for="forename" class="field-label">Forename</label>
+            <input class="text-field" maxlength="256" name="forename" placeholder="Enter your forename" type="text" id="forename" required=""/>
+            <label for="surname" class="field-label">Surname</label>
+            <input class="text-field" maxlength="256" name="surname" placeholder="Enter your surname" type="text" id="surname" required=""/>
+            <label for="email" class="field-label-2">Email address</label>
+            <input class="text-field-2" maxlength="256" name="email" placeholder="Enter your email address" type="email" id="email" required=""/>
+            <label for="password" class="field-label-2">Password</label>
+            <input class="text-field-2" maxlength="256" name="password" placeholder="Enter your password" type="password" id="password" required=""/>
+            <input type="submit" class="submit-button" value="Log in"/>
+            <input type="button" class="reset-password" value="Reset password" onclick="location.href='resetscreen.html'"/>
+        </form>
+        <div class="success-message">
+            <div class="text-block-2">
+                <br/>Welcome back. <br/><br/>Logging in...<br/>
+            </div>
+        </div>
+        <div class="error-message">
+            <div class="text-block">
+                Incorrect details.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

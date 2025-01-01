@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" class="chat-screen">
+<head>
+    <meta charset="utf-8"/>
+    <title>Brace</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <link href="css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Varela&family=Lato:wght@100;300;400;700;900&display=swap" rel="stylesheet"/>
+    <link href="media/bracelogo.png" rel="shortcut icon" type="image/x-icon"/>
+</head>
+<body class="body chat-screen">
+    <div class="header">
+        <div class="header-left">
+            <img src="media/bracelogo.png" class="bracelogo" alt="Brace"/>
+            <h1 class="braceh1">RACE</h1>
+        </div>
+        <div class="header-right">
+            <a href="agentscreen.html" class="back-button">
+                <img src="media/backbutton.png" alt="Back" class="back-button"/>
+            </a>
+            <div class="text-container">
+                <h1 class="login-title">Chat</h1>
+            </div>
+        </div>
+    </div>
+    <div class="chat-interface">
+        <div class="chat-messages" id="chat-messages">
+          <div class="message agent">
+            <div class="message-header">
+                <span class="message-sender agent">Agent</span>
+                <span class="message-time agent">16:11</span>
+            </div>
+            <p>Hi, I'm Carissa. I've looked at your ticket, and I see that you're having issues with your Windows 10 PC updating to Windows 11, is that correct?</p>
+          </div>
+          <div class="message customer">
+            <div class="message-header">
+                <span class="message-sender customer">Customer</span>
+                <span class="message-time customer">16:12</span>
+            </div>
+            <p>Yes, my laptop is only around 6 years old but it won't let me update</p>
+          </div>
+          <div class="message agent">
+            <div class="message-header">
+                <span class="message-sender agent">Agent</span>
+                <span class="message-time agent">16:12</span>
+            </div>
+            <p>Sorry to hear that. Can you please tell me what device you're trying to install Windows 11 on and the model number of your laptop?</p>
+          </div>
+          <div class="message customer">
+            <div class="message-header">
+                <span class="message-sender customer">Customer</span>
+                <span class="message-time customer">16:16</span>
+            </div>
+            <p>It's a Thinkpad laptop and the model number is ZE4XHEM1U54N2KAH</p>
+          </div>
+          <div class="message customer">
+            <div class="message-header">
+                <span class="message-sender customer">Customer</span>
+                <span class="message-time customer">16:16</span>
+            </div>
+            <p>I don't know exactly what kind of Thinkpad laptop it is though</p>
+          </div>
+          <div class="message agent">
+            <div class="message-header">
+                <span class="message-sender agent">Agent</span>
+                <span class="message-time agent">16:17</span>
+            </div>
+            <p>Unfortunately, your laptop model does not have a TPM 2.0 module, so it can't be updated to Windows 11. Please let me know if you have any more enquiries. </p>
+          </div>
+          <div class="message customer">
+            <div class="message-header">
+                <span class="message-sender customer">Customer</span>
+                <span class="message-time customer">16:19</span>
+            </div>
+            <p>How can I get a tpm 2.0 then?</p>
+          </div>
+        </div>
+        <div class="chat-input">
+          <input type="text" maxlength="400" placeholder="Type your message...">
+          <a>
+            <img src="media/attachmentbutton.png" alt="Attachment" class="attachment"/>
+          </a>
+          <button>Send</button>
+          <script>
+            window.onload = function() {
+                let chatMessages = document.getElementById('chat-messages');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            };
+        </script>
+        </div>
+    </div>
+        
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "name": "brace",
+  "version": "1.0.0",
+  "main": "app/frontend/main.js",  
+  "scripts": {
+    "start": "electron .",  
+    "start-web": "cd website && nodemon server.js",  
+    "electron": "electron ."  
+  },
+  "keywords": [],
+  "author": "55amin",
+  "license": "ISC",
+  "description": "OCR A Level Computer Science Project",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "electron": "^33.2.1",
+    "express": "^4.21.2",
+    "mysql2": "^3.12.0",
+    "sequelize": "^6.37.5"
+  },
+  "devDependencies": {
+    "electron-builder": "^25.1.8",
+    "nodemon": "^3.1.9"
+  }
+}

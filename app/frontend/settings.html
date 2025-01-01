@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Brace</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <link href="css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Varela&family=Lato:wght@100;300;400;700;900&display=swap" rel="stylesheet"/>
+    <link href="media/bracelogo.png" rel="shortcut icon" type="image/x-icon"/>
+</head>
+<body class="body">
+    <div class="header">
+        <div class="header-left">
+            <img src="media/bracelogo.png" class="bracelogo" alt="Brace"/>
+            <h1 class="braceh1">RACE</h1>
+        </div>
+        <div class="header-right">
+            <a href="/adminscreen.html" class="back-button">
+                <img src="media/backbutton.png" class="back-button" alt="Back"/>
+            </a>
+            <div class="text-container">
+                <h1 class="login-title">Settings</h1>
+            </div>
+        </div>
+    </div>
+    <div class="settings">
+        <button>Manage account details</button>
+        <button>Manage administrators</button>
+        <button>Manage agents</button>
+        <button>Manage tasks</button>
+        <button>Manage automation</button>
+        <label for="break-duration">Set break duration:</label>
+        <select id="break-duration" name="break-duration">
+            <option value="15">15 minutes</option>
+            <option value="30">30 minutes</option>
+            <option value="60" selected>1 hour</option>
+            <option value="120">2 hours</option>
+        </select>
+        <label for="break-frequency">Set break frequency:</label>
+        <select id="break-frequency" name="break-frequency">
+            <option value="1">1 break</option>
+            <option value="2">2 breaks</option>
+            <option value="3">3 breaks</option>
+            <option value="4">4 breaks</option>
+        </select>
+    </div>
+</body>
+</html>

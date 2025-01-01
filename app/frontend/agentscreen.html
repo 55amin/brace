@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Brace</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <link href="css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Varela&family=Lato:wght@100;300;400;700;900&display=swap" rel="stylesheet"/>
+    <link href="media/bracelogo.png" rel="shortcut icon" type="image/x-icon"/>
+</head>
+<body class="body">
+    <div class="header">
+        <div class="header-left">
+            <img src="media/bracelogo.png" class="bracelogo" alt="Brace"/>
+            <h1 class="braceh1">RACE</h1>
+        </div>
+        <div class="header-right">
+            <a href="chatagent.html" class="chat-button">
+                <img src="media/chatbutton.png" class="chat-button" alt="Chat"/>
+            </a>
+            <a href="agentlogin.html" class="back-button">
+                <img src="media/backbutton.png" class="back-button" alt="Back"/>
+            </a>
+            <div class="text-container">
+                <h1 class="login-title">Agent</h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="toggle-container">
+        <label class="switch">
+            <input title="Switch schedule view" type="checkbox" id="viewToggle">
+            <span class="slider round"></span>
+        </label>
+        <span>Switch schedule view</span>
+    </div>
+    <div class="calendar-container" id="calendarContainer">
+        <div id="calendar"></div>
+    </div>
+    <div class="dropdown-container" id="dropdownContainer">
+        <select title="ticket-dropdown" id="ticketDropdown">
+            <option value="">Select a ticket</option>
+        </select>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendar = document.getElementById('calendar');
+            const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            const daysInMonth = 30; 
+
+            daysOfWeek.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day calendar-day-header';
+                dayHeader.innerText = day;
+                calendar.appendChild(dayHeader);
+            });
+
+            const tickets = [
+                { day: 5, text: 'T-20241205-009' },
+                { day: 9, text: 'T-20241209-005' },
+                { day: 10, text: 'T-20241210-033' },
+                { day: 15, text: 'T-20241215-012' },
+                { day: 18, text: 'T-20241218-004' },
+                { day: 23, text: 'T-20241223-027' }
+            ];
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                day.innerText = i;
+
+                tickets.forEach(ticket => {
+                    if (ticket.day === i) {
+                        const ticketElement = document.createElement('div');
+                        ticketElement.className = 'ticket';
+                        ticketElement.innerText = ticket.text;
+                        day.appendChild(ticketElement);
+                    }
+                });
+
+                calendar.appendChild(day);
+            }
+
+            const ticketDropdown = document.getElementById('ticketDropdown');
+            tickets.forEach(ticket => {
+                const option = document.createElement('option');
+                option.value = ticket.text;
+                option.innerText = `Day ${ticket.day}: ${ticket.text}`;
+                ticketDropdown.appendChild(option);
+            });
+
+            const viewToggle = document.getElementById('viewToggle');
+            const calendarContainer = document.getElementById('calendarContainer');
+            const dropdownContainer = document.getElementById('dropdownContainer');
+
+            viewToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    calendarContainer.style.display = 'none';
+                    dropdownContainer.style.display = 'block';
+                } else {
+                    calendarContainer.style.display = 'block';
+                    dropdownContainer.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
