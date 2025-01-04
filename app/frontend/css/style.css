@@ -132,14 +132,10 @@ button:hover, .login-button:hover, .submit-button:hover, .reset-password:hover, 
 
 .back-button {
   display: inline-block;
-  margin: 5px 10px 0 100px;
-}
-
-a.back-button {
-  display: inline-block;
-  margin: 5px 120px 0 100px;
+  position: relative;
+  margin-left: -20px;
+  top: 2px;
   width: 40px;
-  height: auto;
 }
 
 .back-button img {
@@ -149,37 +145,17 @@ a.back-button {
 
 .chat-button {
   display: inline-block;
-  margin: 5px -160px 0 -160px;
+  position: relative;
+  margin-right: 8px;
+  margin-left: -65px;
+  top: 2px;
+  width: 40px;
+  height: auto;
 }
 
 .chat-button img {
   width: 40px;
   height: auto;
-}
-
-@media (max-width: 768px) {
-  .back-button {
-    margin: 3px -230px 0 -5px; 
-  }
-
-  .back-button img {
-    width: 30px;
-    height: auto;
-  }
-
-  .chat-button {
-    margin: 4px -122px 0 5px; 
-  }
-
-  .chat-button img {
-    width: 30px;
-    height: auto;
-  }
-
-  .login-title {
-    font-size: 20px;
-  }
-
 }
 
 /* Index and login styles */
@@ -188,6 +164,7 @@ a.back-button {
   text-align: right;
   margin-left: auto;
   margin-right: 40px;
+  white-space: nowrap;
 }
 
 .login-options {
@@ -200,10 +177,15 @@ a.back-button {
   width: 100%;
 }
 
-/* Admin styles */
+/* Settings styles */
 .settings-button {
   display: inline-block;
-  margin: 5px -0 0 -45px;
+  position: relative;
+  margin-right: 10px;
+  margin-left: 0;
+  top: 2px;
+  width: 50px;
+  height: auto;
 }
 
 .settings-button img {
@@ -211,55 +193,10 @@ a.back-button {
   height: auto;
 }
 
-.admin-screen.login-title {
-  position: absolute;
-  top: 44px;
-  right: -4px;
-}
-
-.admin-screen.back-button {
-  margin: 5px 0 0 72px;
-}
-
-.admin-screen.chat-button {
-  margin: 5px 0 0 -108px;
-}
-
 .settings {
     display: flex;
     flex-direction: column;
     text-align: left;
-}
-
-@media (max-width: 768px) {
-
-  .settings-button {
-    margin: -12px 9px 0 0; 
-    position: absolute;
-    right: 56px;
-  }
-
-  .settings-button img {
-    width: 40px;
-    height: auto;
-  }
-
-  .admin-screen.back-button {
-    margin: 3px 35px 0 5px;
-  }
-
-  .admin-screen.chat-button {
-    margin: 3px 130px 0 0;
-  }
-
-  .admin-screen.login-title {
-    display: none;
-  }
-
-  .reset-title.login-title {
-    font-size: 16px;
-  }
-
 }
 
 /* Schedule view styles */
@@ -364,55 +301,13 @@ input:checked + .slider:before {
   width: 100%;
 }
 
-@media (max-width: 768px) {
-  #calendar {
-    grid-template-columns: repeat(7, 1fr); /* Adjust columns for smaller screens */
-    gap: 3px; /* Reduce gap */
-  }
-
-  .calendar-day {
-    padding: 2px; /* Reduce padding */
-    font-size: 10px; /* Adjust font size */
-  }
-
-  .calendar-day-header {
-    font-size: 12px; /* Adjust header font size */
-  }
-
-  .ticket {
-    font-size: 8px; /* Adjust ticket font size */
-    padding: 2px; /* Reduce padding */
-  }
-}
-
-@media (max-width: 480px) {
-  #calendar {
-    grid-template-columns: repeat(7, 1fr); /* Further adjust columns for very small screens */
-    gap: 1px; /* Further reduce gap */
-  }
-
-  .calendar-day {
-    padding: 1px; /* Further reduce padding */
-    font-size: 8px; /* Further adjust font size */
-  }
-
-  .calendar-day-header {
-    font-size: 10px; /* Further adjust header font size */
-  }
-
-  .ticket {
-    font-size: 8px; /* Further adjust ticket font size */
-    padding: 2px; /* Further reduce padding */
-  }
-}
-
 /* Chat styles */
 .chat-interface {
   display: flex;
   flex: 1 1 auto;
   position: fixed;
   height: 70%;
-  width: 98 %;
+  width: 98%;
   top: 16%;
   bottom: 20%;
   right: 0;
@@ -496,7 +391,7 @@ input:checked + .slider:before {
   margin: 5px;
   position: fixed;
   height: 40px;
-  width: 98 %;
+  width: 98%;
   bottom: 0;
   left: 0;
   right: 0;

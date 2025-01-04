@@ -1,17 +1,18 @@
 {
   "name": "brace",
   "version": "1.0.0",
-  "main": "app/frontend/main.js",  
+  "main": "app/main.js",
   "scripts": {
-    "start": "electron .",  
-    "start-web": "cd website && nodemon server.js",  
-    "electron": "electron ."  
+    "start": "electron .",
+    "start-web": "cd website && nodemon server.js",
+    "electron": "electron ."
   },
   "keywords": [],
   "author": "55amin",
   "license": "ISC",
   "description": "OCR A Level Computer Science Project",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
