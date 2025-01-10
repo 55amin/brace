@@ -1,6 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 // Define valid channels to prevent unauthorised communication
-const validInvokeChannels = ['create-admin'];
+const validInvokeChannels = ['create-admin', 'check-agent'];
 const validSendChannels = []; 
 const validReceiveChannels = []; 
 

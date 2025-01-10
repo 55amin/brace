@@ -1,4 +1,3 @@
-
 const setupForm = document.getElementById('setupForm');
 setupForm.addEventListener('submit', async (event) => {
     event.preventDefault();

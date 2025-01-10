@@ -16,18 +16,31 @@ const dbConfig = { // Configure database connection
 const connection = mysql.createConnection(dbConfig);
 const admins = [];
 
-// Launch setup screen
-app.on('ready', async () => {
-    mainWindow = new BrowserWindow({
-        width: 1920,
-        height: 1080,
-        webPreferences: {
-            preload: path.join(__dirname, './frontend/preload.js'),
-            nodeIntegration: false,
-            contextIsolation: true
+// Launch start-up screen (or set-up screen if no admins in database)
+app.on('ready', () => {
+    connection.query('SELECT COUNT(*) AS count FROM administrators', (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return;
+        }
+
+        mainWindow = new BrowserWindow({
+            width: 1920,
+            height: 1080,
+            webPreferences: {
+                preload: path.join(__dirname, './frontend/preload.js'),
+                nodeIntegration: false,
+                contextIsolation: true,
+                icon: path.join(__dirname, 'media/bracelogo.png')
+            }
+        });
+
+        if (results[0].count > 0) {
+            mainWindow.loadFile('./app/frontend/index.html');
+        } else {
+            mainWindow.loadFile('./app/frontend/setup.html'); 
         }
     });
-    mainWindow.loadFile('./app/frontend/setup.html');  
 });
 
 // Add admin details to database
@@ -47,8 +60,6 @@ ipcMain.handle('create-admin', async (event, adminData) => {
                     const newAdmin = new Administrator(adminData.forename, adminData.surname, adminData.email, adminData.phone, hashedPassword);
                     newAdmin.setAdminID(adminID); // Create new admin instance and add adminID from database
                     admins.push(newAdmin); // Add new admin to array 
-
-                    // Resolve success response
                     resolve({ success: true, message: 'Administrator account created successfully!' });
                 }
             });
@@ -58,6 +69,26 @@ ipcMain.handle('create-admin', async (event, adminData) => {
         return { success: false, message: 'Failed to create administrator account' };
     }
 });
+ 
+// Check if agent exists in database
+ipcMain.handle('check-agent', async () => {
+    try {
+        return new Promise((resolve, reject) => {
+            connection.query('SELECT COUNT(*) AS count FROM agents', (err, results) => {
+                if (err) {
+                    console.error('Error checking for agents:', err);
+                    reject({ success: false, message: 'Database error' }); 
+                } else {
+                    const count = results[0].count; 
+                    resolve({ success: true, exists: count > 0 });
+                }
+            });
+        });
+    } catch (err) {
+        console.error('Error checking for agents:', err);
+        return { success: false, message: 'Failed to check for agents' };
+    }
+}); 
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') { 

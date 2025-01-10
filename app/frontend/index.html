@@ -17,8 +17,24 @@
         </div>
     </div>
     <div class="login-options">
-        <a href="login/agentlogin.html" class="login-button">Log in as Agent</a>
+        <a href="#" class="login-button" id="agent-login">Log in as Agent</a>
         <a href="login/adminlogin.html" class="login-button">Log in as Administrator</a>
     </div>
+    <script>
+       const agentLogin = document.getElementById('agent-login');
+       agentLogin = addEventListener('click', async (event) => {
+        event.preventDefault(); 
+        try {
+            const response = await window.api.invoke('check-agent');
+            if (!response.exists) {
+                window.location.href = 'login/agentnotfound.html';
+            } else if (response.exists) {
+                window.location.href = 'login/agentlogin.html';
+            }
+        } catch (err) {
+            console.error('Error checking for agents:', err);
+        }
+    });
+    </script>
 </body>
 </html>
