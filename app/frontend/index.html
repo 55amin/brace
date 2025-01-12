@@ -22,9 +22,9 @@
     </div>
     <script>
        const agentLogin = document.getElementById('agent-login');
-       agentLogin = addEventListener('click', async (event) => {
-        event.preventDefault(); 
-        try {
+       agentLogin.addEventListener('click', async (event) => {
+        event.preventDefault();
+        try { // Wait to check if agent exists before redirecting
             const response = await window.api.invoke('check-agent');
             if (!response.exists) {
                 window.location.href = 'login/agentnotfound.html';

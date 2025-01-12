@@ -1,6 +1,21 @@
+function showError(message) {
+    const container = document.getElementById('error-container');
+    const errorMessage = document.createElement('div');
+    errorMessage.className = 'error-message';
+    errorMessage.textContent = message;
+    container.appendChild(errorMessage);
+    errorMessage.style.display = 'block';
+}
+
+window.api.receive('show-error', (message) => {
+    showError(message);
+});
+
 const setupForm = document.getElementById('setupForm');
 setupForm.addEventListener('submit', async (event) => {
     event.preventDefault();
+    const container = document.getElementById('error-container');
+    container.innerHTML = '';
 
     // Data collection
     const forename = document.getElementById('forename').value.trim();
@@ -13,25 +28,19 @@ setupForm.addEventListener('submit', async (event) => {
 
     // Validation
     if (password !== confirmPassword) { 
-        alert('Passwords do not match');
+        showError('Passwords do not match');
         return;
     } 
 
-    try {
-        // Send data to backend to create administrator account
+    try { // Send data to backend to create administrator account
         const adminData = { forename, surname, email, phone, password };
         const response = await window.api.invoke('create-admin', adminData);
         
         if (response.success) {
-            alert('Administrator account created successfully');
-            window.location.reload(); // Reload page to launch startup
-        } else {
-            console.error('Error response:', response.message);
-            alert(`Failed to create administrator account: ${response.message}`);
+            window.location.href = 'index.html'; // Redirect user to start-up screen
         }
     } catch (err) {
-        console.error('Unexpected error:', err);
-        alert('Failed to create administrator account');
+        showError('Failed to create administrator account');
     }
 });
 
