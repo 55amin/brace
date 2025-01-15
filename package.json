@@ -1,7 +1,7 @@
 {
   "name": "brace",
   "version": "1.0.0",
-  "main": "app/main.js",
+  "main": "org/server.js",
   "scripts": {
     "start": "nodemon org/server.js",
     "start-web": "nodemon org/server.js"
