@@ -1,3 +1,5 @@
+const baseUrl = 'http://localhost:3000';
+
 function showError(message) {
     const container = document.getElementById('error-container');
     const errorMessage = document.createElement('div');
@@ -7,15 +9,11 @@ function showError(message) {
     errorMessage.style.display = 'block';
 }
 
-window.api.receive('show-error', (message) => {
-    showError(message);
-});
-
 const setupForm = document.getElementById('setupForm');
 setupForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const container = document.getElementById('error-container');
-    container.innerHTML = '';
+    container.innerHTML = ''; 
 
     // Data collection
     const forename = document.getElementById('forename').value.trim();
@@ -24,9 +22,7 @@ setupForm.addEventListener('submit', async (event) => {
     const phone = document.getElementById('phone').value.trim();
     const password = document.getElementById('password').value.trim();
     const confirmPassword = document.getElementById('confirmPassword').value.trim();
-    console.log('Form data:', { forename, surname, email, phone, password });
 
-    // Validation
     if (password !== confirmPassword) { 
         showError('Passwords do not match');
         return;
@@ -34,10 +30,19 @@ setupForm.addEventListener('submit', async (event) => {
 
     try { // Send data to backend to create administrator account
         const adminData = { forename, surname, email, phone, password };
-        const response = await window.api.invoke('create-admin', adminData);
-        
-        if (response.success) {
+        const response = await fetch(`${baseUrl}/api/create-admin`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(adminData),
+        });
+
+        const result = await response.json();
+        if (result.success) {
             window.location.href = 'index.html'; // Redirect user to start-up screen
+        } else { // Show all validation errors
+            result.errors.forEach(error => showError(error));
         }
     } catch (err) {
         showError('Failed to create administrator account');

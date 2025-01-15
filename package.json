@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "main": "app/main.js",
   "scripts": {
-    "start": "electron .",
-    "start-web": "cd website && nodemon server.js",
-    "electron": "electron ."
+    "start": "nodemon org/server.js",
+    "start-web": "nodemon org/server.js"
   },
   "keywords": [],
   "author": "55amin",
