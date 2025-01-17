@@ -9,12 +9,12 @@ dotenv.config();
 
 const app = express();
 const pool = mysql.createPool({ // Configure database connection
-    host: 'localhost',
-    user: 'root',
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: 'brace_db',
+    database: process.env.DB_NAME,
     waitForConnections: true,
-    connectionLimit: 5,
+    connectionLimit: 15,
     queueLimit: 0
 });
 const admins = [];
@@ -138,20 +138,17 @@ app.post('/api/create-admin', async (req, res) => {
             [validatedEmail.value] // Check if email address exists in database
         );
         if (rowsEmail[0].count > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                errors: ['Email address already registered'] 
-            });
+            errors.push('Email address already registered');
+            return res.status(400).json({ success: false, errors });
         }
+
         const [rowsPhone] = await pool.promise().query(
             'SELECT COUNT(*) as count FROM administrators WHERE phone = ?',
             [validatedPhone.value] // Check if phone number exists in database
         );
         if (rowsPhone[0].count > 0) {
-            return res.status(400).json({ 
-                success: false, 
-                errors: ['Phone number already registered'] 
-            });
+            errors.push('Phone number already registered');
+            return res.status(400).json({ success: false, errors });
         }
 
         // Encrypt password using hashing algorithm, then insert admin details into database

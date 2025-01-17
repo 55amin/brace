@@ -1,5 +1,19 @@
 const baseUrl = 'http://localhost:3000';
 
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const response = await fetch(`${baseUrl}/api/check-admin`);
+        const data = await response.json();
+    
+        if (data.exists) { // Redirect to startup page if an admin exists
+            window.location.href = 'index.html';
+            return; 
+        }
+    } catch (error) {
+        console.error('Failed to check for admin:', error);
+    }
+});
+
 function showError(message) {
     const container = document.getElementById('error-container');
     const errorMessage = document.createElement('div');
