@@ -1,6 +1,4 @@
-import dotenv from 'dotenv';
-dotenv.config();
-const baseUrl = process.env.BASE_URL || window.location.origin;
+const baseUrl = window.location.origin;
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
