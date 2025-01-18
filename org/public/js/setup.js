@@ -1,4 +1,7 @@
-const baseUrl = 'http://localhost:3000';
+const dotenv = require('dotenv');
+dotenv.config();
+const baseUrl = process.env.BASE_URL || window.location.origin;
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
