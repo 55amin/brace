@@ -46,11 +46,11 @@ loginForm.addEventListener('submit', async (event) => {
         if (result.success) {
             window.location.replace('adminscreen.html'); // Redirect to admin screen if user logs in successfully
         } else if (result.message === 'Unverified') {
-            document.getElementById('verification').style.visibility = 'visible';
-            document.getElementById('code').style.visibility = 'visible';
-            document.getElementById('resend').style.visibility = 'visible';
-            document.getElementById('resend-button').style.visibility = 'visible';
-            document.getElementById('verify-button').style.visibility = 'visible';
+            document.getElementById('verification').style.display = 'inline-block';
+            document.getElementById('code').style.display = 'inline-block';
+            document.getElementById('resend').style.display = 'inline-block';
+            document.getElementById('resend-button').style.display = 'inline-block';
+            document.getElementById('verify-button').style.display = 'inline-block';
             showError('Verification required. Please enter the verification code sent to your email.');
         } else { // Show all validation and login errors
             result.errors.forEach(error => showError(error));
@@ -77,11 +77,11 @@ verifyCode.addEventListener('click', async () => {
         const verificationResult = await verificationResponse.json();
 
         if (verificationResult.success) {
-            document.getElementById('verification').style.visibility = 'hidden';
-            document.getElementById('code').style.visibility = 'hidden';
-            document.getElementById('resend').style.visibility = 'hidden';
-            document.getElementById('resend-button').style.visibility = 'hidden';
-            document.getElementById('verify-button').style.visibility = 'hidden';
+            document.getElementById('verification').style.display = 'none';
+            document.getElementById('code').style.display = 'none';
+            document.getElementById('resend').style.display = 'none';
+            document.getElementById('resend-button').style.display = 'none';
+            document.getElementById('verify-button').style.display = 'none';
             localStorage.removeItem('resendAttempts');
             localStorage.removeItem('resendCooldown');
             showError(verificationResult.message, 'success')
