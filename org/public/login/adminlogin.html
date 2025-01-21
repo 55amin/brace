@@ -25,27 +25,21 @@
     </div>
     <div class="form-block">
         <form id="adminlogin" name="adminlogin" method="post" class="form">
-            <label for="forename" class="field-label">Forename</label>
-            <input class="text-field" maxlength="256" name="forename" placeholder="Enter your forename" type="text" id="forename" required=""/>
-            <label for="surname" class="field-label">Surname</label>
-            <input class="text-field" maxlength="256" name="surname" placeholder="Enter your surname" type="text" id="surname" required=""/>
             <label for="email" class="field-label-2">Email address</label>
-            <input class="text-field-2" maxlength="256" name="email" placeholder="Enter your email address" type="email" id="email" required=""/>
+            <input class="text-field-2" maxlength="320" name="email" placeholder="Enter your email address" type="email" id="email" required=""/>
             <label for="password" class="field-label-2">Password</label>
-            <input class="text-field-2" maxlength="256" name="password" placeholder="Enter your password" type="password" id="password" required=""/>
+            <input class="text-field-2" maxlength="20" name="password" placeholder="Enter your password" type="password" id="password" required=""/>
+            <label for="verification" id="verification" class="field-label-2" style="visibility: hidden">Verification code</label>
+            <input class="text-field-2" maxlength="6" name="verification" placeholder="Enter the verification code sent to your email address" type="text" id="code" required="" style="visibility: hidden"/>
             <input type="submit" class="submit-button" value="Log in"/>
+            <input type="button" class="verify-button" id="verify-button" value="Verify code" style="visibility: hidden"/>
+            <label for="resend" class="field-label-2" id="resend" style="visibility: hidden">You can resend the email once per minute, 3 times. After, the cooldown is 1 hour.</label>
+            <input type="button" class="resend-email" id="resend-button" value="Resend email" style="visibility: hidden"/>
             <input type="button" class="reset-password" value="Reset password" onclick="location.href='resetscreen.html'"/>
         </form>
-        <div class="success-message">
-            <div class="text-block-2">
-                <br/>Welcome back. <br/><br/>Logging in...<br/>
-            </div>
-        </div>
-        <div class="error-message">
-            <div class="text-block">
-                Incorrect details.
-            </div>
-        </div>
     </div>
+    <p id="cooldown-timer"></p>
+    <div id="error-container" class="error-container"></div>
+    <script src="../js/adminlogin.js"></script>
 </body>
 </html>

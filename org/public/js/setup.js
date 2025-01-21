@@ -1,6 +1,5 @@
 const baseUrl = window.location.origin;
-
-document.documentElement.style.visibility = 'hidden';
+document.documentElement.style.visibility = 'hidden'; // Hide the form until the admin check is complete
 
 fetch(`${baseUrl}/api/check-admin`)
     .then(response => response.json())
@@ -30,6 +29,8 @@ setupForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const container = document.getElementById('error-container');
     container.innerHTML = ''; 
+    const submitButton = document.getElementById('submit-button');
+    submitButton.disabled = true; // Prevent duplicate submissions
 
     // Data collection
     const forename = document.getElementById('forename').value.trim();
@@ -41,6 +42,7 @@ setupForm.addEventListener('submit', async (event) => {
 
     if (password !== confirmPassword) { 
         showError('Passwords do not match');
+        submitButton.disabled = false;
         return;
     } 
 
@@ -55,18 +57,45 @@ setupForm.addEventListener('submit', async (event) => {
         });
 
         const result = await response.json();
-        if (result.success) {
-            window.location.href = 'index.html'; // Redirect user to start-up screen
+
+        if (result.success) { // Send verification email
+            const sendVerificationEmail = async () => {
+                const emailResponse = await fetch(`${baseUrl}/api/email-code`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, type: 'email' })
+                });
+
+                const emailResult = await emailResponse.json();
+
+                if (emailResult.success) { // Update the screen's contents
+                    document.body.innerHTML = `
+                        <div class="verification-message">
+                            <p>You have been sent an email containing a verification code.</p>
+                            <p>Navigate to the admin login screen, then enter your details and the verification code to verify your account.</p>
+                            <p>You will be redirected to the start-up screen in 20 seconds, or you can refresh the page to go there now.</p>
+                        </div>
+                    `;
+                    setTimeout(() => { // Redirect to startup page after 20 seconds
+                        window.location.replace('index.html');
+                    }, 20000);
+                } else {
+                    document.body.innerHTML = `
+                        <div id="error-container" class="error-container"></div>
+                    `;
+                    showError('Failed to send verification email.\nNavigate to the admin login screen, then enter your details and attempt to resend the email.\nYou will be redirected to the start-up screen in 20 seconds, or you can refresh the page to go there now.');
+                }
+            };
+
+            await sendVerificationEmail();
         } else { // Show all validation errors
             result.errors.forEach(error => showError(error));
+            submitButton.disabled = false;
         }
     } catch (err) {
         showError('Failed to create administrator account');
+        submitButton.disabled = false;
     }
 });
-
-
-
-
-
-

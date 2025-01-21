@@ -3,11 +3,17 @@ const path = require('path');
 const cors = require('cors');
 const Administrator = require('./public/models/administrator');
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 const mysql = require('mysql2');
 const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+
 const pool = mysql.createPool({ // Configure database connection
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -17,10 +23,16 @@ const pool = mysql.createPool({ // Configure database connection
     connectionLimit: 15,
     queueLimit: 0
 });
+
+const transporter = nodemailer.createTransport({ // Configure email service
+    service: 'gmail', 
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD
+    }
+});
+
 const admins = [];
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Check if an administrator exists in database
 app.get('/api/check-admin', async (req, res) => {
@@ -53,6 +65,79 @@ app.get('/api/check-agent', async (req, res) => {
     } catch (error) {
         console.error('Database error:', error);
         res.status(500).json({ error: 'Failed to check for agents' });
+    }
+});
+
+// Send verification email and verify code
+app.post('/api/email-code', async (req, res) => {
+    const { email, type } = req.body;
+    const code = crypto.randomBytes(3).toString('hex').toUpperCase(); // Generate 6 character alphanumeric code
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    try {
+        await pool.promise().query( // Delete any existing codes if a user tries to resend email
+            'DELETE FROM verifications WHERE email = ?',
+            [email]);
+
+        await pool.promise().query( // Insert email address and verification code into database
+            'INSERT INTO verifications (email, code, type, created_at, expires_at) VALUES (?, ?, ?, NOW(), ?)',
+            [email, code, type, expiresAt]);
+
+        let subject; // Define subject and message depending on type
+        let message; 
+
+        if (type === 'email') { 
+            subject = 'Brace: Verify your email address';
+            message = `To verify your email, enter this verification code: ${code}\n\nThis code will expire in 10 minutes.\n\nBrace for Techmedic`;
+        } else if (type === 'password') {
+            subject = 'Brace: Reset your password';
+            message = `To reset your password, enter this verification code: ${code}\n\nThis code will expire in 10 minutes.\n\nBrace for Techmedic`;
+        }
+
+        await transporter.sendMail({ // Send verification email
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject,
+            text: message
+        });
+
+        res.status(200).json({ success: true, message: 'Verification email sent' });
+    } catch (err) {
+        console.error('Error sending verification email:', err);
+        res.status(500).json({ success: false, error: 'Failed to send email' });
+    }
+});
+
+app.post('/api/verify-code', async (req, res) => {
+    const { email, code, user } = req.body;
+
+    try {
+        const [rows] = await pool.promise().query( // Find the matching row
+            'SELECT * FROM verifications WHERE email = ? AND code = ? AND expires_at > NOW()',
+            [email, code]);
+
+        if (rows.length > 0) { // If a row matches, update the user's verification status in memory and database
+            if (user === 'admin') {
+                const admin = admins.find(admin => admin.email === email);
+                if (admin) {
+                    admin.setVerified();
+                    await pool.promise().query('UPDATE administrators SET verified = 1 WHERE email = ?', [email]); 
+                }
+            } else if (user === 'agent') { 
+                const agent = agent.find(agent => agent.email === email);
+                if (agent) {
+                    agent.setVerified();
+                    await pool.promise().query('UPDATE agents SET verified = 1 WHERE email = ?',
+                        [email]); 
+                }
+            }
+            res.status(200).json({ success: true, message: 'Verification successful' });
+        } else {
+            res.status(400).json({ success: false, message: 'Invalid or expired verification code' });
+        }
+    } catch (err) {
+        console.error('Error verifying code:', err);
+        res.status(500).json({ success: false, error: 'Failed to verify code' });
     }
 });
 
@@ -178,6 +263,51 @@ app.post('/api/create-admin', async (req, res) => {
         res.status(500).json({ 
             success: false, 
             errors: ['Failed to create administrator account'] 
+        });
+    }
+});
+
+// Authenticate administrators
+app.post('api/admin-login', async (req, res) => {
+    const { email, password } = req.body;
+    const validatedEmail = validateEmail(email);
+    const validatedPassword = validatePassword(password);
+    // Push validation error messages to array
+    const errors = [];
+    if (!validatedEmail.isValid) errors.push(validatedEmail.error);
+    if (!validatedPassword.isValid) errors.push(validatedPassword.error);
+    if (errors.length > 0) {
+        return res.status(400).json({ success: false, errors });
+    }
+
+    try {
+        const [rowsEmail] = await pool.promise().query(
+            'SELECT COUNT(*) as count FROM administrators WHERE email = ?',
+            [validatedEmail.value] // Check if email address exists in database
+        );
+        if (rowsEmail[0].count === 0) {
+            errors.push('Incorrect email address');
+            return res.status(400).json({ success: false, errors });
+        } else if (rowsEmail[0].count > 0) { // Find admin instance with matching email and compare passwords
+            const admin = admins.find(admin => admin.email === email);
+            const passwordMatch = await bcrypt.compare(validatedPassword.value, admin.hashedPassword);
+            if (!passwordMatch) { 
+                errors.push('Incorrect password');
+                return res.status(400).json({ success: false, errors });
+            } else { // Check if admin is verified
+                if (admin.verified) {
+                    return res.status(200).json({ success: true });
+                } else {
+                return res.status(400).json({ success: false, message: 'Unverified' });
+                }
+                
+            }
+        }
+    } catch (err) {
+        console.error('Error authenticating user:', err);
+        res.status(500).json({ 
+            success: false, 
+            errors: ['Failed to log in'] 
         });
     }
 });

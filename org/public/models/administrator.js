@@ -6,12 +6,16 @@ class Administrator {
       this.phone = phone;
       this.hashedPassword = hashedPassword;
       this.adminID = null;
+      this.verified = false;
     }
 
     setAdminID(adminID) {
       this.adminID = adminID;
     }
+
+    setVerified() {
+      this.verified = true;
+  }
 }
 
 module.exports = Administrator;
-
