@@ -270,7 +270,7 @@ app.post('/api/create-admin', async (req, res) => {
 });
 
 // Authenticate administrators
-app.post('api/admin-login', async (req, res) => {
+app.post('/api/admin-login', async (req, res) => {
     const { email, password } = req.body;
     const validatedEmail = validateEmail(email);
     const validatedPassword = validatePassword(password);
