@@ -72,6 +72,13 @@ setupForm.addEventListener('submit', async (event) => {
 
                 if (emailResult.success) { // Update the screen's contents
                     document.body.innerHTML = `
+                        <div class="header">
+                            <img src="media/wrenchsetupw.png" class="setuplogo" alt="Setup"/>
+                            <div class="header-left">
+                                <img src="media/bracelogo.png" class="bracelogo" alt="Brace"/>
+                                <h1 class="braceh1">RACE</h1>
+                            </div>
+                        </div>
                         <div class="verification-message">
                             <p>You have been sent an email containing a verification code.</p>
                             <p>Navigate to the admin login screen, then enter your details and the verification code to verify your account.</p>
@@ -83,9 +90,19 @@ setupForm.addEventListener('submit', async (event) => {
                     }, 20000);
                 } else {
                     document.body.innerHTML = `
+                        <div class="header">
+                            <img src="media/wrenchsetupw.png" class="setuplogo" alt="Setup"/>
+                            <div class="header-left">
+                                <img src="media/bracelogo.png" class="bracelogo" alt="Brace"/>
+                                <h1 class="braceh1">RACE</h1>
+                            </div>
+                        </div>
                         <div id="error-container" class="error-container"></div>
                     `;
                     showError('Failed to send verification email.\nNavigate to the admin login screen, then enter your details and attempt to resend the email.\nYou will be redirected to the start-up screen in 20 seconds, or you can refresh the page to go there now.');
+                    setTimeout(() => { 
+                        window.location.replace('index.html');
+                    }, 20000);
                 }
             };
 
