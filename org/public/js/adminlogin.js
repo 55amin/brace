@@ -48,6 +48,7 @@ loginForm.addEventListener('submit', async (event) => {
         } else if (result.message === 'Unverified') {
             document.getElementById('verification').style.display = 'inline-block';
             document.getElementById('code').style.display = 'inline-block';
+            document.getElementById('code').required = true;
             document.getElementById('resend').style.display = 'inline-block';
             document.getElementById('resend-button').style.display = 'inline-block';
             document.getElementById('verify-button').style.display = 'inline-block';
@@ -79,6 +80,7 @@ verifyCode.addEventListener('click', async () => {
         if (verificationResult.success) {
             document.getElementById('verification').style.display = 'none';
             document.getElementById('code').style.display = 'none';
+            document.getElementById('code').required = false;
             document.getElementById('resend').style.display = 'none';
             document.getElementById('resend-button').style.display = 'none';
             document.getElementById('verify-button').style.display = 'none';
