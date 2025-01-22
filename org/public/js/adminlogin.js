@@ -1,5 +1,26 @@
 const baseUrl = window.location.origin;
 
+window.addEventListener('load', () => {
+    const cooldownEnd = parseInt(localStorage.getItem('cooldownEnd'));
+    if (cooldownEnd > Date.now()) {
+        resendEmail.disabled = true;
+
+        window.cooldownInterval = setInterval(() => {
+            const remainingTime = Math.ceil((cooldownEnd - Date.now()) / 1000);
+            const cooldownTimer = document.getElementById('cooldown-timer');
+
+            if (remainingTime > 0) {
+                cooldownTimer.textContent = `Resend available in ${remainingTime} seconds.`;
+            } else {
+                clearInterval(window.cooldownInterval);
+                cooldownTimer.textContent = '';
+                localStorage.removeItem('cooldownEnd');
+                resendEmail.disabled = false;
+            }
+        }, 1000);
+    }
+});
+
 function showError(message, type = 'fail') { // Default parameter for common use case
     const container = document.getElementById('error-container');
     container.innerHTML = '';
@@ -20,7 +41,6 @@ function showError(message, type = 'fail') { // Default parameter for common use
 // Load all counters from local storage, so values don't change even if user refreshes/closes window
 let resendAttempts = parseInt(localStorage.getItem('resendAttempts')) || 0;
 let resendCooldown = parseInt(localStorage.getItem('resendCooldown')) || 0;
-
 
 const loginForm = document.getElementById('adminlogin');
 loginForm.addEventListener('submit', async (event) => {
@@ -117,9 +137,11 @@ resendEmail.addEventListener('click', async () => {
             showError('Verification code resent. Please check your emails.', 'neutral');
             resendAttempts++;
             resendCooldown = resendAttempts >= 3 ? 3600 : 60; // 1 hour cooldown if 3 or more attempts, 1 minute if less
+            localStorage.setItem('resendAttempts', resendAttempts);
+            localStorage.setItem('resendCooldown', resendCooldown);
             const cooldownEnd = Date.now() + resendCooldown * 1000;
             localStorage.setItem('cooldownEnd', cooldownEnd);
-            resendButton.disabled = true; // Prevent user from using resend button during cooldown
+            resendEmail.disabled = true; // Prevent user from using resend button during cooldown
 
             if (window.cooldownInterval) { // Clear existing cooldowns to prevent multiple cooldowns
                 clearInterval(window.cooldownInterval);
@@ -135,7 +157,7 @@ resendEmail.addEventListener('click', async () => {
                     clearInterval(window.cooldownInterval); 
                     cooldownTimer.textContent = ''; 
                     localStorage.removeItem('cooldownEnd'); 
-                    resendButton.disabled = false; 
+                    resendEmail.disabled = false; 
                 }
             }, 1000);
         } else {
