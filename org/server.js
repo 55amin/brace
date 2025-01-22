@@ -25,12 +25,9 @@ const pool = mysql.createPool({ // Configure database connection
 });
 
 const transporter = nodemailer.createTransport({ // Configure email service
-    host: process.env.SMTP_HOST,
-    port: 587,
-    secure: false, // Allow insecure port 587 to be automatically secured
     auth: {
-        user: process.env.SMTP_USER, 
-        pass: process.env.SMTP_PASSWORD 
+        user: process.env.EMAIL_ADDRESS, 
+        pass: process.env.EMAIL_PASSWORD 
     }
 });
 
@@ -97,7 +94,7 @@ app.post('/api/email-code', async (req, res) => {
         }
 
         await transporter.sendMail({ // Send verification email
-            from: `Techmedic for Brace <${process.env.SMTP_USER}>`,
+            from: `Techmedic for Brace <${process.env.EMAIL_ADDRESS}>`,
             to: email,
             subject,
             text: message
