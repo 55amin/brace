@@ -2,6 +2,7 @@ const baseUrl = window.location.origin;
 
 function showError(message, type = 'fail') { // Default parameter for common use case
     const container = document.getElementById('error-container');
+    container.innerHTML = '';
     const errorMessage = document.createElement('div');
     errorMessage.className = 'error-message';
     errorMessage.textContent = message;

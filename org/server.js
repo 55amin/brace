@@ -322,7 +322,7 @@ app.listen(PORT, async () => {
         rows.forEach(row => {
             const admin = new Administrator(
                 row.forename, row.surname, row.email, row.phone, row.hashed_password);
-            admin.setAdminID(row.id);
+            admin.setAdminID(row.admin_id);
             admins.push(admin);
         });
         console.log(`Loaded ${admins.length} administrators into memory.`);
