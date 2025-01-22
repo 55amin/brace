@@ -322,7 +322,10 @@ app.listen(PORT, async () => {
         const [rows] = await pool.promise().query('SELECT * FROM administrators ORDER BY admin_id ASC');
         rows.forEach(row => {
             const admin = new Administrator(
-                row.forename, row.surname, row.email, row.phone, row.hashed_password, row.verified);
+                row.forename, row.surname, row.email, row.phone, row.hashed_password);
+            if (row.verified === 1) {
+                admin.setVerified();
+            }
             admin.setAdminID(row.admin_id);
             admins.push(admin);
         });
