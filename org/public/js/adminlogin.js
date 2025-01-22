@@ -61,7 +61,7 @@ loginForm.addEventListener('submit', async (event) => {
     }
 });
 
-verifyCode = document.getElementById('verify-button').
+verifyCode = document.getElementById('verify-button');
 verifyCode.addEventListener('click', async () => {
     const email = document.getElementById('email').value.trim();
     const code = document.getElementById('code').value.trim();
@@ -97,7 +97,7 @@ verifyCode.addEventListener('click', async () => {
     }
 });
 
-resendEmail = document.getElementById('resend-button').
+resendEmail = document.getElementById('resend-button');
 resendEmail.addEventListener('click', async () => {
     const email = document.getElementById('email').value.trim();
 
