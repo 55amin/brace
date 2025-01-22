@@ -63,7 +63,7 @@ html, body {
   font-size: 14px;
 }
 
-button, .login-button, .submit-button, .reset-password, .reset-code {
+button, .login-button, .submit-button, .reset-password, .reset-code, .verify-button, .resend-button {
   padding: 10px;
   margin-bottom: 15px;
   background-color: #1600a0;
@@ -77,7 +77,7 @@ button, .login-button, .submit-button, .reset-password, .reset-code {
   transition: background-color 0.3s;
 }
 
-button:hover, .login-button:hover, .submit-button:hover, .reset-password:hover, .reset-code:hover {
+button:hover, .login-button:hover, .submit-button:hover, .reset-password:hover, .reset-code:hover, .verify-button.hover, .resend-button.hover {
   background-color: #452fd0;
 }
 
