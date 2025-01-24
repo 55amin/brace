@@ -111,11 +111,12 @@ app.post('/api/email-code', async (req, res) => {
 
 app.post('/api/verify-code', async (req, res) => {
     const { email, code, user } = req.body;
+    currentTime = new Date();
 
     try {
         const [rows] = await pool.promise().query( // Find the matching row
-            'SELECT * FROM verifications WHERE email = ? AND code = ? AND expires_at > NOW()',
-            [email, code]);
+            'SELECT * FROM verifications WHERE email = ? AND code = ? AND expires_at > ?',
+            [email, code, currentTime]);
 
         if (rows.length > 0) { // If a row matches, update the user's verification status in memory and database
             if (user === 'admin') {
