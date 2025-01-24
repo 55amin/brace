@@ -72,6 +72,7 @@ app.get('/api/check-agent', async (req, res) => {
 app.post('/api/email-code', async (req, res) => {
     const { email, type } = req.body;
     const code = crypto.randomBytes(3).toString('hex').toUpperCase(); // Generate 6 character alphanumeric code
+    const createdAt = new Date();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     try {
@@ -80,15 +81,15 @@ app.post('/api/email-code', async (req, res) => {
             [email]);
 
         await pool.promise().query( // Insert email address and verification code into database
-            'INSERT INTO verifications (email, code, type, created_at, expires_at) VALUES (?, ?, ?, NOW(), ?)',
-            [email, code, type, expiresAt]);
+            'INSERT INTO verifications (email, code, type, created_at, expires_at) VALUES (?, ?, ?, ?, ?)', 
+            [email, code, type, createdAt, expiresAt]);
 
         let subject; // Define subject and message depending on type
         let message; 
 
         if (type === 'email') { 
             subject = 'Brace: Verify your email address';
-            message = `To verify your email, enter this verification code: ${code}\n\nThis code will expire in 10 minutes.\n\nBrace for Techmedic`;
+            message = `To verify your email address, enter this verification code: ${code}\n\nThis code will expire in 10 minutes.\n\nBrace for Techmedic`;
         } else if (type === 'password') {
             subject = 'Brace: Reset your password';
             message = `To reset your password, enter this verification code: ${code}\n\nThis code will expire in 10 minutes.\n\nBrace for Techmedic`;
