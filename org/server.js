@@ -96,7 +96,7 @@ app.post('/api/email-code', async (req, res) => {
         }
 
         await transporter.sendMail({ // Send verification email
-            from: `Techmedic for Brace <${process.env.EMAIL_ADDRESS}>`,
+            from: `Brace for Techmedic <${process.env.EMAIL_ADDRESS}>`,
             to: email,
             subject,
             text: message
@@ -126,7 +126,7 @@ app.post('/api/verify-code', async (req, res) => {
                     await pool.promise().query('UPDATE administrators SET verified = 1 WHERE email = ?', [email]); 
                 }
             } else if (user === 'agent') { 
-                const agent = agent.find(agent => agent.email === email);
+                const agent = agents.find(agent => agent.email === email);
                 if (agent) {
                     agent.setVerified();
                     await pool.promise().query('UPDATE agents SET verified = 1 WHERE email = ?',
@@ -274,7 +274,6 @@ app.post('/api/admin-login', async (req, res) => {
     const { email, password } = req.body;
     const validatedEmail = validateEmail(email);
     const validatedPassword = validatePassword(password);
-    // Push validation error messages to array
     const errors = [];
     if (!validatedEmail.isValid) errors.push(validatedEmail.error);
     if (!validatedPassword.isValid) errors.push(validatedPassword.error);
@@ -302,7 +301,6 @@ app.post('/api/admin-login', async (req, res) => {
                 } else {
                 return res.status(400).json({ success: false, message: 'Unverified' });
                 }
-                
             }
         }
     } catch (err) {
@@ -310,6 +308,47 @@ app.post('/api/admin-login', async (req, res) => {
         res.status(500).json({ 
             success: false, 
             errors: ['Failed to log in'] 
+        });
+    }
+});
+
+// Reset password
+app.post('/api/reset-password', async (req, res) => {
+    const { email, password, type } = req.body;
+    const validatedEmail = validateEmail(email);
+    const validatedPassword = validatePassword(password);
+    const errors = [];
+    if (!validatedEmail.isValid) errors.push(validatedEmail.error);
+    if (!validatedPassword.isValid) errors.push(validatedPassword.error);
+    if (errors.length > 0) {
+        return res.status(400).json({ success: false, errors });
+    }
+
+    if (type === 'login') {
+        currentTime = new Date();
+        const [rows] = await pool.promise().query( // Find the matching row
+            'SELECT * FROM verifications WHERE email = ? AND type = ? AND verified = 1 AND expires_at > ?',
+            [email, 'password', currentTime]);
+
+        if (rows[0].count === 0) {
+            errors.push('Verification expired or invalid');
+            return res.status(400).json({ success: false, errors });
+        }
+        
+    }
+
+    try { // Update password in database
+        const hashedPassword = await bcrypt.hash(validatedPassword.value, 10);
+            await pool.promise().query(
+                'UPDATE administrators SET hashed_password = ? WHERE email = ?',
+                [hashedPassword, validatedEmail.value] 
+            );
+        res.status(200).json({ success: true });
+    } catch (err) {
+        console.error('Error resetting password:', err);
+        res.status(500).json({ 
+            success: false, 
+            errors: ['Failed to reset password'] 
         });
     }
 });

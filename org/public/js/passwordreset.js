@@ -39,46 +39,6 @@ function showError(message, type = 'fail') { // Default parameter for common use
 let resendAttempts = parseInt(localStorage.getItem('resendAttempts')) || 0;
 let resendCooldown = parseInt(localStorage.getItem('resendCooldown')) || 0;
 
-const loginForm = document.getElementById('adminlogin');
-loginForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const container = document.getElementById('error-container');
-    container.innerHTML = ''; 
-
-    // Data collection
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
-
-    try { // Send data to backend to authenticate user
-        const loginData = { email, password };
-        const response = await fetch(`${baseUrl}/api/admin-login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(loginData)
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            window.location.replace('adminscreen.html'); // Redirect to admin screen if user logs in successfully
-        } else if (result.message === 'Unverified') {
-            document.getElementById('verification').style.display = 'inline-block';
-            document.getElementById('code').style.display = 'inline-block';
-            document.getElementById('code').required = true;
-            document.getElementById('resend').style.display = 'inline-block';
-            document.getElementById('resend-button').style.display = 'inline-block';
-            document.getElementById('verify-button').style.display = 'inline-block';
-            showError('Verification required. Please enter the verification code sent to your email.');
-        } else { // Show all validation and login errors
-            result.errors.forEach(error => showError(error));
-        }
-    } catch (err) { 
-        showError('Failed to log in. Please try again.');
-    }
-});
-
 verifyCode = document.getElementById('verify-button');
 verifyCode.addEventListener('click', async () => {
     const email = document.getElementById('email').value.trim();
@@ -96,15 +56,10 @@ verifyCode.addEventListener('click', async () => {
         const verificationResult = await verificationResponse.json();
 
         if (verificationResult.success) {
-            document.getElementById('verification').style.display = 'none';
-            document.getElementById('code').style.display = 'none';
-            document.getElementById('code').required = false;
-            document.getElementById('resend').style.display = 'none';
-            document.getElementById('resend-button').style.display = 'none';
-            document.getElementById('verify-button').style.display = 'none';
-            localStorage.removeItem('resendAttempts');
-            localStorage.removeItem('resendCooldown');
             showError(verificationResult.message, 'neutral')
+            setTimeout(() => { // Redirect to password reset page after 6 seconds if verification successful
+                window.location.replace('passwordreset.html');
+            }, 6000);
         } else {
             showError(verificationResult.message)
         }
@@ -125,13 +80,13 @@ resendEmail.addEventListener('click', async () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ email, type: 'email' })
+            body: JSON.stringify({ email, type: 'password' })
         });
 
         const emailResult = await emailResponse.json();
 
         if (emailResult.success) {
-            showError('Verification code resent. Please check your emails.', 'neutral');
+            showError('Verification code sent. Please check your emails.', 'neutral');
             resendAttempts++;
             resendCooldown = resendAttempts >= 3 ? 3600 : 60; // 1 hour cooldown if 3 or more attempts, 1 minute if less
             localStorage.setItem('resendAttempts', resendAttempts);
@@ -158,10 +113,48 @@ resendEmail.addEventListener('click', async () => {
                 }
             }, 1000);
         } else {
-            showError('Failed to resend verification email. Please try again.');
+            showError('Failed to resend verification email');
         }
     } catch (error) {
         console.error('Error resending verification email:', error);
-        showError('Failed to resend verification email. Please try again.');
+        showError('Failed to resend verification email');
+    }
+});
+
+resetPassword = document.getElementById('resetPassword');
+resetPassword.addEventListener('click', async (event) => {
+    event.preventDefault(); 
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('Create-password').value.trim();
+    const confirmPassword = document.getElementById('Confirm-password').value.trim();
+
+    if (password !== confirmPassword) {
+        showError('Passwords do not match');
+        return;
+    }
+
+    try { // Reset password
+        const resetResponse = await fetch(`${baseUrl}/api/reset-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password, type: 'login' })
+        });
+
+        const resetResult = await resetResponse.json();
+
+        if (resetResult.success) { // Redirect to login page after 6 seconds if password reset successful
+            showError('Password reset successful', 'neutral');
+            setTimeout(() => {
+                window.location.replace('adminlogin.html');
+            }, 6000);
+        } else {
+            resetResult.errors.forEach(error => showError(error));
+        }
+
+    } catch (error) {
+        console.error('Error resetting password:', error);
+        showError('Failed to reset password');
     }
 });
