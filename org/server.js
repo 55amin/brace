@@ -327,7 +327,7 @@ app.post('/api/reset-password', async (req, res) => {
     if (type === 'login') {
         currentTime = new Date();
         const [rows] = await pool.promise().query( // Find the matching row
-            'SELECT * FROM verifications WHERE email = ? AND type = ? AND verified = 1 AND expires_at > ?',
+            'SELECT * FROM verifications WHERE email = ? AND type = ? AND expires_at > ?',
             [email, 'password', currentTime]);
 
         if (rows[0].count === 0) {
