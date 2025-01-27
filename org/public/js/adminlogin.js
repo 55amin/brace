@@ -62,7 +62,7 @@ loginForm.addEventListener('submit', async (event) => {
         const result = await response.json();
 
         if (result.success) {
-            window.location.replace('adminscreen.html'); // Redirect to admin screen if user logs in successfully
+            window.location.replace('../admin/adminscreen.html'); // Redirect to admin screen if user logs in successfully
         } else if (result.message === 'Unverified') {
             document.getElementById('verification').style.display = 'inline-block';
             document.getElementById('code').style.display = 'inline-block';
