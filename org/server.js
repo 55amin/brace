@@ -343,6 +343,8 @@ app.post('/api/reset-password', async (req, res) => {
                 'UPDATE administrators SET hashed_password = ? WHERE email = ?',
                 [hashedPassword, validatedEmail.value] 
             );
+        const admin = admins.find(admin => admin.email === email);
+        admin.setPassword(hashedPassword);
         res.status(200).json({ success: true });
     } catch (err) {
         console.error('Error resetting password:', err);

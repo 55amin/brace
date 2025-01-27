@@ -13,6 +13,10 @@ class Administrator {
       this.adminID = adminID;
     }
 
+    setPassword(hashedPassword) {
+      this.hashedPassword = hashedPassword;
+    }
+
     setVerified() {
       this.verified = true;
   }
