@@ -59,9 +59,9 @@ if (verifyCode) {
 
             if (verificationResult.success) {
                 showError(verificationResult.message, 'neutral')
-                setTimeout(() => { // Redirect to password reset page after 6 seconds if verification successful
+                setTimeout(() => { // Redirect to password reset page after 4 seconds if verification successful
                     window.location.replace('passwordreset.html');
-                }, 6000);
+                }, 4000);
             } else {
                 showError(verificationResult.message)
             }
@@ -150,11 +150,11 @@ if (resetPassword) {
 
             const resetResult = await resetResponse.json();
 
-            if (resetResult.success) { // Redirect to login page after 6 seconds if password reset successful
+            if (resetResult.success) { // Redirect to login page after 4 seconds if password reset successful
                 showError('Password reset successful', 'neutral');
                 setTimeout(() => {
                     window.location.replace('adminlogin.html');
-                }, 6000);
+                }, 4000);
             } else {
                 resetResult.errors.forEach(error => showError(error));
             }
