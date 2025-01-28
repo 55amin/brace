@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 const Administrator = require('./public/models/administrator');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
@@ -13,26 +14,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'), {
-    index: false
-}));
-
-app.use(session({ // Configure user session
-    secret: process.env.SECRET_KEY,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: true,
-        maxAge: 1000 * 60 * 10 // Sessions expire after 10 minutes of inactivity
-    }
-}));
-
-app.use((req, res, next) => {
-    if (req.session) {
-        req.session.touch(); // Refresh session upon user interaction
-    }
-    next();
-});
+app.use(express.static(path.join(__dirname, 'public')));
 
 const pool = mysql.createPool({ // Configure database connection
     host: process.env.DB_HOST,
@@ -42,6 +24,29 @@ const pool = mysql.createPool({ // Configure database connection
     waitForConnections: true,
     connectionLimit: 15,
     queueLimit: 0
+});
+
+const sessionStore = new MySQLStore({ // Configure MySQL session store
+    clearExpired: true,
+    expiration: 1000 * 60 * 10 // Sessions expire after 10 minutes of inactivity
+}, pool); 
+
+app.use(session({ // Configure user session
+    store: sessionStore, 
+    secret: process.env.SECRET_KEY,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: true,
+        maxAge: 1000 * 60 * 10
+    }
+}));
+
+app.use((req, res, next) => {
+    if (req.session) {
+        req.session.touch(); // Refresh session upon user interaction
+    }
+    next();
 });
 
 const transporter = nodemailer.createTransport({ // Configure email service
@@ -62,6 +67,10 @@ function isAuthenticated(req, res, next) {
         res.redirect('public/index.html');
     }
 }
+
+app.get('/', (req, res) => {
+    res.redirect('/index.html'); // Redirect to your main page
+});
 
 app.get('/adminscreen.html', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'adminscreen.html'));
