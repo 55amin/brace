@@ -24,24 +24,22 @@
         </div>
     </div>
     <div class="settings">
-        <button>Manage account details</button>
-        <button>Manage administrators</button>
-        <button>Manage agents</button>
-        <button>Manage tasks</button>
-        <button>Manage automation</button>
+        <button type="button" onclick="location.href='manageaccount.html'">Manage account details</button>
+        <button type="button" onclick="location.href='manageadmin.html'">Manage administrators</button>
+        <button type="button" onclick="location.href='manageagent.html'">Manage agents</button>
+        <button type="button" onclick="location.href='managetask.html'">Manage tasks</button>
+        <button type="button" onclick="location.href='manageautomation.html'">Manage automation</button>
         <label for="break-duration">Set break duration:</label>
         <select id="break-duration" name="break-duration">
             <option value="15">15 minutes</option>
             <option value="30">30 minutes</option>
             <option value="60" selected>1 hour</option>
-            <option value="120">2 hours</option>
         </select>
         <label for="break-frequency">Set break frequency:</label>
         <select id="break-frequency" name="break-frequency">
             <option value="1">1 break</option>
             <option value="2">2 breaks</option>
             <option value="3">3 breaks</option>
-            <option value="4">4 breaks</option>
         </select>
     </div>
 </body>

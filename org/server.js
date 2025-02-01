@@ -76,6 +76,14 @@ app.get('/adminscreen.html', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'adminscreen.html'));
 });
 
+app.get('/settings.html', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'settings.html'));
+});
+
+app.get('/manageaccount.html', isAuthenticated, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'manageaccount.html'));
+});
+
 // Check if an administrator exists in database
 app.get('/api/check-admin', async (req, res) => {
     try {
@@ -395,6 +403,92 @@ app.post('/api/reset-password', async (req, res) => {
             success: false, 
             errors: ['Failed to reset password'] 
         });
+    }
+});
+
+// Update forename
+app.post('/api/update-forename', async (req, res) => {
+    const { forename } = req.body;
+    const userId = req.session.user.adminID; 
+
+    try {
+        await pool.promise().query('UPDATE administrators SET forename = ? WHERE admin_id = ?', [forename, userId]);
+        res.status(200).json({ success: true, message: 'Forename updated successfully' });
+    } catch (error) {
+        console.error('Error updating forename:', error);
+        res.status(500).json({ success: false, message: 'Failed to update forename' });
+    }
+});
+
+// Update surname
+app.post('/api/update-surname', async (req, res) => {
+    const { surname } = req.body;
+    const userId = req.session.user.adminID;
+
+    try {
+        await pool.promise().query('UPDATE administrators SET surname = ? WHERE admin_id = ?', [surname, userId]);
+        res.status(200).json({ success: true, message: 'Surname updated successfully' });
+    } catch (error) {
+        console.error('Error updating surname:', error);
+        res.status(500).json({ success: false, message: 'Failed to update surname' });
+    }
+});
+
+// Update email address
+app.post('/api/update-email', async (req, res) => {
+    const { email } = req.body;
+    const validatedEmail = validateEmail(email);
+    const userId = req.session.user.adminID;
+
+    if (!validatedEmail.isValid) errors.push(validatedEmail.error);
+    if (errors.length > 0) {
+        return res.status(400).json({ success: false, errors });
+    }
+
+    const [rowsEmail] = await pool.promise().query(
+        'SELECT COUNT(*) as count FROM administrators WHERE email = ?',
+        [validatedEmail.value] // Check if email address exists in database
+    );
+    if (rowsEmail[0].count > 0) {
+        errors.push('Email address already registered');
+        return res.status(400).json({ success: false, errors });
+    }
+
+    try {
+        await pool.promise().query('UPDATE administrators SET email = ? WHERE admin_id = ?', [email, userId]);
+        res.status(200).json({ success: true, message: 'Email updated successfully' });
+    } catch (error) {
+        console.error('Error updating email:', error);
+        res.status(500).json({ success: false, message: 'Failed to update email' });
+    }
+});
+
+// Update phone number
+app.post('/api/update-phone', async (req, res) => {
+    const { phone } = req.body;
+    const validatedPhone = validatePhone(phone);
+    const userId = req.session.user.adminID;
+
+    if (!validatedPhone.isValid) errors.push(validatedPhone.error);
+    if (errors.length > 0) {
+        return res.status(400).json({ success: false, errors });
+    }
+
+    const [rowsPhone] = await pool.promise().query(
+        'SELECT COUNT(*) as count FROM administrators WHERE phone = ?',
+        [validatedPhone.value] // Check if phone number exists in database
+    );
+    if (rowsPhone[0].count > 0) {
+        errors.push('Phone number already registered');
+        return res.status(400).json({ success: false, errors });
+    }
+
+    try {
+        await pool.promise().query('UPDATE administrators SET phone = ? WHERE admin_id = ?', [phone, userId]);
+        res.status(200).json({ success: true, message: 'Phone number updated successfully' });
+    } catch (error) {
+        console.error('Error updating phone number:', error);
+        res.status(500).json({ success: false, message: 'Failed to update phone number' });
     }
 });
 

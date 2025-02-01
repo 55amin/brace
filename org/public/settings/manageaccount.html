@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Brace</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <link href="../css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Varela&family=Lato:wght@100;300;400;700;900&display=swap" rel="stylesheet"/>
+    <link href="../media/bracelogo.png" rel="shortcut icon" type="image/x-icon"/>
+</head>
+<body class="body">
+    <div class="header">
+        <div class="header-left">
+            <img src="../media/bracelogo.png" class="bracelogo" alt="Brace"/>
+            <h1 class="braceh1">RACE</h1>
+        </div>
+        <div class="header-right">
+            <a href="settings.html" class="back-button">
+                <img src="../media/backbutton.png" class="back-button" alt="Back"/>
+            </a>
+            <div class="text-container">
+                <h1 class="login-title">Settings</h1>
+            </div>
+        </div>
+    </div>
+    <div class="form-block">
+        <h1>Manage account details</h1>
+        <form id="updateForename" method="post" class="form">
+            <label for="forename" class="field-label">Forename</label>
+            <input class="text-field" maxlength="20" name="forename" placeholder="Enter a new forename, up to 20 characters" type="text" id="forename"/>
+            <input type="submit" class="submit-button" id="submitForename" value="Update forename"/>
+        </form>
+        <form id="updateSurname" method="post" class="form">
+            <label for="surname" class="field-label">Surname</label>
+            <input class="text-field" maxlength="20" name="surname" placeholder="Enter a new surname, up to 20 characters" type="text" id="surname"/>
+            <input type="submit" class="submit-button" id="submitSurname" value="Update surname"/>
+        </form>
+        <form id="updateEmail" method="post" class="form"></form>
+            <label for="email" class="field-label-2">Email address</label>
+            <input class="text-field-2" maxlength="320" name="email" placeholder="Enter a new email address" type="email" id="email"/>
+            <input type="submit" class="submit-button" id="submitEmail" value="Update email address"/>
+        </form>
+        <form id="verifyEmail"></form>
+        <form id="updatePhone" method="post" class="form"></form>
+            <label for="phone" class="field-label-2">Phone number</label>
+            <input class="text-field-2" maxlength="11" name="phone" placeholder="Enter a new UK phone number" type="tel" id="phone"/>
+            <input type="submit" class="submit-button" id="submitPhone" value="Update phone number"/>
+        </form>
+        <button type="button" class="reset-password" onclick="location.href='../login/resetscreen.html'">Reset password</button>
+    </div>
+    <div id="error-container" class="error-container"></div>
+    <script href="../js/manageaccount.js"></script>
+</body>
+</html>
