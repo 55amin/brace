@@ -385,7 +385,6 @@ app.post('/api/reset-password', async (req, res) => {
             errors.push('Verification expired or invalid');
             return res.status(400).json({ success: false, errors });
         }
-        
     }
 
     try { // Update password in database
@@ -411,7 +410,7 @@ app.post('/api/update-forename', async (req, res) => {
     const { forename } = req.body;
     const userId = req.session.user.adminID; 
 
-    try {
+    try { // Update forename in database
         await pool.promise().query('UPDATE administrators SET forename = ? WHERE admin_id = ?', [forename, userId]);
         res.status(200).json({ success: true, message: 'Forename updated successfully' });
     } catch (error) {
@@ -425,7 +424,7 @@ app.post('/api/update-surname', async (req, res) => {
     const { surname } = req.body;
     const userId = req.session.user.adminID;
 
-    try {
+    try { // Update surname in database
         await pool.promise().query('UPDATE administrators SET surname = ? WHERE admin_id = ?', [surname, userId]);
         res.status(200).json({ success: true, message: 'Surname updated successfully' });
     } catch (error) {
@@ -454,9 +453,9 @@ app.post('/api/update-email', async (req, res) => {
         return res.status(400).json({ success: false, errors });
     }
 
-    try {
+    try { // Update email address in database
         await pool.promise().query('UPDATE administrators SET email = ? WHERE admin_id = ?', [email, userId]);
-        res.status(200).json({ success: true, message: 'Email updated successfully' });
+        res.status(200).json({ success: true, message: 'Email address updated successfully' });
     } catch (error) {
         console.error('Error updating email:', error);
         res.status(500).json({ success: false, message: 'Failed to update email' });
@@ -483,7 +482,7 @@ app.post('/api/update-phone', async (req, res) => {
         return res.status(400).json({ success: false, errors });
     }
 
-    try {
+    try { // Update phone number in database
         await pool.promise().query('UPDATE administrators SET phone = ? WHERE admin_id = ?', [phone, userId]);
         res.status(200).json({ success: true, message: 'Phone number updated successfully' });
     } catch (error) {

@@ -24,26 +24,32 @@
         </div>
     </div>
     <div class="form-block">
-        <h1>Manage account details</h1>
+        <h3>Manage account details</h3>
         <form id="updateForename" method="post" class="form">
             <label for="forename" class="field-label">Forename</label>
-            <input class="text-field" maxlength="20" name="forename" placeholder="Enter a new forename, up to 20 characters" type="text" id="forename"/>
+            <input class="text-field" maxlength="20" name="forename" placeholder="Enter a new forename, up to 20 characters" type="text" id="forename" required=""/>
             <input type="submit" class="submit-button" id="submitForename" value="Update forename"/>
         </form>
         <form id="updateSurname" method="post" class="form">
             <label for="surname" class="field-label">Surname</label>
-            <input class="text-field" maxlength="20" name="surname" placeholder="Enter a new surname, up to 20 characters" type="text" id="surname"/>
+            <input class="text-field" maxlength="20" name="surname" placeholder="Enter a new surname, up to 20 characters" type="text" id="surname" required=""/>
             <input type="submit" class="submit-button" id="submitSurname" value="Update surname"/>
         </form>
-        <form id="updateEmail" method="post" class="form"></form>
+        <form id="updateEmail" method="post" class="form">
             <label for="email" class="field-label">Email address</label>
-            <input class="text-field" maxlength="320" name="email" placeholder="Enter a new email address" type="email" id="email"/>
+            <input class="text-field" maxlength="320" name="email" placeholder="Enter a new email address" type="email" id="email" required=""/>
             <input type="submit" class="submit-button" id="submitEmail" value="Update email address"/>
         </form>
-        <form id="verifyEmail"></form>
-        <form id="updatePhone" method="post" class="form"></form>
+        <form id="verifyEmail" style="display: none">
+            <label for="verification-code" class="field-label">Verification code</label>
+            <input class="text-field" name="verification-code" placeholder="Enter the verification code" type="text" id="verification-code" required=""/>
+            <input type="submit" class="submit-button" value="Verify code"/>
+        </form>
+        <button type="button" id="resendEmail" style="display: none">Resend email</button>
+        <p id="cooldown-timer" style="display: none"></p>
+        <form id="updatePhone" method="post" class="form">
             <label for="phone" class="field-label">Phone number</label>
-            <input class="text-field" maxlength="11" name="phone" placeholder="Enter a new UK phone number" type="tel" id="phone"/>
+            <input class="text-field" maxlength="11" name="phone" placeholder="Enter a new UK phone number" type="tel" id="phone" required=""/>
             <input type="submit" class="submit-button" id="submitPhone" value="Update phone number"/>
         </form>
         <button type="button" class="reset-password" onclick="location.href='../login/resetscreen.html'">Reset password</button>
