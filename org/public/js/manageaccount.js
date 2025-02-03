@@ -35,7 +35,7 @@ function showError(message, type = 'fail') { // Default parameter for common use
     }
 }
 
-const sendVerificationEmail = async () => {
+const sendVerificationEmail = async (email) => {
     const emailResponse = await fetch(`${baseUrl}/api/email-code`, {
         method: 'POST',
         headers: {
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         errorContainer.innerHTML = ''; 
         const email = document.getElementById('email').value.trim();
         const verifyEmail = document.getElementById('verifyEmail');
-        const emailSent = await sendVerificationEmail(); // Send verification email and store result
+        const emailSent = await sendVerificationEmail(email); // Send verification email and store result
 
         if (emailSent) { // If email sent successfully, display verification form
             verifyEmail.style.display = 'block';
