@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         errorContainer.innerHTML = ''; 
         const email = document.getElementById('email').value.trim();
         const verifyEmail = document.getElementById('verifyEmail');
-        const emailSent = sendVerificationEmail(); // Send verification email and store result
+        const emailSent = await sendVerificationEmail(); // Send verification email and store result
 
         if (emailSent) { // If email sent successfully, display verification form
             verifyEmail.style.display = 'block';

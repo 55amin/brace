@@ -40,7 +40,7 @@
             <input class="text-field" maxlength="320" name="email" placeholder="Enter a new email address" type="email" id="email" required=""/>
             <input type="submit" class="submit-button" id="submitEmail" value="Update email address"/>
         </form>
-        <form id="verifyEmail" style="display: none">
+        <form id="verifyEmail" method="post" style="display: none">
             <label for="verification-code" class="field-label">Verification code</label>
             <input class="text-field" name="verification-code" placeholder="Enter the verification code" type="text" id="verification-code" required=""/>
             <input type="submit" class="submit-button" value="Verify code"/>
@@ -55,6 +55,6 @@
         <button type="button" class="reset-password" onclick="location.href='../login/resetscreen.html'">Reset password</button>
     </div>
     <div id="error-container" class="error-container"></div>
-    <script href="../js/manageaccount.js"></script>
+    <script src="../js/manageaccount.js"></script>
 </body>
 </html>
