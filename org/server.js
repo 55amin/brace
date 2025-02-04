@@ -61,12 +61,10 @@ const transporter = nodemailer.createTransport({ // Configure email service
 const admins = [];
 
 // Check if admin is authenticated
-function isAuthenticatedAdmin(req, res, next) {
-    if (req.session && req.session.user && req.session.user.adminID) { // Check if session exists and user is logged in
-        console.log('isAuthenticatedAdmin check - session:', req.session);
+function isAuthenticatedAdmin(req, res, next) { // Check if session exists and user is logged in as an admin
+    if (req.session && req.session.user && req.session.user.adminID) { 
         return next(); 
     } else { // Redirect to startup page if user is not authenticated
-        console.warn('Unauthenticated: Missing session or adminID', req.session);
         res.redirect('public/index.html');
     }
 }
@@ -442,6 +440,7 @@ app.post('/api/update-email', async (req, res) => {
     const { email } = req.body;
     const validatedEmail = validateEmail(email);
     const userId = req.session.user.adminID;
+    const errors = [];
 
     if (!validatedEmail.isValid) errors.push(validatedEmail.error);
     if (errors.length > 0) {
@@ -471,6 +470,7 @@ app.post('/api/update-phone', async (req, res) => {
     const { phone } = req.body;
     const validatedPhone = validatePhone(phone);
     const userId = req.session.user.adminID;
+    const errors = [];
 
     if (!validatedPhone.isValid) errors.push(validatedPhone.error);
     if (errors.length > 0) {

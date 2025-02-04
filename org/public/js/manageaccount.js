@@ -145,6 +145,12 @@ document.addEventListener('DOMContentLoaded', () => {
             resendEmail.style.display = 'block';
             cooldownTimer.style.display = 'block';
 
+            resendAttemptsU++;
+            resendCooldownU = resendAttemptsU >= 3 ? 3600 : 60; // 1 hour cooldown if 3 or more attempts, 1 minute if less
+            localStorage.setItem('resendAttemptsU', resendAttemptsU);
+            localStorage.setItem('resendCooldownU', resendCooldownU);
+            handleCooldown(updateEmail); // Calculate and display cooldown
+
             verifyEmail.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 const code = document.getElementById('code').value.trim();
@@ -157,12 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 const verifyResult = await verifyResponse.json();
                 if (verifyResult.success) { // If verification successful, update email in database
-                    resendAttemptsU++;
-                    resendCooldownU = resendAttemptsU >= 3 ? 3600 : 60; // 1 hour cooldown if 3 or more attempts, 1 minute if less
-                    localStorage.setItem('resendAttemptsU', resendAttemptsU);
-                    localStorage.setItem('resendCooldownU', resendCooldownU);
-                    
-                    handleCooldown(updateEmail); // Calculate and display cooldown
 
                     const updateResponse = await fetch(`${baseUrl}/api/update-email`, {
                         method: 'POST',
