@@ -60,11 +60,13 @@ const transporter = nodemailer.createTransport({ // Configure email service
 
 const admins = [];
 
-// Check if user is authenticated
-function isAuthenticated(req, res, next) {
-    if (req.session && req.session.user) { // Check if session exists and user is logged in
+// Check if admin is authenticated
+function isAuthenticatedAdmin(req, res, next) {
+    if (req.session && req.session.user && req.session.user.adminID) { // Check if session exists and user is logged in
+        console.log('isAuthenticatedAdmin check - session:', req.session);
         return next(); 
     } else { // Redirect to startup page if user is not authenticated
+        console.warn('Unauthenticated: Missing session or adminID', req.session);
         res.redirect('public/index.html');
     }
 }
@@ -73,15 +75,15 @@ app.get('/', (req, res) => {
     res.redirect('/index.html'); // Redirect to your main page
 });
 
-app.get('/adminscreen.html', isAuthenticated, (req, res) => {
+app.get('/adminscreen.html', isAuthenticatedAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'adminscreen.html'));
 });
 
-app.get('/settings.html', isAuthenticated, (req, res) => {
+app.get('/settings.html', isAuthenticatedAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'settings.html'));
 });
 
-app.get('/manageaccount.html', isAuthenticated, (req, res) => {
+app.get('/manageaccount.html', isAuthenticatedAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'manageaccount.html'));
 });
 
