@@ -31,6 +31,7 @@ const sessionStore = new MySQLStore({ // Configure MySQL session store
     expiration: 1000 * 60 * 10 // Sessions expire after 10 minutes of inactivity
 }, pool); 
 
+app.set('trust proxy', 1);
 app.use(session({ // Configure user session
     store: sessionStore, 
     secret: process.env.SECRET_KEY,
@@ -423,6 +424,7 @@ app.post('/api/update-forename', async (req, res) => {
 app.post('/api/update-surname', async (req, res) => {
     const { surname } = req.body;
     const userId = req.session.user.adminID;
+    console.log(req.session.user.adminID);
 
     try { // Update surname in database
         await pool.promise().query('UPDATE administrators SET surname = ? WHERE admin_id = ?', [surname, userId]);
