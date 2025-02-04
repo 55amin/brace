@@ -361,7 +361,7 @@ app.post('/api/admin-login', async (req, res) => {
             errors: ['Failed to log in'] 
         });
     }
-});
+});  
 
 // Reset password
 app.post('/api/reset-password', async (req, res) => {

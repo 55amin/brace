@@ -4,6 +4,7 @@ window.addEventListener('load', () => {
     const cooldownEndU = parseInt(localStorage.getItem('cooldownEndU'));
     if (cooldownEndU > Date.now()) {
         resendEmail.disabled = true;
+        updateEmail.disabled = true;
 
         window.cooldownInterval = setInterval(() => {
             const remainingTimeU = Math.ceil((cooldownEndU - Date.now()) / 1000);
@@ -17,6 +18,7 @@ window.addEventListener('load', () => {
                 cooldownTimer.textContent = '';
                 localStorage.removeItem('cooldownEndU');
                 resendEmail.disabled = false;
+                updateEmail.disabled = false;
             }
         }, 1000);
     }
@@ -34,6 +36,31 @@ function showError(message, type = 'fail') { // Default parameter for common use
         errorMessage.style.border = 'white';
     }
 }
+
+function handleCooldown(button) {
+    const cooldownEndU = Date.now() + resendCooldownU * 1000; 
+    localStorage.setItem('cooldownEndU', cooldownEndU);
+    button.disabled = true; // Disable button during cooldown
+
+    if (window.cooldownInterval) { // Clear existing cooldown to prevent multiple cooldowns
+        clearInterval(window.cooldownInterval);
+    }
+
+    window.cooldownInterval = setInterval(() => {
+        const remainingTimeU = Math.ceil((cooldownEndU - Date.now()) / 1000);
+        const cooldownTimer = document.getElementById('cooldown-timer');
+
+        if (remainingTimeU > 0) { // Display cooldown
+            cooldownTimer.textContent = `Resend available in ${remainingTimeU} seconds.`;
+        } else { // Clear interval when cooldown ends and re-enable button
+            clearInterval(window.cooldownInterval); 
+            cooldownTimer.textContent = ''; 
+            localStorage.removeItem('cooldownEndU'); 
+            button.disabled = false; 
+        }
+    }, 1000);
+}
+
 
 const sendVerificationEmail = async (email) => {
     const emailResponse = await fetch(`${baseUrl}/api/email-code`, {
@@ -130,6 +157,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 const verifyResult = await verifyResponse.json();
                 if (verifyResult.success) { // If verification successful, update email in database
+                    resendAttemptsU++;
+                    resendCooldownU = resendAttemptsU >= 3 ? 3600 : 60; // 1 hour cooldown if 3 or more attempts, 1 minute if less
+                    localStorage.setItem('resendAttemptsU', resendAttemptsU);
+                    localStorage.setItem('resendCooldownU', resendCooldownU);
+                    
+                    handleCooldown(updateEmail); // Calculate and display cooldown
+
                     const updateResponse = await fetch(`${baseUrl}/api/update-email`, {
                         method: 'POST',
                         headers: {
@@ -191,27 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 resendCooldownU = resendAttemptsU >= 3 ? 3600 : 60; // 1 hour cooldown if 3 or more attempts, 1 minute if less
                 localStorage.setItem('resendAttemptsU', resendAttemptsU);
                 localStorage.setItem('resendCooldownU', resendCooldownU);
-                const cooldownEndU = Date.now() + resendCooldownU * 1000;
-                localStorage.setItem('cooldownEndU', cooldownEndU);
-                resendEmail.disabled = true; // Prevent user from using resend button during cooldown
+                
+                handleCooldown(resendEmail); // Calculate and display cooldown
 
-                if (window.cooldownInterval) { // Clear existing cooldowns to prevent multiple cooldowns
-                    clearInterval(window.cooldownInterval);
-                }
-
-                window.cooldownInterval = setInterval(() => {
-                    const remainingTimeU = Math.ceil((cooldownEndU - Date.now()) / 1000);
-                    const cooldownTimer = document.getElementById('cooldown-timer');
-        
-                    if (remainingTimeU > 0) { // Display cooldown
-                        cooldownTimer.textContent = `Resend available in ${remainingTimeU} seconds.`;
-                    } else { // Clear interval when cooldown ends and re-enable resend button
-                        clearInterval(window.cooldownInterval); 
-                        cooldownTimer.textContent = ''; 
-                        localStorage.removeItem('cooldownEndU'); 
-                        resendEmail.disabled = false; 
-                    }
-                }, 1000);
             } else {
                 showError('Failed to resend verification email');
             }
