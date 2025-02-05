@@ -23,7 +23,23 @@
             </div>
         </div>
     </div>
-    
+    <div class="form-block"></div>
+        <form id="adminForm" name="createadmin" method="post" class="form">
+            <label for="forename" class="field-label">Forename</label>
+            <input class="text-field" maxlength="20" name="forename" placeholder="Enter a forename, up to 20 characters" type="text" id="forename" required=""/>
+            <label for="surname" class="field-label">Surname</label>
+            <input class="text-field" maxlength="20" name="surname" placeholder="Enter a surname, up to 20 characters" type="text" id="surname" required=""/>
+            <label for="email" class="field-label-2">Email address</label>
+            <input class="text-field-2" maxlength="320" name="email" placeholder="Enter an email address" type="email" id="email" required=""/>
+            <label for="phone" class="field-label-2">Phone number</label>
+            <input class="text-field-2" maxlength="11" name="phone" placeholder="Enter a UK phone number" type="tel" id="phone" required=""/>
+            <label for="password" class="field-label-2">Create password</label>
+            <input class="text-field-2" maxlength="20" name="password" placeholder="Create a password with at least 8 characters, including at least one number, one uppercase letter, one lowercase character and a special character" type="password" id="password" required=""/>
+            <label for="confirmPassword" class="field-label-2">Confirm password</label>
+            <input class="text-field-2" maxlength="20" name="confirmPassword" placeholder="Both passwords must match" type="password" id="confirmPassword" required=""/>
+            <input type="submit" class="submit-button" id="submit-button" value="Create administrator account"/>
+        </form>
+    </div>
     <div id="error-container" class="error-container"></div>
     <script src="../js/manageadmin.js"></script>
 </body>
