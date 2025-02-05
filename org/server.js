@@ -86,6 +86,14 @@ app.get('/manageaccount.html', isAuthenticatedAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'manageaccount.html'));
 });
 
+app.get('/manageaccount.html', isAuthenticatedAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'manageadmin.html'));
+});
+
+app.get('/manageaccount.html', isAuthenticatedAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'createadmin.html'));
+});
+
 // Check if an administrator exists in database
 app.get('/api/check-admin', async (req, res) => {
     try {
