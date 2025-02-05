@@ -9,6 +9,7 @@ const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 const mysql = require('mysql2');
 const dotenv = require('dotenv');
+const { load } = require('npm');
 dotenv.config();
 
 const app = express();
@@ -364,6 +365,34 @@ app.post('/api/admin-login', async (req, res) => {
     }
 });  
 
+// Return all users
+app.post('/api/get-users', async (req, res) => {
+    const { type } = req.body;
+    const users = [];
+    if (type === 'admin') {
+        admins.forEach(admin => {
+            users.push({
+                adminID: admin.adminID,
+                forename: admin.forename,
+                surname: admin.surname,
+                email: admin.email,
+                phone: admin.phone,
+                verified: admin.verified
+            });
+        });
+    } else if (type === 'agent') {
+        agents.forEach(agent => {
+            users.push({
+                agentID: agent.agentID,
+                username: agent.username,
+                email: agent.email,
+                verified: agent.verified
+            });
+        });
+    }
+    res.status(200).json({ users });
+});
+
 // Reset password
 app.post('/api/reset-password', async (req, res) => {
     const { email, password, type } = req.body;
@@ -408,11 +437,14 @@ app.post('/api/reset-password', async (req, res) => {
 
 // Update forename
 app.post('/api/update-forename', async (req, res) => {
-    const { forename } = req.body;
-    const userId = req.session.user.adminID; 
+    const { forename, userId = req.session.user.adminID } = req.body;
 
     try { // Update forename in database
         await pool.promise().query('UPDATE administrators SET forename = ? WHERE admin_id = ?', [forename, userId]);
+        const admin = admins.find(admin => admin.adminID === userId);
+        if (admin) {
+            admin.forename = forename; // Update the in-memory admin's forename
+        }
         res.status(200).json({ success: true, message: 'Forename updated successfully' });
     } catch (error) {
         console.error('Error updating forename:', error);
@@ -422,12 +454,15 @@ app.post('/api/update-forename', async (req, res) => {
 
 // Update surname
 app.post('/api/update-surname', async (req, res) => {
-    const { surname } = req.body;
-    const userId = req.session.user.adminID;
+    const { surname, userId = req.session.user.adminID } = req.body;
     console.log(req.session.user.adminID);
 
     try { // Update surname in database
         await pool.promise().query('UPDATE administrators SET surname = ? WHERE admin_id = ?', [surname, userId]);
+        const admin = admins.find(admin => admin.adminID === userId);
+        if (admin) {
+            admin.surname = surname; // Update the in-memory admin's surname
+        }
         res.status(200).json({ success: true, message: 'Surname updated successfully' });
     } catch (error) {
         console.error('Error updating surname:', error);
@@ -437,19 +472,31 @@ app.post('/api/update-surname', async (req, res) => {
 
 // Update email address
 app.post('/api/update-email', async (req, res) => {
-    const { email } = req.body;
+    const { email, role, userId = 0} = req.body;
     const validatedEmail = validateEmail(email);
-    const userId = req.session.user.adminID;
     const errors = [];
+    let table;
 
     if (!validatedEmail.isValid) errors.push(validatedEmail.error);
     if (errors.length > 0) {
         return res.status(400).json({ success: false, errors });
     }
 
+    if (role === 'admin') {
+        if (userId === 0) {
+            userId = req.session.user.adminID;
+        } 
+        table = 'administrators';
+    } else if (role === 'agent') {
+        if (userId === 0) {
+            userId = req.session.user.agentID;
+        }
+        table = 'agents';
+    }
+
     const [rowsEmail] = await pool.promise().query(
-        'SELECT COUNT(*) as count FROM administrators WHERE email = ?',
-        [validatedEmail.value] // Check if email address exists in database
+        'SELECT COUNT(*) as count FROM ?? WHERE email = ?',
+        [table, validatedEmail.value] // Check if email address exists in database
     );
     if (rowsEmail[0].count > 0) {
         errors.push('Email address already registered');
@@ -457,7 +504,19 @@ app.post('/api/update-email', async (req, res) => {
     }
 
     try { // Update email address in database
-        await pool.promise().query('UPDATE administrators SET email = ? WHERE admin_id = ?', [email, userId]);
+        if (role === 'admin') {
+            await pool.promise().query('UPDATE administrators SET email = ? WHERE admin_id = ?', [email, userId]);
+            const admin = admins.find(admin => admin.adminID === userId);
+            if (admin) {
+                admin.email = email; // Update the in-memory admin's email address
+            }
+        } else if (role === 'agent') {
+            await pool.promise().query('UPDATE agents SET email = ? WHERE agent_id = ?', [email, userId]);
+            const agent = agents.find(agent => agent.agentID === userId);
+            if (agent) {
+                agent.email = email; // Update the in-memory agent's email address
+            }
+        }
         res.status(200).json({ success: true, message: 'Email address updated successfully' });
     } catch (error) {
         console.error('Error updating email:', error);
@@ -467,9 +526,8 @@ app.post('/api/update-email', async (req, res) => {
 
 // Update phone number
 app.post('/api/update-phone', async (req, res) => {
-    const { phone } = req.body;
+    const { phone, userId = req.session.user.adminID } = req.body;
     const validatedPhone = validatePhone(phone);
-    const userId = req.session.user.adminID;
     const errors = [];
 
     if (!validatedPhone.isValid) errors.push(validatedPhone.error);
@@ -488,6 +546,10 @@ app.post('/api/update-phone', async (req, res) => {
 
     try { // Update phone number in database
         await pool.promise().query('UPDATE administrators SET phone = ? WHERE admin_id = ?', [phone, userId]);
+        const admin = admins.find(admin => admin.adminID === userId);
+        if (admin) {
+            admin.phone = phone; // Update the in-memory admin's phone number
+        }
         res.status(200).json({ success: true, message: 'Phone number updated successfully' });
     } catch (error) {
         console.error('Error updating phone number:', error);
@@ -500,8 +562,7 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
     
-    // Load admins into memory from database
-    try {
+    try { // Load administrators from database into memory
         const [rows] = await pool.promise().query('SELECT * FROM administrators ORDER BY admin_id ASC');
         rows.forEach(row => {
             const admin = new Administrator(
