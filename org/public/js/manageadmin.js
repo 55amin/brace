@@ -15,21 +15,23 @@ function showError(message, type = 'fail') { // Default parameter for common use
 }
 
 function expand(admin, adminRow) {
+    const admin = JSON.parse(adminRow.dataset.admin);
     adminRow.innerHTML = `
-    <h5>${admin.adminID}</h5>
-    <h4>${admin.forename} ${admin.surname}</h4>
-    <p>${admin.email}</p>
-    <p>${admin.phone}</p>
-    <button class="minimise-button" onclick="minimise(${JSON.stringify(admin)}, adminRow)">Minimise</button>
-    <button class="delete-button" onclick="deleteAdmin(${JSON.stringify(admin)}, adminRow)">Delete admin</button>
+    <h5>ID: ${admin.adminID}</h5>
+    <h4>Name: ${admin.forename} ${admin.surname}</h4>
+    <p>Email address: ${admin.email}</p>
+    <p>Phone number: ${admin.phone}</p>
+    <button class="minimise-button" onclick="minimise(${admin.adminID}, adminRow)">Minimise</button>
+    <button class="delete-button" onclick="deleteAdmin(${admin.adminID}, adminRow)">Delete admin</button>
 `;
 }
 
 function minimise(admin, adminRow) {
+    const admin = JSON.parse(adminRow.dataset.admin);
     adminRow.innerHTML = `
-    <h5>${admin.adminID}</h5>
-    <h4>${admin.forename} ${admin.surname}</h4>
-    <button class="expand-button" onclick="expand(${JSON.stringify(admin)}, adminRow)">Expand</button>
+    <h5>ID: ${admin.adminID}</h5>
+    <h4>Name: ${admin.forename} ${admin.surname}</h4>
+    <button class="expand-button" onclick="expand(${admin.adminID}, adminRow)">Expand</button>
 `;
 }
 
@@ -47,10 +49,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         for (let admin of result.users) {
             let adminRow = document.createElement('div');
             adminRow.className = 'admin-row';
+            adminRow.dataset.admin = JSON.stringify(admin);
             adminRow.innerHTML = `
-                <h5>${admin.adminID}</h5>
-                <h4>${admin.forename} ${admin.surname}</h4>
-                <button class="expand-button" onclick="expand(${JSON.stringify(admin)}, adminRow)">Expand</button>
+                <h5>ID: ${admin.adminID}</h5>
+                <h4>Name: ${admin.forename} ${admin.surname}</h4>
+                <button class="expand-button" onclick="expand(${admin.adminID}, adminRow)">Expand</button>
             `;
             document.getElementById('admin-container').appendChild(adminRow);
         }
