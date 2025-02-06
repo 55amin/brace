@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify('admin'),
+            body: JSON.stringify({ type: 'admin' }),
         });
         const result = await response.json();
 
