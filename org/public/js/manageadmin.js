@@ -14,7 +14,7 @@ function showError(message, type = 'fail') { // Default parameter for common use
     }
 }
 
-function expand(admin, adminRow) {
+function expand(admin, button) {
     adminRow = button.closest('.admin-row');
     admin = JSON.parse(adminRow.dataset.admin);
     adminRow.innerHTML = `
@@ -27,7 +27,7 @@ function expand(admin, adminRow) {
 `;
 }
 
-function minimise(admin, adminRow) {
+function minimise(admin, button) {
     adminRow = button.closest('.admin-row');
     admin = JSON.parse(adminRow.dataset.admin);
     adminRow.innerHTML = `
