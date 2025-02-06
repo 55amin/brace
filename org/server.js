@@ -384,7 +384,6 @@ app.post('/api/get-users', async (req, res) => {
                 surname: admin.surname,
                 email: admin.email,
                 phone: admin.phone,
-                verified: admin.verified
             });
         });
     } else if (type === 'agent') {
@@ -393,7 +392,6 @@ app.post('/api/get-users', async (req, res) => {
                 agentID: agent.agentID,
                 username: agent.username,
                 email: agent.email,
-                verified: agent.verified
             });
         });
     }
