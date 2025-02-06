@@ -15,7 +15,7 @@ function showError(message, type = 'fail') { // Default parameter for common use
 }
 
 function expand(admin, adminRow) {
-    const admin = JSON.parse(adminRow.dataset.admin);
+    let admin = JSON.parse(adminRow.dataset.admin);
     adminRow.innerHTML = `
     <h5>ID: ${admin.adminID}</h5>
     <h4>Name: ${admin.forename} ${admin.surname}</h4>
@@ -27,7 +27,7 @@ function expand(admin, adminRow) {
 }
 
 function minimise(admin, adminRow) {
-    const admin = JSON.parse(adminRow.dataset.admin);
+    let admin = JSON.parse(adminRow.dataset.admin);
     adminRow.innerHTML = `
     <h5>ID: ${admin.adminID}</h5>
     <h4>Name: ${admin.forename} ${admin.surname}</h4>
