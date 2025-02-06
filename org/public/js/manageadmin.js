@@ -20,8 +20,8 @@ function expand(admin, adminRow) {
     <h4>${admin.forename} ${admin.surname}</h4>
     <p>${admin.email}</p>
     <p>${admin.phone}</p>
-    <button class="minimise-button" onclick="minimise(admin, adminRow)">Minimise</button>
-    <button class="delete-button" onclick="deleteAdmin(admin, adminRow)">Delete admin</button>
+    <button class="minimise-button" onclick="minimise(${admin}, adminRow)">Minimise</button>
+    <button class="delete-button" onclick="deleteAdmin(${admin}, adminRow)">Delete admin</button>
 `;
 }
 
@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         for (let admin of result.users) {
             let adminRow = document.createElement('div');
+            adminRow.className = 'admin-row';
             adminRow.innerHTML = `
                 <h5>${admin.adminID}</h5>
                 <h4>${admin.forename} ${admin.surname}</h4>
