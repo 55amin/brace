@@ -217,8 +217,9 @@ button:hover, .login-button:hover, .submit-button:hover, .reset-password:hover, 
   border-radius: 10px;
 }
 
-.admin-row h5 h4 {
-  margin: 10px;
+.admin-row h5,
+.admin-row h4 {
+  margin: 15px;
 }
 
 /* Schedule view styles */

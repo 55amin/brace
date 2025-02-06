@@ -15,23 +15,25 @@ function showError(message, type = 'fail') { // Default parameter for common use
 }
 
 function expand(admin, adminRow) {
+    adminRow = button.closest('.admin-row');
     admin = JSON.parse(adminRow.dataset.admin);
     adminRow.innerHTML = `
     <h5>ID: ${admin.adminID}</h5>
     <h4>Name: ${admin.forename} ${admin.surname}</h4>
     <p>Email address: ${admin.email}</p>
     <p>Phone number: ${admin.phone}</p>
-    <button class="minimise-button" onclick="minimise(${admin.adminID}, ${adminRow})">Minimise</button>
-    <button class="delete-button" onclick="deleteAdmin(${admin.adminID}, ${adminRow})">Delete admin</button>
+    <button class="minimise-button" onclick="minimise(${admin.adminID}, this)">Minimise</button>
+    <button class="delete-button" onclick="deleteAdmin(${admin.adminID}, this)">Delete admin</button>
 `;
 }
 
 function minimise(admin, adminRow) {
+    adminRow = button.closest('.admin-row');
     admin = JSON.parse(adminRow.dataset.admin);
     adminRow.innerHTML = `
     <h5>ID: ${admin.adminID}</h5>
     <h4>Name: ${admin.forename} ${admin.surname}</h4>
-    <button class="expand-button" onclick="expand(${admin.adminID}, ${adminRow})">Expand</button>
+    <button class="expand-button" onclick="expand(${admin.adminID}, this)">Expand</button>
 `;
 }
 
@@ -53,7 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             adminRow.innerHTML = `
                 <h5>ID: ${admin.adminID}</h5>
                 <h4>Name: ${admin.forename} ${admin.surname}</h4>
-                <button class="expand-button" onclick="expand(${admin.adminID}, ${adminRow})">Expand</button>
+                <button class="expand-button" onclick="expand(${admin.adminID}, this)">Expand</button>
             `;
             document.getElementById('admin-container').appendChild(adminRow);
         }
@@ -61,3 +63,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         showError('Error fetching admins');
     }
 });
+
+
