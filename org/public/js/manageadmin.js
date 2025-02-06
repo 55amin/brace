@@ -20,8 +20,8 @@ function expand(admin, adminRow) {
     <h4>${admin.forename} ${admin.surname}</h4>
     <p>${admin.email}</p>
     <p>${admin.phone}</p>
-    <button class="minimise-button" onclick="minimise(${admin}, adminRow)">Minimise</button>
-    <button class="delete-button" onclick="deleteAdmin(${admin}, adminRow)">Delete admin</button>
+    <button class="minimise-button" onclick="minimise(${JSON.stringify(admin)}, adminRow)">Minimise</button>
+    <button class="delete-button" onclick="deleteAdmin(${JSON.stringify(admin)}, adminRow)">Delete admin</button>
 `;
 }
 
@@ -29,7 +29,7 @@ function minimise(admin, adminRow) {
     adminRow.innerHTML = `
     <h5>${admin.adminID}</h5>
     <h4>${admin.forename} ${admin.surname}</h4>
-    <button class="expand-button" onclick="expand(${admin}, adminRow)">Expand</button>
+    <button class="expand-button" onclick="expand(${JSON.stringify(admin)}, adminRow)">Expand</button>
 `;
 }
 
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             adminRow.innerHTML = `
                 <h5>${admin.adminID}</h5>
                 <h4>${admin.forename} ${admin.surname}</h4>
-                <button class="expand-button" onclick="expand(${admin}, adminRow)">Expand</button>
+                <button class="expand-button" onclick="expand(${JSON.stringify(admin)}, adminRow)">Expand</button>
             `;
             document.getElementById('admin-container').appendChild(adminRow);
         }
