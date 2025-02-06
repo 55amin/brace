@@ -14,8 +14,8 @@ function showError(message, type = 'fail') { // Default parameter for common use
     }
 }
 
-const setupForm = document.getElementById('adminForm');
-setupForm.addEventListener('submit', async (event) => {
+const adminForm = document.getElementById('adminForm');
+adminForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const container = document.getElementById('error-container');
     container.innerHTML = ''; 
