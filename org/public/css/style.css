@@ -212,11 +212,15 @@ button:hover, .login-button:hover, .submit-button:hover, .reset-password:hover, 
 }
 
 .admin-row {
+  display: flex;
+  margin: 10px;
   border: 3px solid #452fd0;
   border-radius: 10px;
 }
 
-
+h5.admin-row {
+  margin: 5px;
+}
 
 /* Schedule view styles */
 .calendar-container {
