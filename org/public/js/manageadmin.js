@@ -29,7 +29,7 @@ function minimise(admin, adminRow) {
     adminRow.innerHTML = `
     <h5>${admin.adminID}</h5>
     <h4>${admin.forename} ${admin.surname}</h4>
-    <button class="expand-button" onclick="expand(admin, adminRow)">Expand</button>
+    <button class="expand-button" onclick="expand(${admin}, adminRow)">Expand</button>
 `;
 }
 
@@ -44,12 +44,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         const result = await response.json();
 
-        for (let admin in result.users) {
+        for (let admin of result.users) {
             let adminRow = document.createElement('div');
             adminRow.innerHTML = `
                 <h5>${admin.adminID}</h5>
                 <h4>${admin.forename} ${admin.surname}</h4>
-                <button class="expand-button" onclick="expand(admin, adminRow)">Expand</button>
+                <button class="expand-button" onclick="expand(${admin}, adminRow)">Expand</button>
             `;
             document.getElementById('admin-container').appendChild(adminRow);
         }
