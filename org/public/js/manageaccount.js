@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ email }),
+                        body: JSON.stringify({ email, role: 'admin' }),
                     });
                     const updateResult = await updateResponse.json();
                     if (updateResult.success) {
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, type: 'password' })
+                body: JSON.stringify({ email, type: 'email' })
             });
 
             const emailResult = await emailResponse.json();

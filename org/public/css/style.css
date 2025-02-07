@@ -222,6 +222,10 @@ button:hover, .login-button:hover, .submit-button:hover, .reset-password:hover, 
   margin: 15px;
 }
 
+.delete-button {
+  color: #b00c0c;
+}
+
 /* Schedule view styles */
 .calendar-container {
   margin: 20px;
