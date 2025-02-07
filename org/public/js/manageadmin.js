@@ -41,7 +41,7 @@ function minimise(admin, button) { // Only display basic details when minimise b
 function deleteAdmin(admin, button) { // Delete admin when delete admin button clicked
     adminRow = button.closest('.admin-row');
     admin = JSON.parse(adminRow.dataset.admin);
-    adminID = admin.adminID;
+    let adminID = admin.adminID;
 
     // Confirm deletion using built-in browser alert before proceeding
     if (!confirm('Are you sure you want to delete this admin?')) {
