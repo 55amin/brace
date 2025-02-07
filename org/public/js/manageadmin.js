@@ -38,7 +38,7 @@ function minimise(admin, button) { // Only display basic details when minimise b
 `;
 }
 
-function deleteAdmin(admin, button) { // Delete admin when delete admin button clicked
+async function deleteAdmin(admin, button) { // Delete admin when delete admin button clicked
     adminRow = button.closest('.admin-row');
     admin = JSON.parse(adminRow.dataset.admin);
     let adminID = admin.adminID;
@@ -48,14 +48,15 @@ function deleteAdmin(admin, button) { // Delete admin when delete admin button c
         return;
     }
 
-    const response = fetch(`${baseUrl}/api/delete-user`, { 
+    const response = await fetch(`${baseUrl}/api/delete-user`, { 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({ role: 'admin', userId: adminID }),
     });
-    const result = response.json();
+    const result = await response.json();
+
     if (result.success) {
         showError(result.message, 'neutral');
         adminRow.remove();
