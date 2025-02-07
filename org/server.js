@@ -483,7 +483,6 @@ app.post('/api/update-forename', async (req, res) => {
 // Update surname
 app.post('/api/update-surname', async (req, res) => {
     const { surname, userId = req.session.user.adminID } = req.body;
-    console.log(req.session.user.adminID);
 
     try { // Update surname in database
         await pool.promise().query('UPDATE administrators SET surname = ? WHERE admin_id = ?', [surname, userId]);

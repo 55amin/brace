@@ -72,6 +72,7 @@ function edit(admin, button) { // Display forms to update details when edit butt
     document.getElementById(`updateForename-${adminID}`).addEventListener('submit', async (event) => {
         event.preventDefault();
         const forename = document.getElementById(`forename-${adminID}`).value.trim();
+        adminID = admin.adminID;
         const response = await fetch(`${baseUrl}/api/update-forename`, {
             method: 'POST',
             headers: {
@@ -90,6 +91,7 @@ function edit(admin, button) { // Display forms to update details when edit butt
     document.getElementById(`updateSurname-${adminID}`).addEventListener('submit', async (event) => {
         event.preventDefault();
         const surname = document.getElementById(`surname-${adminID}`).value.trim();
+        adminID = admin.adminID;
         const response = await fetch(`${baseUrl}/api/update-surname`, {
             method: 'POST',
             headers: {
@@ -108,6 +110,7 @@ function edit(admin, button) { // Display forms to update details when edit butt
     document.getElementById(`updateEmail-${adminID}`).addEventListener('submit', async (event) => {
         event.preventDefault();
         const email = document.getElementById(`email-${adminID}`).value.trim();
+        adminID = admin.adminID;
         const emailResponse = await fetch(`${baseUrl}/api/email-code`, { // Send verification email
             method: 'POST',
             headers: {
@@ -151,6 +154,7 @@ function edit(admin, button) { // Display forms to update details when edit butt
     document.getElementById(`updatePhone-${adminID}`).addEventListener('submit', async (event) => {
         event.preventDefault();
         const phone = document.getElementById(`phone-${adminID}`).value.trim();
+        adminID = admin.adminID;
         const response = await fetch(`${baseUrl}/api/update-phone`, {
             method: 'POST',
             headers: {
