@@ -459,6 +459,58 @@ app.post('/api/admin-login', async (req, res) => {
     }
 });  
 
+// Create agent account
+app.post('/api/create-agent', async (req, res) => {
+    const { username, email, password } = req.body;
+    const validatedUsername = validateUsername(username);
+    const validatedEmail = validateEmail(email);
+    const validatedPassword = validatePassword(password);
+    // Push validation error messages to array
+    const errors = [];
+    if (!validatedUsername.isValid) errors.push(validatedUsername.error);
+    if (!validatedEmail.isValid) errors.push(validatedEmail.error);
+    if (!validatedPassword.isValid) errors.push(validatedPassword.error);
+    if (errors.length > 0) {
+        return res.status(400).json({ success: false, errors });
+    }
+
+    try {
+        const [rowsEmail] = await pool.promise().query(
+            'SELECT COUNT(*) as count FROM agents WHERE email = ?',
+            [validatedEmail.value] // Check if email address exists in database
+        );
+        if (rowsEmail[0].count > 0) {
+            errors.push('Email address already registered');
+            return res.status(400).json({ success: false, errors });
+        }
+
+        // Encrypt password using hashing algorithm, then insert agent details into database
+        const hashedPassword = await bcrypt.hash(validatedPassword.value, 10);
+        const query = 'INSERT INTO agents (username, email, hashed_password) VALUES (?, ?, ?)';
+        const values = [
+            validatedUsername.value,
+            validatedEmail.value,
+            hashedPassword
+        ];
+        const [results] = await pool.promise().query(query, values);
+        // Create new agent instance and add agentID from database
+        const newAgent = new Agent(
+            validatedUsername.value,
+            validatedEmail.value,
+            hashedPassword
+        );
+        newAgent.setAgentID(results.insertId);
+        agents.push(newAgent);
+        res.status(200).json({ success: true });
+    } catch (err) {
+        console.error('Error creating agent: ', err);
+        res.status(500).json({ 
+            success: false, 
+            errors: ['Failed to create agent account'] 
+        });
+    }
+});
+
 // Reset password
 app.post('/api/reset-password', async (req, res) => {
     const { email, password, type } = req.body;
