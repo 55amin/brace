@@ -301,6 +301,17 @@ function validateName(name) {
     return { isValid: true, value: name };
 }
 
+function validateUsername(username) {
+    const regex = /^[A-Za-z0-9_]{6,20}$/; 
+    if (!regex.test(username)) {
+        return { 
+            isValid: false,
+            error: "Invalid username. Please enter a username between 6 and 20 characters, containing only letters, numbers and underscores."
+        };
+    }
+    return { isValid: true, value: username };
+}
+
 function validateEmail(email) {
     const normalised = email.toLowerCase(); 
     
@@ -475,6 +486,15 @@ app.post('/api/create-agent', async (req, res) => {
     }
 
     try {
+        const [rowsUsername] = await pool.promise().query(
+            'SELECT COUNT(*) as count FROM administrators WHERE username = ?',
+            [validatedUsername.value] // Check if username exists in database
+        );
+        if (rowsUsername[0].count > 0) {
+            errors.push('Username taken');
+            return res.status(400).json({ success: false, errors });
+        }
+
         const [rowsEmail] = await pool.promise().query(
             'SELECT COUNT(*) as count FROM agents WHERE email = ?',
             [validatedEmail.value] // Check if email address exists in database
