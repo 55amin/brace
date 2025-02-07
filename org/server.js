@@ -280,7 +280,7 @@ app.post('/api/delete-user', async (req, res) => {
             }
         }
         res.status(200).json({ success: true, message: 'User deleted successfully' });
-    } catch {
+    } catch(err) {
         console.error('Error deleting user:', err);
         res.status(500).json({ error: 'Failed to delete user' });
     }

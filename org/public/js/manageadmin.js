@@ -211,7 +211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         for (let admin of result.users) { // Display basic details for each admin
             let adminRow = document.createElement('div');
             adminRow.className = 'admin-row';
-            adminRow.dataset.admin = JSON.stringify(admin);
+            adminRow.dataset.admin = JSON.stringify(admin); // Store admin object in element's dataset to be accessed by other functions
             adminRow.innerHTML = `
                 <h5>ID: ${admin.adminID}</h5>
                 <h4>Name: ${admin.forename} ${admin.surname}</h4>
