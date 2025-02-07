@@ -77,7 +77,7 @@ function edit(admin, button) { // Display forms to update details when edit butt
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ forename, adminID }),
+            body: JSON.stringify({ forename, userId: adminID }),
         });
         const result = await response.json();
         if (result.success) {
@@ -95,7 +95,7 @@ function edit(admin, button) { // Display forms to update details when edit butt
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ surname, adminID }),
+            body: JSON.stringify({ surname, userId: adminID }),
         });
         const result = await response.json();
         if (result.success) {
@@ -108,7 +108,6 @@ function edit(admin, button) { // Display forms to update details when edit butt
     document.getElementById(`updateEmail-${adminID}`).addEventListener('submit', async (event) => {
         event.preventDefault();
         const email = document.getElementById(`email-${adminID}`).value.trim();
-
         const emailResponse = await fetch(`${baseUrl}/api/email-code`, { // Send verification email
             method: 'POST',
             headers: {
@@ -119,18 +118,30 @@ function edit(admin, button) { // Display forms to update details when edit butt
         const emailResult = await emailResponse.json();
 
         if (emailResult.success) {
-            const updateResponse = await fetch(`${baseUrl}/api/update-email`, {
+            const unverifyResponse = await fetch(`${baseUrl}/api/unverify-user`, { // Unverify user to trigger verification upon login
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ email, role: 'admin', adminID }),
+                body: JSON.stringify({ user: 'admin', userId: adminID }),
             });
-            const updateResult = await updateResponse.json();
-            if (updateResult.success) {
-                showError(updateResultresult.message, 'neutral');
-            } else {
-                updateResult.errors.forEach(error => showError(error));
+            const unverifyResult = await unverifyResponse.json();
+
+            if (unverifyResult.success) { 
+                const updateResponse = await fetch(`${baseUrl}/api/update-email`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, role: 'admin', userId: adminID }),
+                });
+                const updateResult = await updateResponse.json();
+
+                if (updateResult.success) {
+                    showError(updateResult.message, 'neutral');
+                } else {
+                    updateResult.errors.forEach(error => showError(error));
+                }
             }
         } else {
             emailResult.errors.forEach(error => showError(error));
@@ -145,7 +156,7 @@ function edit(admin, button) { // Display forms to update details when edit butt
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ phone, adminID }),
+            body: JSON.stringify({ phone, userId: adminID }),
         });
         const result = await response.json();
         if (result.success) {

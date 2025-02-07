@@ -223,7 +223,7 @@ button:hover, .login-button:hover, .submit-button:hover, .reset-password:hover, 
 }
 
 .delete-button {
-  color: #b00c0c;
+  color: #ff0000;
 }
 
 /* Schedule view styles */

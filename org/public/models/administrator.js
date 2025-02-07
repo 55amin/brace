@@ -20,6 +20,10 @@ class Administrator {
     setVerified() {
       this.verified = true;
   }
+
+  setUnverified() {
+    this.verified = false;
+}
 }
 
 module.exports = Administrator;

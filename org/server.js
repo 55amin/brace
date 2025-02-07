@@ -202,6 +202,29 @@ app.post('/api/verify-code', async (req, res) => {
     }
 });
 
+app.post('/api/unverify-user', async (req, res) => {
+    const { user, userId } = req.body;
+    try { // Unverify user in memory and database
+        if (user === 'admin') {
+            const admin = admins.find(admin => admin.adminID === userId);
+            if (admin) {
+                admin.setUnverified();
+                await pool.promise().query('UPDATE administrators SET verified = 0 WHERE admin_id = ?', [userId]);
+            }
+        } else if (user === 'agent') {  
+            const agent = agents.find(agent => agent.agentID === userId);
+            if (agent) {
+                agent.setUnverified();
+                await pool.promise().query('UPDATE agents SET verified = 0 WHERE agent_id = ?', [userId]);
+            }
+        }
+        res.status(200).json({ success: true, message: 'User unverified successfully' });
+    } catch {
+        console.error('Error unverifying user:', err);
+        res.status(500).json({ success: false, error: 'Failed to unverify user' });
+    }
+});
+
 // Validation functions
 function validateName(name) {
     const regex = /^[A-Za-zÀ-ÿ\-']{2,20}$/; 
