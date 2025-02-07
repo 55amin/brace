@@ -38,6 +38,32 @@ function minimise(admin, button) { // Only display basic details when minimise b
 `;
 }
 
+function deleteAdmin(admin, button) { // Delete admin when delete admin button clicked
+    adminRow = button.closest('.admin-row');
+    admin = JSON.parse(adminRow.dataset.admin);
+    adminID = admin.adminID;
+
+    // Confirm deletion using built-in browser alert before proceeding
+    if (!confirm('Are you sure you want to delete this admin?')) {
+        return;
+    }
+
+    const response = fetch(`${baseUrl}/api/delete-user`, { 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ role: 'admin', userId: adminID }),
+    });
+    const result = response.json();
+    if (result.success) {
+        showError(result.message, 'neutral');
+        adminRow.remove();
+    } else {
+        showError(result.error);
+    }
+}
+
 function edit(admin, button) { // Display forms to update details when edit button clicked
     adminRow = button.closest('.admin-row');
     admin = JSON.parse(adminRow.dataset.admin);
@@ -126,7 +152,7 @@ function edit(admin, button) { // Display forms to update details when edit butt
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ user: 'admin', userId: adminID }),
+                body: JSON.stringify({ role: 'admin', userId: adminID }),
             });
             const unverifyResult = await unverifyResponse.json();
 
@@ -178,7 +204,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ type: 'admin' }),
+            body: JSON.stringify({ role: 'admin' }),
         });
         const result = await response.json();
 
@@ -197,5 +223,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         showError('Error fetching admins');
     }
 });
-
-

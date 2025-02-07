@@ -203,15 +203,15 @@ app.post('/api/verify-code', async (req, res) => {
 });
 
 app.post('/api/unverify-user', async (req, res) => {
-    const { user, userId } = req.body;
+    const { role, userId } = req.body; // Get user type and ID
     try { // Unverify user in memory and database
-        if (user === 'admin') {
+        if (role === 'admin') {
             const admin = admins.find(admin => admin.adminID === userId);
             if (admin) {
                 admin.setUnverified();
                 await pool.promise().query('UPDATE administrators SET verified = 0 WHERE admin_id = ?', [userId]);
             }
-        } else if (user === 'agent') {  
+        } else if (role === 'agent') {  
             const agent = agents.find(agent => agent.agentID === userId);
             if (agent) {
                 agent.setUnverified();
@@ -224,6 +224,68 @@ app.post('/api/unverify-user', async (req, res) => {
         res.status(500).json({ success: false, error: 'Failed to unverify user' });
     }
 });
+
+// Return all users
+app.post('/api/get-users', async (req, res) => {
+    const { role } = req.body; 
+    const users = [];
+    try { // Return all users depending on role
+        if (role === 'admin') {
+            admins.forEach(admin => {
+                users.push({
+                    adminID: admin.adminID,
+                    forename: admin.forename,
+                    surname: admin.surname,
+                    email: admin.email,
+                    phone: admin.phone,
+                });
+            });
+        } else if (role === 'agent') {
+            agents.forEach(agent => {
+                users.push({
+                    agentID: agent.agentID,
+                    username: agent.username,
+                    email: agent.email,
+                });
+            });
+        }
+        res.status(200).json({ users });
+    } catch {
+        res.status(500).json({ error: 'Failed to fetch users' });
+    }
+});
+
+
+// Delete user from database and memory
+app.post('/api/delete-user', async (req, res) => {
+    const { role, userId } = req.body;
+    try {
+        if (role === 'admin') {
+            const admin = admins.find(admin => admin.adminID === userId);
+            if (admin) {
+                if (req.session.user.adminID === userId) { // Prevent user from deleting their own account while logged in
+                    return res.status(400).json({ error: 'Cannot delete currently logged in user' });
+                }
+                admins.splice(admins.indexOf(admin), 1);
+                await pool.promise().query('DELETE FROM administrators WHERE admin_id = ?', [userId]);
+            }
+        } else if (role === 'agent') {
+            const agent = agents.find(agent => agent.agentID === userId);
+            if (agent) {
+                if (req.session.user.agentID === userId) { // Prevent user from deleting their own account while logged in
+                    return res.status(400).json({ error: 'Cannot delete currently logged in user' });
+                }
+                agent.splice(agents.indexOf(agent), 1);
+                await pool.promise().query('DELETE FROM agents WHERE agent_id = ?', [userId]);
+            }
+        }
+        res.status(200).json({ success: true, message: 'User deleted successfully' });
+    } catch {
+        console.error('Error deleting user:', err);
+        res.status(500).json({ error: 'Failed to delete user' });
+    }
+});
+
 
 // Validation functions
 function validateName(name) {
@@ -394,32 +456,6 @@ app.post('/api/admin-login', async (req, res) => {
         });
     }
 });  
-
-// Return all users
-app.post('/api/get-users', async (req, res) => {
-    const { type } = req.body;
-    const users = [];
-    if (type === 'admin') {
-        admins.forEach(admin => {
-            users.push({
-                adminID: admin.adminID,
-                forename: admin.forename,
-                surname: admin.surname,
-                email: admin.email,
-                phone: admin.phone,
-            });
-        });
-    } else if (type === 'agent') {
-        agents.forEach(agent => {
-            users.push({
-                agentID: agent.agentID,
-                username: agent.username,
-                email: agent.email,
-            });
-        });
-    }
-    res.status(200).json({ users });
-});
 
 // Reset password
 app.post('/api/reset-password', async (req, res) => {
