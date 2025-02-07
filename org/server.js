@@ -4,6 +4,7 @@ const cors = require('cors');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const Administrator = require('./public/models/administrator');
+const Agent = require('./public/models/agent');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
@@ -59,6 +60,7 @@ const transporter = nodemailer.createTransport({ // Configure email service
 });
 
 const admins = [];
+const agents = [];
 
 // Check if admin is authenticated
 function isAuthenticatedAdmin(req, res, next) { // Check if session exists and user is logged in as an admin
@@ -85,11 +87,11 @@ app.get('/manageaccount.html', isAuthenticatedAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'manageaccount.html'));
 });
 
-app.get('/manageaccount.html', isAuthenticatedAdmin, (req, res) => {
+app.get('/manageadmin.html', isAuthenticatedAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'manageadmin.html'));
 });
 
-app.get('/manageaccount.html', isAuthenticatedAdmin, (req, res) => {
+app.get('/createadmin.html', isAuthenticatedAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'createadmin.html'));
 });
 
@@ -640,6 +642,23 @@ app.listen(PORT, async () => {
     } catch (err) {
         console.error('Error loading admins from database:', err);
     }
+
+    try { // Load agents from database into memory
+        const [rows] = await pool.promise().query('SELECT * FROM agents ORDER BY agent_id ASC');
+        rows.forEach(row => {
+            const agent = new Agent(
+                row.username, row.email, row.hashed_password);
+            if (row.verified === 1) {
+                agent.setVerified();
+            }
+            agent.setAgentID(row.agent_id);
+            agents.push(agent);
+        });
+        console.log(`Loaded ${agents.length} agents into memory.`);
+    } catch (err) {
+        console.error('Error loading agents from database:', err);
+    }
+
 });
 
 // Close database connection
