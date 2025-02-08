@@ -29,6 +29,37 @@
             <input class="text-field" maxlength="20" name="username" placeholder="Enter a unique username, up to 20 characters" type="text" id="username" required=""/>
             <label for="email" class="field-label-2">Email address</label>
             <input class="text-field-2" maxlength="320" name="email" placeholder="Enter an email address" type="email" id="email" required=""/>
+            <label for="accessLevel">Set access level</label>
+            <select id="accessLevel" name="accessLevel" required="">
+                <option value="" disabled selected>Select access level</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+            <label for="workingHours">Set working hours</label>
+            <div id="workingHours">
+                ${['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => `
+                    <div class="hoursRow">
+                        <label>
+                            <input type="checkbox" name="workingDays" value="${day}" id="${day.toLowerCase()}Checkbox">
+                            ${day}
+                        </label>
+                        <input type="time" id="${day.toLowerCase()}Start" name="workingHours[${day}][start]" placeholder="Start time" disabled>
+                        <input type="time" id="${day.toLowerCase()}End" name="workingHours[${day}][end]" placeholder="End time" disabled>
+                    </div>
+                `).join('')}
+            </div>
+            <label for="specialties">Set specialties</label>
+            <select id="specialties" name="specialties" multiple>
+                <option value="" disabled selected>Select one or more specialties</option>
+                <option value="1">PC/laptop hardware specialist</option>
+                <option value="2">Mobile phone hardware specialist</option>
+                <option value="3">Network specialist</option>
+                <option value="4">Windows specialist</option>
+                <option value="5">MacOS specialist</option>
+                <option value="6">Android/iOS specialist</option>
+                <option value="7">Application specialist</option>
+            </select>
             <label for="password" class="field-label-2">Create password</label>
             <input class="text-field-2" maxlength="20" name="password" placeholder="Create a password with at least 8 characters, including at least one number, one uppercase letter, one lowercase character and a special character" type="password" id="password" required=""/>
             <label for="confirmPassword" class="field-label-2">Confirm password</label>

@@ -739,4 +739,3 @@ process.on('SIGINT', () => {
     console.log('Database connection closed');
     process.exit();
 });
-
