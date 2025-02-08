@@ -71,6 +71,15 @@ function isAuthenticatedAdmin(req, res, next) { // Check if session exists and u
     }
 }
 
+// Check if agent is authenticated
+function isAuthenticatedAgent(req, res, next) { // Check if session exists and user is logged in as an agent
+    if (req.session && req.session.user && req.session.user.agentID) { 
+        return next();
+    } else { // Redirect to startup page if user is not authenticated
+        res.redirect('public/index.html');
+    }
+}
+
 app.get('/', (req, res) => {
     res.redirect('/index.html'); // Redirect to your main page
 });
@@ -101,6 +110,10 @@ app.get('/manageagent.html', isAuthenticatedAdmin, (req, res) => {
 
 app.get('/createagent.html', isAuthenticatedAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'createagent.html'));
+});
+
+app.get('/agentscreen.html', isAuthenticatedAgent, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'agentscreen.html'));
 });
 
 // Check if an administrator exists in database
