@@ -37,18 +37,7 @@
                 <option value="3">3</option>
             </select>
             <label for="workingHours">Set working hours</label>
-            <div id="workingHours">
-                ${['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map(day => `
-                    <div class="hoursRow">
-                        <label>
-                            <input type="checkbox" name="workingDays" value="${day}" id="${day.toLowerCase()}Checkbox">
-                            ${day}
-                        </label>
-                        <input type="time" id="${day.toLowerCase()}Start" name="workingHours[${day}][start]" placeholder="Start time" disabled>
-                        <input type="time" id="${day.toLowerCase()}End" name="workingHours[${day}][end]" placeholder="End time" disabled>
-                    </div>
-                `).join('')}
-            </div>
+            <div id="workingHours"></div>
             <label for="specialties">Set specialties</label>
             <select id="specialties" name="specialties" multiple>
                 <option value="" disabled selected>Select one or more specialties</option>

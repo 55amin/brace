@@ -24,13 +24,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         submitButton.disabled = true; // Prevent duplicate submissions
 
         // Add working hours options to form
+        const hoursContainer = document.getElementById('workingHours');
         const workingDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
         workingDays.forEach(day => {
-            const checkbox = document.getElementById(`${day}Checkbox`);
-            const startInput = document.getElementById(`${day}Start`);
-            const endInput = document.getElementById(`${day}End`);
-
+            const dayRow = document.createElement('div');
+            dayRow.className = 'hoursRow';
+            dayRow.innerHTML = `
+                <label>
+                    <input type="checkbox" name="workingDays" value="${day}" id="${day.toLowerCase()}Checkbox">
+                    ${day}
+                </label>
+                <input type="time" id="${day.toLowerCase()}Start" name="workingHours[${day}][start]" placeholder="Start time in 24-hour format" disabled>
+                <input type="time" id="${day.toLowerCase()}End" name="workingHours[${day}][end]" placeholder="End time in 24-hour format" disabled>
+            `;
+            hoursContainer.appendChild(dayRow);
+    
+            const checkbox = document.getElementById(`${day.toLowerCase()}Checkbox`);
+            const startInput = document.getElementById(`${day.toLowerCase()}Start`);
+            const endInput = document.getElementById(`${day.toLowerCase()}End`);
+    
             checkbox.addEventListener('change', () => {
                 if (checkbox.checked) {
                     startInput.disabled = false;
@@ -43,6 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         });
+    
 
         // Data collection
         const username = document.getElementById('username').value.trim();
@@ -64,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         workingDays.forEach(day => {
             const startInput = document.getElementById(`${day}Start`).value;
             const endInput = document.getElementById(`${day}End`).value;
-            if (startInput && endInput) {
+            if (startInput < endInput) {
                 hasWorkingHours = true;
                 workingHours[day.charAt(0).toUpperCase() + day.slice(1)] = { start: startInput, end: endInput };
             }
