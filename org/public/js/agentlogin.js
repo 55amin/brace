@@ -2,6 +2,7 @@ const baseUrl = window.location.origin;
 import { showError } from '../helpers/showError.js';
 
 window.addEventListener('load', () => {
+    const resendEmail = document.getElementById('resend-button');
     const cooldownEndL = parseInt(localStorage.getItem('cooldownEndL'));
     if (cooldownEndL > Date.now()) {
         resendEmail.disabled = true;
@@ -65,7 +66,7 @@ loginForm.addEventListener('submit', async (event) => {
     }
 });
 
-verifyCode = document.getElementById('verify-button');
+const verifyCode = document.getElementById('verify-button');
 verifyCode.addEventListener('click', async () => {
     const email = document.getElementById('email').value.trim();
     const code = document.getElementById('code').value.trim();
@@ -101,7 +102,7 @@ verifyCode.addEventListener('click', async () => {
     }
 });
 
-resendEmail = document.getElementById('resend-button');
+const resendEmail = document.getElementById('resend-button');
 resendEmail.addEventListener('click', async () => {
     const email = document.getElementById('email').value.trim();
 
