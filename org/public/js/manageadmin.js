@@ -2,8 +2,8 @@ const baseUrl = window.location.origin;
 import { showError } from '../helpers/showError.js';
 
 function expand(admin, button) { // Display full details when expand button clicked
-    adminRow = button.closest('.admin-row');
-    admin = JSON.parse(adminRow.dataset.admin);
+    let adminRow = button.closest('.admin-row');
+    let admin = JSON.parse(adminRow.dataset.admin);
     adminRow.innerHTML = `
     <h5>ID: ${admin.adminID}</h5>
     <h4>Name: ${admin.forename} ${admin.surname}</h4>
@@ -16,8 +16,8 @@ function expand(admin, button) { // Display full details when expand button clic
 }
 
 function minimise(admin, button) { // Only display basic details when minimise button clicked
-    adminRow = button.closest('.admin-row');
-    admin = JSON.parse(adminRow.dataset.admin);
+    let adminRow = button.closest('.admin-row');
+    let admin = JSON.parse(adminRow.dataset.admin);
     adminRow.innerHTML = `
     <h5>ID: ${admin.adminID}</h5>
     <h4>Name: ${admin.forename} ${admin.surname}</h4>
@@ -26,8 +26,8 @@ function minimise(admin, button) { // Only display basic details when minimise b
 }
 
 async function deleteAdmin(admin, button) { // Delete admin when delete admin button clicked
-    adminRow = button.closest('.admin-row');
-    admin = JSON.parse(adminRow.dataset.admin);
+    let adminRow = button.closest('.admin-row');
+    let admin = JSON.parse(adminRow.dataset.admin);
     let adminID = admin.adminID;
 
     // Confirm deletion using built-in browser alert before proceeding
@@ -53,8 +53,8 @@ async function deleteAdmin(admin, button) { // Delete admin when delete admin bu
 }
 
 function edit(admin, button) { // Display forms to update details when edit button clicked
-    adminRow = button.closest('.admin-row');
-    admin = JSON.parse(adminRow.dataset.admin);
+    let adminRow = button.closest('.admin-row');
+    let admin = JSON.parse(adminRow.dataset.admin);
     let adminID = admin.adminID;
     adminRow.innerHTML = `
         <h5>ID: ${adminID}</h5>
