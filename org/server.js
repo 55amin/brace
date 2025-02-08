@@ -518,7 +518,7 @@ app.post('/api/create-agent', async (req, res) => {
 
         // Encrypt password using hashing algorithm, then insert agent details into database
         const hashedPassword = await bcrypt.hash(validatedPassword.value, 10);
-        const query = 'INSERT INTO agents (username, email, hashed_password) VALUES (?, ?, ?)';
+        const query = 'INSERT INTO agents (username, email, access_level, working_hours, hashed_password, specialty) VALUES (?, ?, ?, ?, ?, ?)';
         const values = [
             validatedUsername.value,
             validatedEmail.value,
