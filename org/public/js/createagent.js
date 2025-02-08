@@ -4,26 +4,28 @@ import { showError } from '../helpers/showError.js';
 document.addEventListener('DOMContentLoaded', async () => {
     // Add working hours options to form
     const hoursContainer = document.getElementById('workingHours');
-    const workingDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const workingDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    workingDays.forEach(day => {
+    workingDays.forEach(day => { // Create an option for each day of the week, with start and end time inputs
         const dayRow = document.createElement('div');
         dayRow.className = 'hoursRow';
         dayRow.innerHTML = `
             <label>
-                <input type="checkbox" name="workingDays" value="${day}" id="${day}Checkbox">
+                <input type="checkbox" name="workingDays" value="${day} " id="${day.toLowerCase()}Checkbox">
                 ${day}
             </label>
-            <input type="time" id="${day}Start" name="workingHours[${day}][start]" placeholder="Start time" disabled>
-            <input type="time" id="${day}End" name="workingHours[${day}][end]" placeholder="End time" disabled>
+            <label for="${day.toLowerCase()}Start" style="font-style: italic;">Start: </label>
+            <input type="time" id="${day.toLowerCase()}Start" name="workingHours[${day.toLowerCase()}][start]" placeholder="Start time" disabled>
+            <label for="${day.toLowerCase()}End" style="font-style: italic;">End: </label>
+            <input type="time" id="${day.toLowerCase()}End" name="workingHours[${day.toLowerCase()}][end]" placeholder="End time" disabled>
         `;
         hoursContainer.appendChild(dayRow);
 
-        const checkbox = document.getElementById(`${day}Checkbox`);
-        const startInput = document.getElementById(`${day}Start`);
-        const endInput = document.getElementById(`${day}End`);
+        const checkbox = document.getElementById(`${day.toLowerCase()}Checkbox`);
+        const startInput = document.getElementById(`${day.toLowerCase()}Start`);
+        const endInput = document.getElementById(`${day.toLowerCase()}End`);
 
-        checkbox.addEventListener('change', () => {
+        checkbox.addEventListener('change', () => { // Enable/disable start and end time inputs based on whether day is selected
             if (checkbox.checked) {
                 startInput.disabled = false;
                 endInput.disabled = false;
@@ -57,27 +59,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             showError('Passwords do not match');
             submitButton.disabled = false;
             return;
-        } 
+        }
 
         let hasWorkingHours = false;
         const workingHours = {};
         workingDays.forEach(day => {
-            const startInput = document.getElementById(`${day}Start`).value;
-            const endInput = document.getElementById(`${day}End`).value;
+            const startInput = document.getElementById(`${day.toLowerCase()}Start`).value;
+            const endInput = document.getElementById(`${day.toLowerCase()}End`).value;
             if (startInput < endInput) {
                 hasWorkingHours = true;
                 workingHours[day.charAt(0).toUpperCase() + day.slice(1)] = { start: startInput, end: endInput };
             }
         });
 
-        if (!hasWorkingHours) {
+        if (!hasWorkingHours) { // Prevent form submission if no working hours are set
             showError('You must set at least one working hour for at least one day');
             submitButton.disabled = false;
             return;
         }
 
         try { // Send data to backend to create agent account
-            const agentData = { username, email, accessLevel, specialties, password, workingHours };
+            const agentData = { username, email, accessLevel, workingHours, password, specialties };
             const response = await fetch(`${baseUrl}/api/create-agent`, {
                 method: 'POST',
                 headers: {

@@ -65,7 +65,7 @@ const agents = [];
 // Check if admin is authenticated
 function isAuthenticatedAdmin(req, res, next) { // Check if session exists and user is logged in as an admin
     if (req.session && req.session.user && req.session.user.adminID) { 
-        return next(); 
+        return next();
     } else { // Redirect to startup page if user is not authenticated
         res.redirect('public/index.html');
     }
@@ -93,6 +93,14 @@ app.get('/manageadmin.html', isAuthenticatedAdmin, (req, res) => {
 
 app.get('/createadmin.html', isAuthenticatedAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'createadmin.html'));
+});
+
+app.get('/manageagent.html', isAuthenticatedAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'manageagent.html'));
+});
+
+app.get('/createagent.html', isAuthenticatedAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'createagent.html'));
 });
 
 // Check if an administrator exists in database
@@ -362,6 +370,7 @@ app.post('/api/create-admin', async (req, res) => {
     const validatedEmail = validateEmail(email);
     const validatedPhone = validatePhone(phone);
     const validatedPassword = validatePassword(password);
+
     // Push validation error messages to array
     const errors = [];
     if (!validatedForename.isValid) {
@@ -406,6 +415,7 @@ app.post('/api/create-admin', async (req, res) => {
             hashedPassword
         ];
         const [results] = await pool.promise().query(query, values);
+
         // Create new admin instance and add adminID from database
         const newAdmin = new Administrator(
             validatedForename.value,
@@ -449,6 +459,7 @@ app.post('/api/admin-login', async (req, res) => {
         } else if (rowsEmail[0].count > 0) { // Find admin instance with matching email and compare passwords
             const admin = admins.find(admin => admin.email === email);
             const passwordMatch = await bcrypt.compare(validatedPassword.value, admin.hashedPassword);
+
             if (!passwordMatch) { 
                 errors.push('Incorrect password');
                 return res.status(400).json({ success: false, errors });
@@ -472,10 +483,11 @@ app.post('/api/admin-login', async (req, res) => {
 
 // Create agent account
 app.post('/api/create-agent', async (req, res) => {
-    const { username, email, password } = req.body;
+    const { username, email, accessLevel, workingHours, password, specialties } = req.body;
     const validatedUsername = validateUsername(username);
     const validatedEmail = validateEmail(email);
     const validatedPassword = validatePassword(password);
+    
     // Push validation error messages to array
     const errors = [];
     if (!validatedUsername.isValid) errors.push(validatedUsername.error);
@@ -487,7 +499,7 @@ app.post('/api/create-agent', async (req, res) => {
 
     try {
         const [rowsUsername] = await pool.promise().query(
-            'SELECT COUNT(*) as count FROM administrators WHERE username = ?',
+            'SELECT COUNT(*) as count FROM agents WHERE username = ?',
             [validatedUsername.value] // Check if username exists in database
         );
         if (rowsUsername[0].count > 0) {
@@ -510,16 +522,23 @@ app.post('/api/create-agent', async (req, res) => {
         const values = [
             validatedUsername.value,
             validatedEmail.value,
-            hashedPassword
+            accessLevel,
+            JSON.stringify(workingHours), // Store working hours as a JSON string
+            hashedPassword,
+            JSON.stringify(specialties), // Store specialties as a JSON string
         ];
         const [results] = await pool.promise().query(query, values);
+        
         // Create new agent instance and add agentID from database
         const newAgent = new Agent(
             validatedUsername.value,
             validatedEmail.value,
+            accessLevel,
+            workingHours,
             hashedPassword
         );
         newAgent.setAgentID(results.insertId);
+        newAgent.setSpecialties(specialties);
         agents.push(newAgent);
         res.status(200).json({ success: true });
     } catch (err) {
@@ -719,11 +738,14 @@ app.listen(PORT, async () => {
         const [rows] = await pool.promise().query('SELECT * FROM agents ORDER BY agent_id ASC');
         rows.forEach(row => {
             const agent = new Agent(
-                row.username, row.email, row.hashed_password);
+                row.username, row.email, row.access_level, JSON.parse(row.working_hours), row.hashed_password);
             if (row.verified === 1) {
                 agent.setVerified();
             }
             agent.setAgentID(row.agent_id);
+            if (row.specialty) {
+                agent.setSpecialties(JSON.parse(row.specialty));
+            }
             agents.push(agent);
         });
         console.log(`Loaded ${agents.length} agents into memory.`);

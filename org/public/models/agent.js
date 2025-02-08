@@ -1,8 +1,11 @@
 class Agent {
-    constructor(username, email, hashedPassword) {
+    constructor(username, email, accessLevel, workingHours, hashedPassword) {
         this.username = username;
         this.email = email;
+        this.accessLevel = accessLevel;
+        this.workingHours = workingHours;
         this.hashedPassword = hashedPassword;
+        this.specialties = [];
         this.agentID = null;
         this.verified = false;
         this.availability = 'Offline';
@@ -13,8 +16,20 @@ class Agent {
         this.agentID = agentID;
     }
 
+    setAccessLevel(accessLevel) {
+        this.accessLevel = accessLevel;
+    }
+
+    setWorkingHours(workingHours) {
+        this.workingHours = workingHours;
+    }
+
     setPassword(hashedPassword) {
         this.hashedPassword = hashedPassword;
+    }
+
+    setSpecialties(specialties) {
+        this.specialties = specialties;
     }
 
     setVerified() {
