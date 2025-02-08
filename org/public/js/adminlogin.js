@@ -38,12 +38,12 @@ loginForm.addEventListener('submit', async (event) => {
 
     try { // Send data to backend to authenticate user
         const loginData = { email, password };
-        const response = await fetch(`${baseUrl}/api/admin-login`, {
+        const response = await fetch(`${baseUrl}/api/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(loginData)
+            body: JSON.stringify({ loginData, role: 'admin' })
         });
 
         const result = await response.json();

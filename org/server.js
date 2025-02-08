@@ -436,9 +436,9 @@ app.post('/api/create-admin', async (req, res) => {
     }
 });
 
-// Authenticate administrators
-app.post('/api/admin-login', async (req, res) => {
-    const { email, password } = req.body;
+// Authenticate users
+app.post('/api/login', async (req, res) => {
+    const { email, password, role } = req.body;
     const validatedEmail = validateEmail(email);
     const validatedPassword = validatePassword(password);
     const errors = [];
@@ -449,26 +449,52 @@ app.post('/api/admin-login', async (req, res) => {
     }
 
     try {
-        const [rowsEmail] = await pool.promise().query(
-            'SELECT COUNT(*) as count FROM administrators WHERE email = ?',
-            [validatedEmail.value] // Check if email address exists in database
-        );
-        if (rowsEmail[0].count === 0) {
-            errors.push('Incorrect email address');
-            return res.status(400).json({ success: false, errors });
-        } else if (rowsEmail[0].count > 0) { // Find admin instance with matching email and compare passwords
-            const admin = admins.find(admin => admin.email === email);
-            const passwordMatch = await bcrypt.compare(validatedPassword.value, admin.hashedPassword);
-
-            if (!passwordMatch) { 
-                errors.push('Incorrect password');
+        if (role === 'admin') {
+            const [rowsEmail] = await pool.promise().query(
+                'SELECT COUNT(*) as count FROM administrators WHERE email = ?',
+                [validatedEmail.value] // Check if email address exists in database
+            );
+            if (rowsEmail[0].count === 0) {
+                errors.push('Incorrect email address');
                 return res.status(400).json({ success: false, errors });
-            } else { // Check if admin is verified
-                if (admin.verified) {
-                    req.session.user = { email: validatedEmail.value, adminID: admin.adminID }; // Create session for user
-                    return res.status(200).json({ success: true });
-                } else {
-                return res.status(400).json({ success: false, message: 'Unverified' });
+            } else if (rowsEmail[0].count > 0) { // Find admin instance with matching email and compare passwords
+                const admin = admins.find(admin => admin.email === email);
+                const passwordMatch = await bcrypt.compare(validatedPassword.value, admin.hashedPassword);
+
+                if (!passwordMatch) { 
+                    errors.push('Incorrect password');
+                    return res.status(400).json({ success: false, errors });
+                } else { // Check if admin is verified
+                    if (admin.verified) {
+                        req.session.user = { email: validatedEmail.value, adminID: admin.adminID }; // Create session for user
+                        return res.status(200).json({ success: true });
+                    } else {
+                    return res.status(400).json({ success: false, message: 'Unverified' });
+                    }
+                }
+            }
+        } else if (role === 'agent') {
+            const [rowsEmail] = await pool.promise().query(
+                'SELECT COUNT(*) as count FROM agents WHERE email = ?',
+                [validatedEmail.value] // Check if email address exists in database
+            );
+            if (rowsEmail[0].count === 0) {
+                errors.push('Incorrect email address');
+                return res.status(400).json({ success: false, errors });
+            } else if (rowsEmail[0].count > 0) { // Find agent instance with matching email and compare passwords
+                const agent = agents.find(agent => agent.email === email);
+                const passwordMatch = await bcrypt.compare(validatedPassword.value, agent.hashedPassword);
+
+                if (!passwordMatch) { 
+                    errors.push('Incorrect password');
+                    return res.status(400).json({ success: false, errors });
+                } else { // Check if agent is verified
+                    if (agent.verified) {
+                        req.session.user = { email: validatedEmail.value, agentID: agent.agentID }; // Create session for user
+                        return res.status(200).json({ success: true });
+                    } else {
+                        return res.status(400).json({ success: false, message: 'Unverified' });
+                    }
                 }
             }
         }
