@@ -66,7 +66,7 @@ loginForm.addEventListener('submit', async (event) => {
             loginAttempts++;
             localStorage.setItem('loginAttempts', loginAttempts);
 
-            if (loginAttempts >= 5) {
+            if (loginAttempts === 5) {
                 // Notify admin after 5 failed login attempts
                 await fetch(`${baseUrl}/api/notify-admin`, {
                     method: 'POST',
