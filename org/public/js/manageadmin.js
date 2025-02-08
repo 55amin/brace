@@ -211,3 +211,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         showError('Error fetching admins');
     }
 });
+
+window.expand = expand;
+window.minimise = minimise;
+window.deleteAdmin = deleteAdmin;
+window.edit = edit;
