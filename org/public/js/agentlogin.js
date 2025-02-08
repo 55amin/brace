@@ -26,6 +26,7 @@ window.addEventListener('load', () => {
 // Load all counters from local storage, so values don't change even if user refreshes/closes window
 let resendAttemptsL = parseInt(localStorage.getItem('resendAttemptsL')) || 0;
 let resendCooldownL = parseInt(localStorage.getItem('resendCooldownL')) || 0;
+let loginAttempts = parseInt(localStorage.getItem('loginAttempts')) || 0;
 
 const loginForm = document.getElementById('agentlogin');
 loginForm.addEventListener('submit', async (event) => {
@@ -49,6 +50,8 @@ loginForm.addEventListener('submit', async (event) => {
         const result = await response.json();
 
         if (result.success) {
+            loginAttempts = 0; // Reset login attempts after successful login
+            localStorage.setItem('loginAttempts', loginAttempts);
             window.location.replace('../agent/agentscreen.html'); // Redirect to agent screen if user logs in successfully
         } else if (result.message === 'Unverified') {
             document.getElementById('verification').style.display = 'inline-block';
@@ -58,8 +61,22 @@ loginForm.addEventListener('submit', async (event) => {
             document.getElementById('resend-button').style.display = 'inline-block';
             document.getElementById('verify-button').style.display = 'inline-block';
             showError('Verification required. Please enter the verification code sent to your email.');
-        } else { // Show all validation and login errors
+        } else { // Show all validation and login errors, and record login attempts
             result.errors.forEach(error => showError(error));
+            loginAttempts++;
+            localStorage.setItem('loginAttempts', loginAttempts);
+
+            if (loginAttempts >= 5) {
+                // Notify admin after 5 failed login attempts
+                await fetch(`${baseUrl}/api/notify-admin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+                showError('Too many failed login attempts. Admin has been notified.');
+            }
         }
     } catch (err) { 
         showError('Failed to log in. Please try again.');

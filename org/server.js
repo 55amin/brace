@@ -150,6 +150,25 @@ app.get('/api/check-agent', async (req, res) => {
     }
 });
 
+// Notify admins of multiple failed login attempts
+app.post('/api/notify-admin', async (req, res) => {
+    const { email } = req.body;
+    try {
+        for (const admin of admins) { // Notify all admins
+            await transporter.sendMail({
+                from: `Brace for Techmedic <${process.env.EMAIL_ADDRESS}>`,
+                to: admin.email,
+                subject: 'Brace: Multiple failed login attempts',
+                text: `Multiple failed login attempts for user with email address: ${email}`
+            });
+        }
+        res.status(200).json({ success: true, message: 'Admin notified successfully' });
+    } catch (err) {
+        console.error('Error notifying admin:', err);
+        res.status(500).json({ success: false, error: 'Failed to notify admin' });
+    }
+});
+
 // Send verification email and verify code
 app.post('/api/email-code', async (req, res) => {
     const { email, type } = req.body;
