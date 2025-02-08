@@ -1,5 +1,5 @@
 const baseUrl = window.location.origin;
-const showError = require('../helpers/showError');
+import { showError } from '../helpers/showError.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Add working hours options to form

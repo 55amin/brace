@@ -1,4 +1,4 @@
-function showError(message, type = 'fail') { // Default parameter for common use case
+export function showError(message, type = 'fail') { // Default parameter for common use case
     const container = document.getElementById('error-container');
     container.innerHTML = '';
     const errorMessage = document.createElement('div');
@@ -11,5 +11,3 @@ function showError(message, type = 'fail') { // Default parameter for common use
         errorMessage.style.border = 'white';
     }
 }
-
-module.exports = showError;

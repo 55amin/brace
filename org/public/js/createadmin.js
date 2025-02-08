@@ -1,5 +1,5 @@
 const baseUrl = window.location.origin;
-const showError = require('../helpers/showError');
+import { showError } from '../helpers/showError.js';
 
 const adminForm = document.getElementById('adminForm');
 adminForm.addEventListener('submit', async (event) => {

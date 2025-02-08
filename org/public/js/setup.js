@@ -1,5 +1,5 @@
 const baseUrl = window.location.origin;
-const showError = require('../helpers/showError');
+import { showError } from '../helpers/showError.js';
 document.documentElement.style.visibility = 'hidden'; // Hide the form until the admin check is complete
 
 fetch(`${baseUrl}/api/check-admin`)

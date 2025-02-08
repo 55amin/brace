@@ -1,5 +1,5 @@
-baseUrl = window.location.origin;
-const showError = require('../helpers/showError');
+const baseUrl = window.location.origin;
+import { showError } from '../helpers/showError.js';
 
 function expand(admin, button) { // Display full details when expand button clicked
     adminRow = button.closest('.admin-row');

@@ -1,5 +1,5 @@
 const baseUrl = window.location.origin;
-const showError = require('../helpers/showError');
+import { showError } from '../helpers/showError.js';
 
 window.addEventListener('load', () => {
     const cooldownEndL = parseInt(localStorage.getItem('cooldownEndL'));
