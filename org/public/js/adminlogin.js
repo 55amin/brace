@@ -1,4 +1,5 @@
 const baseUrl = window.location.origin;
+const showError = require('../helpers/showError');
 
 window.addEventListener('load', () => {
     const cooldownEndL = parseInt(localStorage.getItem('cooldownEndL'));
@@ -20,20 +21,6 @@ window.addEventListener('load', () => {
         }, 1000);
     }
 });
-
-function showError(message, type = 'fail') { // Default parameter for common use case
-    const container = document.getElementById('error-container');
-    container.innerHTML = '';
-    const errorMessage = document.createElement('div');
-    errorMessage.className = 'error-message';
-    errorMessage.textContent = message;
-    container.appendChild(errorMessage);
-    errorMessage.style.display = 'block';
-    if (type === 'neutral') { // Apply different styles based on type
-        errorMessage.style.color = 'white';
-        errorMessage.style.border = 'white';
-    }
-}
 
 // Load all counters from local storage, so values don't change even if user refreshes/closes window
 let resendAttemptsL = parseInt(localStorage.getItem('resendAttemptsL')) || 0;

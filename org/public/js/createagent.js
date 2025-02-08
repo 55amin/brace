@@ -1,20 +1,41 @@
 const baseUrl = window.location.origin;
-
-function showError(message, type = 'fail') { // Default parameter for common use case
-    const container = document.getElementById('error-container');
-    container.innerHTML = '';
-    const errorMessage = document.createElement('div');
-    errorMessage.className = 'error-message';
-    errorMessage.textContent = message;
-    container.appendChild(errorMessage);
-    errorMessage.style.display = 'block';
-    if (type === 'neutral') { // Apply different styles based on type
-        errorMessage.style.color = 'white';
-        errorMessage.style.border = 'white';
-    }
-}
+const showError = require('../helpers/showError');
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Add working hours options to form
+    const hoursContainer = document.getElementById('workingHours');
+    const workingDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+    workingDays.forEach(day => {
+        const dayRow = document.createElement('div');
+        dayRow.className = 'hoursRow';
+        dayRow.innerHTML = `
+            <label>
+                <input type="checkbox" name="workingDays" value="${day}" id="${day}Checkbox">
+                ${day}
+            </label>
+            <input type="time" id="${day}Start" name="workingHours[${day}][start]" placeholder="Start time" disabled>
+            <input type="time" id="${day}End" name="workingHours[${day}][end]" placeholder="End time" disabled>
+        `;
+        hoursContainer.appendChild(dayRow);
+
+        const checkbox = document.getElementById(`${day}Checkbox`);
+        const startInput = document.getElementById(`${day}Start`);
+        const endInput = document.getElementById(`${day}End`);
+
+        checkbox.addEventListener('change', () => {
+            if (checkbox.checked) {
+                startInput.disabled = false;
+                endInput.disabled = false;
+            } else {
+                startInput.disabled = true;
+                endInput.disabled = true;
+                startInput.value = '';
+                endInput.value = '';
+            }
+        });
+    });
+
     const agentForm = document.getElementById('agentForm');
     agentForm.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -22,41 +43,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         container.innerHTML = ''; 
         const submitButton = document.getElementById('submit-button');
         submitButton.disabled = true; // Prevent duplicate submissions
-
-        // Add working hours options to form
-        const hoursContainer = document.getElementById('workingHours');
-        const workingDays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-
-        workingDays.forEach(day => {
-            const dayRow = document.createElement('div');
-            dayRow.className = 'hoursRow';
-            dayRow.innerHTML = `
-                <label>
-                    <input type="checkbox" name="workingDays" value="${day}" id="${day.toLowerCase()}Checkbox">
-                    ${day}
-                </label>
-                <input type="time" id="${day.toLowerCase()}Start" name="workingHours[${day}][start]" placeholder="Start time in 24-hour format" disabled>
-                <input type="time" id="${day.toLowerCase()}End" name="workingHours[${day}][end]" placeholder="End time in 24-hour format" disabled>
-            `;
-            hoursContainer.appendChild(dayRow);
-    
-            const checkbox = document.getElementById(`${day.toLowerCase()}Checkbox`);
-            const startInput = document.getElementById(`${day.toLowerCase()}Start`);
-            const endInput = document.getElementById(`${day.toLowerCase()}End`);
-    
-            checkbox.addEventListener('change', () => {
-                if (checkbox.checked) {
-                    startInput.disabled = false;
-                    endInput.disabled = false;
-                } else {
-                    startInput.disabled = true;
-                    endInput.disabled = true;
-                    startInput.value = '';
-                    endInput.value = '';
-                }
-            });
-        });
-    
 
         // Data collection
         const username = document.getElementById('username').value.trim();
@@ -85,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         if (!hasWorkingHours) {
-            showError('Please set at least one working hour for at least one day.');
+            showError('You must set at least one working hour for at least one day');
             submitButton.disabled = false;
             return;
         }

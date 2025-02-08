@@ -1,4 +1,5 @@
 const baseUrl = window.location.origin;
+const showError = require('../helpers/showError');
 document.documentElement.style.visibility = 'hidden'; // Hide the form until the admin check is complete
 
 fetch(`${baseUrl}/api/check-admin`)
@@ -14,15 +15,6 @@ fetch(`${baseUrl}/api/check-admin`)
         console.error('Failed to check for admin:', error);
         window.location.replace('index.html');
     });
-
-function showError(message) {
-    const container = document.getElementById('error-container');
-    const errorMessage = document.createElement('div');
-    errorMessage.className = 'error-message';
-    errorMessage.textContent = message;
-    container.appendChild(errorMessage);
-    errorMessage.style.display = 'block';
-}
 
 const setupForm = document.getElementById('setupForm');
 setupForm.addEventListener('submit', async (event) => {

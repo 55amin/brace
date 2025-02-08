@@ -1,4 +1,5 @@
 const baseUrl = window.location.origin;
+const showError = require('../helpers/showError');
 
 window.addEventListener('load', () => {
     const cooldownEndU = parseInt(localStorage.getItem('cooldownEndU'));
@@ -23,19 +24,6 @@ window.addEventListener('load', () => {
         }, 1000);
     }
 });
-
-function showError(message, type = 'fail') { // Default parameter for common use case
-    const container = document.getElementById('error-container');
-    const errorMessage = document.createElement('div');
-    errorMessage.className = 'error-message';
-    errorMessage.textContent = message;
-    container.appendChild(errorMessage);
-    errorMessage.style.display = 'block';
-    if (type === 'neutral') { // Apply different styles based on type
-        errorMessage.style.color = 'white';
-        errorMessage.style.border = 'white';
-    }
-}
 
 function handleCooldown(button) {
     const cooldownEndU = Date.now() + resendCooldownU * 1000; 
