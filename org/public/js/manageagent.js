@@ -4,11 +4,19 @@ import { showError } from '../helpers/showError.js';
 function expand(agent, button) { // Display full details when expand button clicked
     let agentRow = button.closest('.agent-row');
     agent = JSON.parse(agentRow.dataset.agent);
+    let workingHours = JSON.parse(agent.workingHours);
+    let formattedHours = Object.entries(workingHours).map(([day, hours]) => {
+        return `${day}: ${hours.start} - ${hours.end}`; // Format working hours for readability
+    }).join('<br>');
+
     agentRow.innerHTML = `
     <h5>ID: ${agent.agentID}</h5>
-    <h4>Name: ${agent.forename} ${agent.surname}</h4>
+    <h4>Username: ${agent.username}</h4>
+    <h3 style="font-style: italic;">${agent.availability}</h3>
     <p>Email address: ${agent.email}</p>
-    <p>Phone number: ${agent.phone}</p>
+    <p>Access level: ${agent.accessLevel}</p>
+    <p>Working hours: ${formattedHours}</p>
+    <p>Specialties: ${agent.specialties.join(', ')}</p>
     <button class="minimise-button" onclick="minimise(${agent.agentID}, this)">Minimise</button>
     <button class="edit-button" onclick="edit(${agent.agentID}, this)">Edit</button>
     <button class="delete-button" onclick="deleteagent(${agent.agentID}, this)">Delete agent</button>
@@ -20,7 +28,8 @@ function minimise(agent, button) { // Only display basic details when minimise b
     agent = JSON.parse(agentRow.dataset.agent);
     agentRow.innerHTML = `
     <h5>ID: ${agent.agentID}</h5>
-    <h4>Name: ${agent.forename} ${agent.surname}</h4>
+    <h4>Username: ${agent.username}</h4>
+    <h3 style="font-style: italic;">${agent.availability}</h3>
     <button class="expand-button" onclick="expand(${agent.agentID}, this)">Expand</button>
 `;
 }
@@ -182,7 +191,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             agentRow.dataset.agent = JSON.stringify(agent); // Store agent object in element's dataset to be accessed by other functions
             agentRow.innerHTML = `
                 <h5>ID: ${agent.agentID}</h5>
-                <h4>Name: ${agent.forename} ${agent.surname}</h4>
+                <h4>Username: ${agent.username}</h4>
+                <h3 style="font-style: italic;">${agent.availability}</h3>
                 <button class="expand-button" onclick="expand(${agent.agentID}, this)">Expand</button>
             `;
             document.getElementById('agent-container').appendChild(agentRow);
