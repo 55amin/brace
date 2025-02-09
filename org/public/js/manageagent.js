@@ -18,8 +18,7 @@ function expand(agent, button) { // Display full details when expand button clic
     <h4 style="font-style: italic;">${agent.availability}</h4>
     <p>Email address: ${agent.email}</p>
     <p>Access level: ${agent.accessLevel}</p>
-    <p style="font-style: italic;">Working hours</p>
-    <p>${formattedHours}</p>
+    <p>Working hours:<br/>${formattedHours}</p>
     <p>Specialties: ${agent.specialties.join(', ')}</p>
     <button class="minimise-button" onclick="minimise(${agent.agentID}, this)">Minimise</button>
     <button class="edit-button" onclick="edit(${agent.agentID}, this)">Edit</button>
