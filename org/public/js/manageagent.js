@@ -12,7 +12,7 @@ function expand(agent, button) { // Display full details when expand button clic
     agentRow.innerHTML = `
     <h5>ID: ${agent.agentID}</h5>
     <h4>Username: ${agent.username}</h4>
-    <h3 style="font-style: italic;">${agent.availability}</h3>
+    <h4 style="font-style: italic;">${agent.availability}</h4>
     <p>Email address: ${agent.email}</p>
     <p>Access level: ${agent.accessLevel}</p>
     <p>Working hours: ${formattedHours}</p>
@@ -29,7 +29,7 @@ function minimise(agent, button) { // Only display basic details when minimise b
     agentRow.innerHTML = `
     <h5>ID: ${agent.agentID}</h5>
     <h4>Username: ${agent.username}</h4>
-    <h3 style="font-style: italic;">${agent.availability}</h3>
+    <h4 style="font-style: italic;">${agent.availability}</h4>
     <button class="expand-button" onclick="expand(${agent.agentID}, this)">Expand</button>
 `;
 }
@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             agentRow.innerHTML = `
                 <h5>ID: ${agent.agentID}</h5>
                 <h4>Username: ${agent.username}</h4>
-                <h3 style="font-style: italic;">${agent.availability}</h3>
+                <h4 style="font-style: italic;">${agent.availability}</h4>
                 <button class="expand-button" onclick="expand(${agent.agentID}, this)">Expand</button>
             `;
             document.getElementById('agent-container').appendChild(agentRow);
