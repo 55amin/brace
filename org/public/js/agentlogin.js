@@ -60,7 +60,7 @@ loginForm.addEventListener('submit', async (event) => {
             document.getElementById('resend').style.display = 'inline-block';
             document.getElementById('resend-button').style.display = 'inline-block';
             document.getElementById('verify-button').style.display = 'inline-block';
-            showError('Verification required. Please enter the verification code sent to your email.');
+            showError('Verification required. Please enter the verification code sent to your email address.');
         } else { // Show all validation and login errors, and record login attempts
             result.errors.forEach(error => showError(error));
             loginAttempts++;

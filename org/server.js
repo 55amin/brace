@@ -154,7 +154,7 @@ app.get('/api/check-agent', async (req, res) => {
 app.post('/api/notify-admin', async (req, res) => {
     const { email } = req.body;
     try {
-        for (const admin of admins) { // Notify all admins
+        for (const admin of admins) { // Send email to each admin
             await transporter.sendMail({
                 from: `Brace for Techmedic <${process.env.EMAIL_ADDRESS}>`,
                 to: admin.email,
@@ -468,6 +468,75 @@ app.post('/api/create-admin', async (req, res) => {
     }
 });
 
+// Create agent account
+app.post('/api/create-agent', async (req, res) => {
+    const { username, email, accessLevel, workingHours, password, specialties } = req.body;
+    const validatedUsername = validateUsername(username);
+    const validatedEmail = validateEmail(email);
+    const validatedPassword = validatePassword(password);
+    
+    // Push validation error messages to array
+    const errors = [];
+    if (!validatedUsername.isValid) errors.push(validatedUsername.error);
+    if (!validatedEmail.isValid) errors.push(validatedEmail.error);
+    if (!validatedPassword.isValid) errors.push(validatedPassword.error);
+    if (errors.length > 0) {
+        return res.status(400).json({ success: false, errors });
+    }
+
+    try {
+        const [rowsUsername] = await pool.promise().query(
+            'SELECT COUNT(*) as count FROM agents WHERE username = ?',
+            [validatedUsername.value] // Check if username exists in database
+        );
+        if (rowsUsername[0].count > 0) {
+            errors.push('Username taken');
+            return res.status(400).json({ success: false, errors });
+        }
+
+        const [rowsEmail] = await pool.promise().query(
+            'SELECT COUNT(*) as count FROM agents WHERE email = ?',
+            [validatedEmail.value] // Check if email address exists in database
+        );
+        if (rowsEmail[0].count > 0) {
+            errors.push('Email address already registered');
+            return res.status(400).json({ success: false, errors });
+        }
+
+        // Encrypt password using hashing algorithm, then insert agent details into database
+        const hashedPassword = await bcrypt.hash(validatedPassword.value, 10);
+        const query = 'INSERT INTO agents (username, email, access_level, working_hours, hashed_password, specialty) VALUES (?, ?, ?, ?, ?, ?)';
+        const values = [
+            validatedUsername.value,
+            validatedEmail.value,
+            accessLevel,
+            JSON.stringify(workingHours), // Store working hours as a JSON string
+            hashedPassword,
+            JSON.stringify(specialties), // Store specialties as a JSON string
+        ];
+        const [results] = await pool.promise().query(query, values);
+        
+        // Create new agent instance and add agentID from database
+        const newAgent = new Agent(
+            validatedUsername.value,
+            validatedEmail.value,
+            accessLevel,
+            workingHours,
+            hashedPassword
+        );
+        newAgent.setAgentID(results.insertId);
+        newAgent.setSpecialties(specialties);
+        agents.push(newAgent);
+        res.status(200).json({ success: true });
+    } catch (err) {
+        console.error('Error creating agent: ', err);
+        res.status(500).json({ 
+            success: false, 
+            errors: ['Failed to create agent account'] 
+        });
+    }
+});
+
 // Authenticate users
 app.post('/api/login', async (req, res) => {
     const { email, password, role } = req.body;
@@ -538,75 +607,6 @@ app.post('/api/login', async (req, res) => {
         });
     }
 });  
-
-// Create agent account
-app.post('/api/create-agent', async (req, res) => {
-    const { username, email, accessLevel, workingHours, password, specialties } = req.body;
-    const validatedUsername = validateUsername(username);
-    const validatedEmail = validateEmail(email);
-    const validatedPassword = validatePassword(password);
-    
-    // Push validation error messages to array
-    const errors = [];
-    if (!validatedUsername.isValid) errors.push(validatedUsername.error);
-    if (!validatedEmail.isValid) errors.push(validatedEmail.error);
-    if (!validatedPassword.isValid) errors.push(validatedPassword.error);
-    if (errors.length > 0) {
-        return res.status(400).json({ success: false, errors });
-    }
-
-    try {
-        const [rowsUsername] = await pool.promise().query(
-            'SELECT COUNT(*) as count FROM agents WHERE username = ?',
-            [validatedUsername.value] // Check if username exists in database
-        );
-        if (rowsUsername[0].count > 0) {
-            errors.push('Username taken');
-            return res.status(400).json({ success: false, errors });
-        }
-
-        const [rowsEmail] = await pool.promise().query(
-            'SELECT COUNT(*) as count FROM agents WHERE email = ?',
-            [validatedEmail.value] // Check if email address exists in database
-        );
-        if (rowsEmail[0].count > 0) {
-            errors.push('Email address already registered');
-            return res.status(400).json({ success: false, errors });
-        }
-
-        // Encrypt password using hashing algorithm, then insert agent details into database
-        const hashedPassword = await bcrypt.hash(validatedPassword.value, 10);
-        const query = 'INSERT INTO agents (username, email, access_level, working_hours, hashed_password, specialty) VALUES (?, ?, ?, ?, ?, ?)';
-        const values = [
-            validatedUsername.value,
-            validatedEmail.value,
-            accessLevel,
-            JSON.stringify(workingHours), // Store working hours as a JSON string
-            hashedPassword,
-            JSON.stringify(specialties), // Store specialties as a JSON string
-        ];
-        const [results] = await pool.promise().query(query, values);
-        
-        // Create new agent instance and add agentID from database
-        const newAgent = new Agent(
-            validatedUsername.value,
-            validatedEmail.value,
-            accessLevel,
-            workingHours,
-            hashedPassword
-        );
-        newAgent.setAgentID(results.insertId);
-        newAgent.setSpecialties(specialties);
-        agents.push(newAgent);
-        res.status(200).json({ success: true });
-    } catch (err) {
-        console.error('Error creating agent: ', err);
-        res.status(500).json({ 
-            success: false, 
-            errors: ['Failed to create agent account'] 
-        });
-    }
-});
 
 // Reset password
 app.post('/api/reset-password', async (req, res) => {
