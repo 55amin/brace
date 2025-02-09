@@ -189,8 +189,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             let agentRow = document.createElement('div');
             agentRow.className = 'agent-row';
             agentRow.dataset.agent = JSON.stringify(agent); // Store agent object in element's dataset to be accessed by other functions
-            console.log('Agent object:', agent); 
-            console.log('Agent attributes from dataset:', agentRow.dataset.agent); 
 
             agentRow.innerHTML = `
                 <h5>ID: ${agent.agentID}</h5>

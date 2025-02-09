@@ -288,6 +288,10 @@ app.post('/api/get-users', async (req, res) => {
                     agentID: agent.agentID,
                     username: agent.username,
                     email: agent.email,
+                    accessLevel: agent.accessLevel,
+                    workingHours: agent.workingHours,
+                    specialties: agent.specialties,
+                    availability: agent.availability
                 });
             });
         }
