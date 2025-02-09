@@ -4,6 +4,10 @@ import { showError } from '../helpers/showError.js';
 function expand(agent, button) { // Display full details when expand button clicked
     let agentRow = button.closest('.agent-row');
     agent = JSON.parse(agentRow.dataset.agent);
+    if (!agent.availability) { // Set default availability status if undefined
+        agent.availability = 'Offline'; 
+    }
+
     let workingHours = JSON.parse(agent.workingHours);
     let formattedHours = Object.entries(workingHours).map(([day, hours]) => {
         return `${day}: ${hours.start} - ${hours.end}`; // Format working hours for readability
@@ -26,6 +30,10 @@ function expand(agent, button) { // Display full details when expand button clic
 function minimise(agent, button) { // Only display basic details when minimise button clicked
     let agentRow = button.closest('.agent-row');
     agent = JSON.parse(agentRow.dataset.agent);
+    if (!agent.availability) { // Set default availability status if undefined
+        agent.availability = 'Offline'; 
+    }
+
     agentRow.innerHTML = `
     <h5>ID: ${agent.agentID}</h5>
     <h4>Username: ${agent.username}</h4>
@@ -189,6 +197,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             let agentRow = document.createElement('div');
             agentRow.className = 'agent-row';
             agentRow.dataset.agent = JSON.stringify(agent); // Store agent object in element's dataset to be accessed by other functions
+            if (!agent.availability) { // Set default availability status if undefined
+                agent.availability = 'Offline'; 
+            }
+
             agentRow.innerHTML = `
                 <h5>ID: ${agent.agentID}</h5>
                 <h4>Username: ${agent.username}</h4>
