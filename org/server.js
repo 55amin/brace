@@ -801,6 +801,7 @@ app.listen(PORT, async () => {
                 agent.setVerified();
             }
             agent.setAgentID(row.agent_id);
+            agent.setAvailability('Offline')
             if (row.specialty) {
                 agent.setSpecialties(JSON.parse(row.specialty));
             }
