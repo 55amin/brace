@@ -4,8 +4,7 @@ import { showError } from '../helpers/showError.js';
 function expand(agent, button) { // Display full details when expand button clicked
     let agentRow = button.closest('.agent-row');
     agent = JSON.parse(agentRow.dataset.agent);
-    let workingHours = JSON.parse(agent.workingHours);
-    let formattedHours = Object.entries(workingHours).map(([day, hours]) => {
+    let formattedHours = Object.entries(agent.workingHours).map(([day, hours]) => {
         return `${day}: ${hours.start} - ${hours.end}`; // Format working hours for readability
     }).join('<br>');
 
