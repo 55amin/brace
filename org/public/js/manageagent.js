@@ -245,8 +245,8 @@ function edit(agent, button) { // Display forms to update details when edit butt
 
         let hasWorkingHours = false;
         workingDays.forEach(day => {
-            const startInput = document.getElementById(`${day.toLowerCase()}Start`).value;
-            const endInput = document.getElementById(`${day.toLowerCase()}End`).value;
+            const startInput = document.getElementById(`${day.toLowerCase()}Start-${agentID}`).value;
+            const endInput = document.getElementById(`${day.toLowerCase()}End-${agentID}`).value;
             if (startInput < endInput) {
                 hasWorkingHours = true;
                 workingHours[day.charAt(0).toUpperCase() + day.slice(1)] = { start: startInput, end: endInput };
