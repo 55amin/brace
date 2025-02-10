@@ -775,6 +775,114 @@ app.post('/api/update-phone', async (req, res) => {
     }
 });
 
+// Update username
+app.post('/api/update-username', async (req, res) => {
+    const { username, userId } = req.body;
+    const validatedUsername = validateUsername(username);
+    const errors = [];
+
+    if (!validatedUsername.isValid) errors.push(validatedUsername.error);
+    if (errors.length > 0) {
+        return res.status(400).json({ success: false, errors });
+    }
+
+    const [rowsUsername] = await pool.promise().query(
+        'SELECT COUNT(*) as count FROM agents WHERE username = ?',
+        [validatedUsername.value] // Check if username exists in database
+    );
+    if (rowsUsername[0].count > 0) {
+        errors.push('Username taken');
+        return res.status(400).json({ success: false, errors });
+    }
+
+    try { // Update username in database
+        await pool.promise().query('UPDATE agents SET username = ? WHERE agent_id = ?', [username, userId]);
+        const agent = agents.find(agent => agent.agentID === userId);
+        if (agent) {
+            agent.username = username; // Update the in-memory agent's username
+        }
+        res.status(200).json({ success: true, message: 'Username updated successfully' });
+    } catch (error) {
+        console.error('Error updating username:', error);
+        res.status(500).json({ success: false, message: 'Failed to update username' });
+    }
+});
+
+// Update access level
+app.post('/api/update-access', async (req, res) => {
+    const { accessLevel, userId } = req.body;
+    try { // Update access level in database
+        await pool.promise().query('UPDATE agents SET access_level = ? WHERE agent_id = ?', [accessLevel, userId]);
+        const agent = agents.find(agent => agent.agentID === userId);
+        if (agent) {
+            agent.setAccessLevel(accessLevel); // Update the in-memory agent's access level
+        }
+        res.status(200).json({ success: true, message: 'Access level updated successfully' });
+    } catch (error) {
+        console.error('Error updating access level:', error);
+        res.status(500).json({ success: false, message: 'Failed to update access level' });
+    }
+});
+
+// Update working hours
+app.post('/api/update-hours', async (req, res) => {
+    const { workingHours, userId } = req.body;
+
+    try { // Update working hours in database
+        await pool.promise().query('UPDATE agents SET working_hours = ? WHERE agent_id = ?', [JSON.stringify(workingHours), userId]);
+        const agent = agents.find(agent => agent.agentID === userId);
+        if (agent) {
+            agent.setWorkingHours(workingHours); // Update the in-memory agent's working hours
+        }
+        res.status(200).json({ success: true, message: 'Working hours updated successfully' });
+    } catch (error) {
+        console.error('Error updating working hours:', error);
+        res.status(500).json({ success: false, message: 'Failed to update working hours' });
+    }
+});
+
+// Update specialties
+app.post('/api/update-specialties', async (req, res) => {
+    const { specialties, userId } = req.body;
+
+    try { // Update specialties in database
+        await pool.promise().query('UPDATE agents SET specialty = ? WHERE agent_id = ?', [JSON.stringify(specialties), userId]);
+        const agent = agents.find(agent => agent.agentID === userId);
+        if (agent) {
+            agent.setSpecialties(specialties); // Update the in-memory agent's specialties
+        }
+        res.status(200).json({ success: true, message: 'Specialties updated successfully' });
+    } catch (error) {
+        console.error('Error updating specialties:', error);
+        res.status(500).json({ success: false, message: 'Failed to update specialties' });
+    }
+});
+
+// Update password
+app.post('/api/update-password', async (req, res) => {
+    const { password, userId } = req.body;
+    const validatedPassword = validatePassword(password);
+    const errors = [];
+
+    if (!validatedPassword.isValid) errors.push(validatedPassword.error);
+    if (errors.length > 0) {
+        return res.status(400).json({ success: false, errors });
+    }
+
+    try { // Update password in database
+        const hashedPassword = await bcrypt.hash(validatedPassword.value, 10);
+        await pool.promise().query('UPDATE agents SET hashed_password = ? WHERE agent_id = ?', [hashedPassword, userId]);
+        const agent = agents.find(agent => agent.agentID === userId);
+        if (agent) {
+            agent.setPassword(hashedPassword); // Update the in-memory agent's password
+        }
+        res.status(200).json({ success: true, message: 'Password updated successfully' });
+    } catch (error) {
+        console.error('Error updating password:', error);
+        res.status(500).json({ success: false, message: 'Failed to update password' });
+    }
+});
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
