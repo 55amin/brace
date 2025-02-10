@@ -184,7 +184,7 @@ function edit(agent, button) { // Display forms to update details when edit butt
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ email, type: 'email' }),
+            body: JSON.stringify({ email, role: 'agent', type: 'email' }),
         });
         const emailResult = await emailResponse.json();
 
@@ -234,7 +234,89 @@ function edit(agent, button) { // Display forms to update details when edit butt
         if (result.success) {
             showError(result.message, 'neutral');
         } else {
-            showError(result.error);
+            showError(result.message);
+        }
+    });
+
+    document.getElementById(`updateHours-${agentID}`).addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const workingHours = {};
+        agentID = agent.agentID;
+
+        let hasWorkingHours = false;
+        workingDays.forEach(day => {
+            const startInput = document.getElementById(`${day.toLowerCase()}Start`).value;
+            const endInput = document.getElementById(`${day.toLowerCase()}End`).value;
+            if (startInput < endInput) {
+                hasWorkingHours = true;
+                workingHours[day.charAt(0).toUpperCase() + day.slice(1)] = { start: startInput, end: endInput };
+            }
+        });
+
+        if (!hasWorkingHours) { // Prevent form submission if no working hours are set
+            showError('You must set at least one working hour for at least one day');
+            submitButton.disabled = false;
+            return;
+        }
+
+        const response = await fetch(`${baseUrl}/api/update-hours`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ workingHours, userId: agentID }),
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            showError(result.message, 'neutral');
+        } else {
+            showError(result.message);
+        }
+    });
+
+    document.getElementById(`updateSpecialties-${agentID}`).addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const specialties = Array.from(document.getElementById(`specialties-${agentID}`).selectedOptions).map(option => option.value);
+        agentID = agent.agentID;
+        const response = await fetch(`${baseUrl}/api/update-specialties`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ specialties, userId: agentID }),
+        });
+        const result = await response.json();
+        if (result.success) {
+            showError(result.message, 'neutral');
+        } else {
+            showError(result.message);
+        }
+    });
+
+    document.getElementById(`updatePassword-${agentID}`).addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const password = document.getElementById(`password-${agentID}`).value.trim();
+        const confirmPassword = document.getElementById(`confirmPassword-${agentID}`).value.trim();
+        agentID = agent.agentID;
+
+        if (password !== confirmPassword) { // Prevent form submission if passwords do not match
+            showError('Passwords do not match');
+            return;
+        }
+
+        const response = await fetch(`${baseUrl}/api/update-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ password, userId: agentID }),
+        });
+        const result = await response.json();
+        if (result.success) {
+            showError(result.message, 'neutral');
+        } else {
+            result.errors.forEach(error => showError(error));
         }
     });
 }

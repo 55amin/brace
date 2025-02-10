@@ -130,7 +130,7 @@ function edit(admin, button) { // Display forms to update details when edit butt
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ email, type: 'email' }),
+            body: JSON.stringify({ email, role: 'admin', type: 'email' }),
         });
         const emailResult = await emailResponse.json();
 
