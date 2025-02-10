@@ -5,6 +5,7 @@ const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const Administrator = require('./public/models/administrator');
 const Agent = require('./public/models/agent');
+const Task = require('./public/models/task');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
