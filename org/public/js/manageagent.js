@@ -81,6 +81,7 @@ function edit(agent, button) { // Display forms to update details when edit butt
             <input type="submit" class="submit-button" value="Update email address"/>
         </form>
         <form id="updateAccess-${agentID}" class="form" method="post">
+            <label for="accessLevel" class="field-label">Access level</label>
             <select id="access-${agentID}" name="accessLevel" required="">
                 <option value="" disabled selected>Select access level</option>
                 <option value="1">1</option>
@@ -90,12 +91,12 @@ function edit(agent, button) { // Display forms to update details when edit butt
             <input type="submit" class="submit-button" value="Update access level"/>
         </form>
         <form id=updateHours-${agentID} class="form" method="post">
-            <label for="workingHours">Set working hours</label>
+            <label for="workingHours" class="field-label">Set working hours</label>
             <div id="workingHours"></div>
             <input type="submit" class="submit-button" value="Update working hours"/>
         </form>
         <form id="updateSpecialties-${agentID}" class="form" method="post">
-            <label for="specialties">Specialties</label>
+            <label for="specialties" class="field-label">Specialties</label>
             <select id="specialties-${agentID}" name="specialties" multiple required="">
                 <option value="" disabled selected>Select one or more specialties</option>
                 <option value="PC/laptop hardware specialist">PC/laptop hardware specialist</option>
