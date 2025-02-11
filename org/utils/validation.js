@@ -76,7 +76,7 @@ function validateTitle(title) {
 
 function validateDesc(desc) {
     const regex = /^[A-Za-z0-9\s.,'-:;&£$(){}[]+-=@]{1,600}$/;
-    if (!regex.test(title)) {
+    if (!regex.test(desc)) {
         return {
             isValid: false,
             error: "Invalid description. Description must be 1-600 characters long."
