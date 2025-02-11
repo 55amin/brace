@@ -10,6 +10,7 @@ class Agent {
         this.verified = false;
         this.availability = 'Offline';
         this.workload = 0;
+        this.tasks = [];
     }
 
     setAgentID(agentID) {
@@ -51,6 +52,17 @@ class Agent {
             if (this.workload > 0) { // Prevent negative workload
                 this.workload--;
             }
+        }
+    }
+
+    addTask(task) {
+        this.tasks.push(task)
+    }
+
+    removeTask(task) {
+        const index = this.tasks.indexOf(task);
+        if (index > -1) {
+            this.tasks.splice(index, 1);
         }
     }
 }

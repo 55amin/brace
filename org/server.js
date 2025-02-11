@@ -837,6 +837,7 @@ app.post('/api/create-task', async (req, res) => {
     const validatedDeadline = validateDeadline(deadline);
     const errors = [];
     const creationDate = new Date();
+    const creator = req.session.user.adminID;
 
     if (!validatedTitle.isValid) errors.push(validatedTitle.error);
     if (!validatedDesc.isValid) errors.push(validatedDesc.error);
@@ -847,27 +848,34 @@ app.post('/api/create-task', async (req, res) => {
     }
 
     try {
-        const query = 'INSERT INTO tasks (title, description, deadline, assigned_to, created_at) VALUES (?, ?, ?, ?, ?)';
+        const query = 'INSERT INTO tasks (title, description, deadline, assigned_to, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?)';
         const values = [
             validatedTitle.value,
             validatedDesc.value,
             validatedDeadline.value,
             assignedTo,
-            creationDate
+            creationDate,
+            creator
         ];
         const [results] = await pool.promise().query(query, values);
 
-        // Create new task instance and add taskID from database
-        const newTask = new Task(
+        const newTask = new Task( // Create new task instance and add taskID from database
             validatedTitle.value,
             validatedDesc.value,
-            req.session.user.adminID,
+            creator,
             validatedDeadline.value,
             assignedTo,
             creationDate
         );
         newTask.taskID = results.insertId;
         tasks.push(newTask);
+
+        assignedTo.forEach(agentID => { // Add task to each assigned agent
+            const agent = agents.find(agent => agent.agentID === agentID);
+            if (agent) {
+                agent.addTask(newTask);
+            }
+        });
         res.status(200).json({ success: true, task: newTask });
     } catch (err) {
         console.error('Error creating task:', err);
