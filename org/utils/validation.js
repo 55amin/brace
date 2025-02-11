@@ -107,7 +107,6 @@ function validateDeadline(deadline) {
             error: "Invalid deadline. Deadline cannot be later than 30 days from the current date."
         };
     }
-
     return { isValid: true, value: deadline };
 }
 

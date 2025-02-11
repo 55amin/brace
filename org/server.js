@@ -72,6 +72,7 @@ const transporter = nodemailer.createTransport({ // Configure email service
 
 const admins = [];
 const agents = [];
+const tasks = [];
 
 // Check if admin is authenticated
 function isAuthenticatedAdmin(req, res, next) { // Check if session exists and user is logged in as an admin
@@ -825,6 +826,52 @@ app.post('/api/update-password', async (req, res) => {
     } catch (error) {
         console.error('Error updating password:', error);
         res.status(500).json({ success: false, message: 'Failed to update password' });
+    }
+});
+
+// Create task
+app.post('/api/create-task', async (req, res) => {
+    const { title, desc, deadline, assignedTo } = req.body;
+    const validatedTitle = validateTitle(title);
+    const validatedDesc = validateDesc(desc);
+    const validatedDeadline = validateDeadline(deadline);
+    const errors = [];
+    const creationDate = new Date();
+
+    if (!validatedTitle.isValid) errors.push(validatedTitle.error);
+    if (!validatedDesc.isValid) errors.push(validatedDesc.error);
+    if (!validatedDeadline.isValid) errors.push(validatedDeadline.error);
+    if (!assignedTo) errors.push('Task must be assigned to at least one agent')
+    if (errors.length > 0) {
+        return res.status(400).json({ success: false, errors });
+    }
+
+    try {
+        const query = 'INSERT INTO tasks (title, description, deadline, assigned_to, created_at) VALUES (?, ?, ?, ?, ?)';
+        const values = [
+            validatedTitle.value,
+            validatedDesc.value,
+            validatedDeadline.value,
+            assignedTo,
+            creationDate
+        ];
+        const [results] = await pool.promise().query(query, values);
+
+        // Create new task instance and add taskID from database
+        const newTask = new Task(
+            validatedTitle.value,
+            validatedDesc.value,
+            req.session.user.adminID,
+            validatedDeadline.value,
+            assignedTo,
+            creationDate
+        );
+        newTask.taskID = results.insertId;
+        tasks.push(newTask);
+        res.status(200).json({ success: true, task: newTask });
+    } catch (err) {
+        console.error('Error creating task:', err);
+        res.status(500).json({ success: false, errors: ['Failed to create task'] });
     }
 });
 
