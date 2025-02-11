@@ -228,6 +228,12 @@ button:hover, .login-button:hover, .submit-button:hover, .reset-password:hover, 
   color: #ff0000;
 }
 
+input[type="datetime-local"], input[type="time"] {
+  margin: 10px;
+  border: 3px solid #452fd0;
+  border-radius: 10px;
+}
+
 /* Schedule view styles */
 .calendar-container {
   margin: 20px;
