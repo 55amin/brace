@@ -75,7 +75,7 @@ function validateTitle(title) {
 }
 
 function validateDesc(desc) {
-    const regex = /^[A-Za-z0-9\s.,'-:;&£$(){}[]+-=@]{1,600}$/;
+    const regex = /^[A-Za-z0-9\s.,'\-:;&£$(){}[\]+=@]{1,600}$/;
     if (!regex.test(desc)) {
         return {
             isValid: false,
