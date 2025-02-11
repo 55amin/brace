@@ -853,7 +853,7 @@ app.post('/api/create-task', async (req, res) => {
             validatedTitle.value,
             validatedDesc.value,
             validatedDeadline.value,
-            assignedTo,
+            JSON.stringify(assignedTo),
             creationDate,
             creator
         ];
