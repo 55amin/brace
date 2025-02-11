@@ -12,22 +12,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         const result = await response.json();
 
-        if (result.success) {
-            const agentContainer = document.getElementById('agent-container');
-            result.users.forEach(agent => { // Create checkbox input for each agent
-                const agentRow = document.createElement('div');
-                agentRow.className = 'agent-row';
-                agentRow.innerHTML = `
-                    <label>
-                        <input type="checkbox" name="assignedTo" value="${agent.agentID}">
-                        ${agent.username}
-                    </label>
-                `;
-                agentContainer.appendChild(agentRow);
-            });
-        } else {
-            showError('Failed to fetch agents');
-        }
+        const agentContainer = document.getElementById('agent-container');
+        result.users.forEach(agent => { // Create checkbox input for each agent
+            const agentRow = document.createElement('div');
+            agentRow.className = 'agent-row';
+            agentRow.innerHTML = `
+                <label>
+                    <input type="checkbox" name="assignedTo" value="${agent.agentID}">
+                    ${agent.username}
+                </label>
+            `;
+            agentContainer.appendChild(agentRow);
+        });
     } catch (err) {
         showError('Error fetching agents');
     }
