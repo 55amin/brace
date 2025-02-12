@@ -4,13 +4,18 @@ import { showError } from '../helpers/showError.js';
 function expand(task, button) { // Display full details when expand button clicked
     let taskRow = button.closest('.task-row');
     task = JSON.parse(taskRow.dataset.task);
+
+    // Format date based on user's local conventions 
+    const creationDate = new Date(task.creationDate).toLocaleString();
+    const deadline = new Date(task.deadline).toLocaleString();
+
     taskRow.innerHTML = `
     <h5>ID: ${task.taskID}</h5>
     <h4>Title: ${task.title}</h4>
     <h4 style="font-style: italic;">${task.status}</h4>
     <p>Description: ${task.desc}</p>
-    <p>Creation date: ${task.creationDate}</p>
-    <p>Deadline: ${task.deadline}</p>
+    <p>Creation date: ${creationDate}</p>
+    <p>Deadline: ${deadline}</p>
     <p>Assigned to: ${task.assignedTo.join(', ')}</p>
     <button class="minimise-button" onclick="minimise(${task.taskID}, this)">Minimise</button>
     <button class="edit-button" onclick="edit(${task.taskID}, this)">Edit</button>

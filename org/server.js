@@ -242,8 +242,7 @@ app.post('/api/verify-code', async (req, res) => {
                 const agent = agents.find(agent => agent.email === email);
                 if (agent) {
                     agent.setVerified();
-                    await pool.promise().query('UPDATE agents SET verified = 1 WHERE email = ?',
-                        [email]); 
+                    await pool.promise().query('UPDATE agents SET verified = 1 WHERE email = ?', [email]); 
                 }
             }
             res.status(200).json({ success: true, message: 'Verification successful' });
@@ -318,13 +317,20 @@ app.post('/api/get-tasks', async (req, res) => {
     const taskArr = [];
     try {
         tasks.forEach(task => {
+            const assignedAgents = task.assignedTo.map(agentID => {
+                const agent = agents.find(agent => agent.agentID === agentID);
+                if (agent) {
+                    return agent.username;
+                }
+            });
+
             taskArr.push({
                 taskID: task.taskID,
                 status: task.status,
                 title: task.title,
                 desc: task.desc,
                 deadline: task.deadline,
-                assignedTo: task.assignedTo,
+                assignedTo: assignedAgents.join(', '),
                 creationDate: task.creationDate,
                 creator: task.creator
             });
