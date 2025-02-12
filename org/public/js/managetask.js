@@ -16,7 +16,7 @@ function expand(task, button) { // Display full details when expand button click
     <p>Description: ${task.desc}</p>
     <p>Creation date: ${creationDate}</p>
     <p>Deadline: ${deadline}</p>
-    <p>Assigned to: ${task.assignedTo.join(', ')}</p>
+    <p>Assigned to: ${task.assignedTo}</p>
     <button class="minimise-button" onclick="minimise(${task.taskID}, this)">Minimise</button>
     <button class="edit-button" onclick="edit(${task.taskID}, this)">Edit</button>
     <button class="delete-button" onclick="deleteTask(${task.taskID}, this)">Delete task</button>
@@ -67,51 +67,25 @@ function edit(task, button) { // Display forms to update details when edit butto
     let taskID = task.taskID;
     taskRow.innerHTML = `
         <h5>ID: ${taskID}</h5>
-        <form id="updateUsername-${taskID}" class="form" method="post">
-            <label for="username" class="field-label">Username</label>
-            <input class="text-field" maxlength="20" name="username" placeholder="Enter a new, unique username, up to 20 characters, containing only letters, numbers and underscores" type="text" id="username-${taskID}" required=""/>
-            <input type="submit" class="submit-button" value="Update username"/>
+        <form id="updateTitle-${taskID}" class="form" method="post">
+            <label for="title" class="field-label">Title</label>
+            <input class="text-field" maxlength="100" name="title" placeholder="Enter a new title, up to 100 characters" type="text" id="title-${taskID}" required=""/>
+            <input type="submit" class="submit-button" value="Update title"/>
         </form>
-        <form id="updateEmail-${taskID}" class="form" method="post">
-            <label for="email" class="field-label">Email address</label>
-            <input class="text-field" maxlength="320" name="email" placeholder="Enter a new email address" type="email" id="email-${taskID}" required=""/>
-            <input type="submit" class="submit-button" value="Update email address"/>
+        <form id="updateDesc-${taskID}" class="form" method="post">
+            <label for="description" class="field-label">description</label>
+            <textarea class="text-field" maxlength="100" name="description" placeholder="Enter a new title, up to 100 characters" type="text" id="desc-${taskID}" required=""/>
+            <input type="submit" class="submit-button" value="Update description"/>
         </form>
-        <form id="updateAccess-${taskID}" class="form" method="post">
-            <label for="accessLevel" class="field-label">Access level</label>
-            <select id="access-${taskID}" name="accessLevel" required="">
-                <option value="" disabled selected>Select access level</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-            </select>
-            <input type="submit" class="submit-button" value="Update access level"/>
+        <form id="updateDeadline-${taskID}" class="form" method="post">
+            <label for="deadline" class="field-label">Deadline</label>
+            <input name="deadline" type="datetime-local" id="deadline-${taskID}" required=""/>
+            <input type="submit" class="submit-button" value="Update deadline"/>
         </form>
-        <form id=updateHours-${taskID} class="form" method="post">
-            <label for="workingHours" class="field-label">Set working hours</label>
-            <div id="workingHours"></div>
-            <input type="submit" class="submit-button" value="Update working hours"/>
-        </form>
-        <form id="updateSpecialties-${taskID}" class="form" method="post">
-            <label for="specialties" class="field-label">Specialties</label>
-            <select id="specialties-${taskID}" name="specialties" multiple required="">
-                <option value="" disabled selected>Select one or more specialties</option>
-                <option value="PC/laptop hardware specialist">PC/laptop hardware specialist</option>
-                <option value="Mobile phone hardware specialist">Mobile phone hardware specialist</option>
-                <option value="Network specialist">Network specialist</option>
-                <option value="Windows specialist">Windows specialist</option>
-                <option value="MacOS specialist">MacOS specialist</option>
-                <option value="Android/iOS specialist">Android/iOS specialist</option>
-                <option value="Application specialist">Application specialist</option>
-            </select>
-            <input type="submit" class="submit-button" value="Update specialties"/>
-        </form>
-        <form id="updatePassword-${taskID}" class="form" method="post">
-            <label for="password" class="field-label-2">Create password</label>
-            <input class="text-field-2" maxlength="20" name="password" placeholder="Create a new password with at least 8 characters, including at least one number, one uppercase letter, one lowercase character and a special character" type="password" id="password-${taskID}" required=""/>
-            <label for="confirmPassword" class="field-label-2">Confirm password</label>
-            <input class="text-field-2" maxlength="20" name="confirmPassword" placeholder="Both passwords must match" type="password" id="confirmPassword-${taskID}" required=""/>
-            <input type="submit" class="submit-button" value="Update password"/>
+        <form id="updateAssign-${taskID}" class="form" method="post">
+            <label for="assignedTo" class="field-label">Assign to:</label>
+            <div id="agent-container-${taskID}"></div>
+            <input type="submit" class="submit-button" value="Update assigned agents"/>
         </form>
         <button class="minimise-button" onclick="minimise(${taskID}, this)">Minimise</button>
         <button class="delete-button" onclick="deleteTask(${taskID}, this)">Delete task</button>
