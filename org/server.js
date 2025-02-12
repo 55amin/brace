@@ -313,6 +313,28 @@ app.post('/api/get-users', async (req, res) => {
     }
 });
 
+// Return all tasks
+app.post('/api/get-tasks', async (req, res) => {
+    const taskArr = [];
+    try {
+        tasks.forEach(task => {
+            taskArr.push({
+                taskID: task.taskID,
+                status: task.status,
+                title: task.title,
+                desc: task.desc,
+                deadline: task.deadline,
+                assignedTo: task.assignedTo,
+                creationDate: task.creationDate,
+                creator: task.creator
+            });
+        });
+        res.status(200).json({ taskArr });
+    } catch {
+        res.status(500).json({ error: 'Failed to fetch tasks' });
+    }
+});
+
 
 // Delete user from database and memory
 app.post('/api/delete-user', async (req, res) => {
@@ -921,6 +943,27 @@ app.listen(PORT, async () => {
         console.log(`Loaded ${agents.length} agents into memory.`);
     } catch (err) {
         console.error('Error loading agents from database:', err);
+    }
+
+    try { // Load tasks from database into memory
+        const [rows] = await pool.promise().query('SELECT * FROM tasks ORDER BY task_id ASC');
+        rows.forEach(row => {
+            const task = new Task(
+                row.title, row.desc, row.created_by, row.deadline, JSON.parse(row.assigned_to), row.created_at);
+            task.setTaskID(row.task_id);
+            tasks.push(task);
+
+            const assignedTo = JSON.parse(row.assigned_to);
+            assignedTo.forEach(agentID => { // Add task to each assigned agent
+                const agent = agents.find(agent => agent.agentID === agentID);
+                if (agent) {
+                    agent.addTask(task);
+                }
+        });
+        });
+        console.log(`Loaded ${tasks.length} tasks into memory.`);
+    } catch (err) {
+        console.error('Error loading tasks from database:', err);
     }
 
 });
