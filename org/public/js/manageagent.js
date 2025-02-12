@@ -22,7 +22,7 @@ function expand(agent, button) { // Display full details when expand button clic
     <p>Specialties: ${agent.specialties.join(', ')}</p>
     <button class="minimise-button" onclick="minimise(${agent.agentID}, this)">Minimise</button>
     <button class="edit-button" onclick="edit(${agent.agentID}, this)">Edit</button>
-    <button class="delete-button" onclick="deleteagent(${agent.agentID}, this)">Delete agent</button>
+    <button class="delete-button" onclick="deleteAgent(${agent.agentID}, this)">Delete agent</button>
 `;
 }
 
@@ -117,7 +117,7 @@ function edit(agent, button) { // Display forms to update details when edit butt
             <input type="submit" class="submit-button" value="Update password"/>
         </form>
         <button class="minimise-button" onclick="minimise(${agentID}, this)">Minimise</button>
-        <button class="delete-button" onclick="deleteagent(${agentID}, this)">Delete agent</button>
+        <button class="delete-button" onclick="deleteAgent(${agentID}, this)">Delete agent</button>
     `;
 
     // Add working hours options to form
@@ -353,5 +353,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 window.expand = expand;
 window.minimise = minimise;
-window.deleteagent = deleteAgent;
+window.deleteAgent = deleteAgent;
 window.edit = edit;

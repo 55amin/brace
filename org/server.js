@@ -352,9 +352,6 @@ app.post('/api/delete-user', async (req, res) => {
         } else if (role === 'agent') {
             const agent = agents.find(agent => agent.agentID === userId);
             if (agent) {
-                if (req.session.user.agentID === userId) { // Prevent user from deleting their own account while logged in
-                    return res.status(400).json({ error: 'Cannot delete currently logged in user' });
-                }
                 agent.splice(agents.indexOf(agent), 1);
                 await pool.promise().query('DELETE FROM agents WHERE agent_id = ?', [userId]);
             }
@@ -365,6 +362,30 @@ app.post('/api/delete-user', async (req, res) => {
         res.status(500).json({ error: 'Failed to delete user' });
     }
 });
+
+// Delete task from database and memory
+app.post('/api/delete-task', async (req, res) => {
+    const { taskId } = req.body;
+    try {
+        const task = tasks.find(task => task.taskID === taskId);
+            if (task) {
+                task.splice(tasks.indexOf(task), 1);
+                await pool.promise().query('DELETE FROM tasks WHERE task_id = ?', [taskId]);
+            }
+        // Remove task from each assigned agent's tasks array
+        task.assignedTo.forEach(agentID => {
+            const agent = agents.find(agent => agent.agentID === agentID);
+            if (agent) {
+                agent.removeTask(task);
+            }
+        });
+        res.status(200).json({ success: true, message: 'Task deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting task:', err);
+        res.status(500).json({ success: false, message: 'Failed to delete task' });
+    }
+});
+
 
 // Create administrator account
 app.post('/api/create-admin', async (req, res) => {
