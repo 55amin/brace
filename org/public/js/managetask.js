@@ -74,8 +74,8 @@ async function edit(task, button) { // Display forms to update details when edit
             <input type="submit" class="submit-button" value="Update title"/>
         </form>
         <form id="updateDesc-${taskID}" class="form" method="post">
-            <label for="description" class="field-label">description</label>
-            <textarea class="text-field" maxlength="100" name="description" placeholder="Enter a new title, up to 100 characters" type="text" id="desc-${taskID}" required=""/>
+            <label for="description" class="field-label">Description</label>
+            <textarea class="text-field" maxlength="100" name="description" placeholder="Enter a new title, up to 100 characters" type="text" id="desc-${taskID}" required=""></textarea>
             <input type="submit" class="submit-button" value="Update description"/>
         </form>
         <form id="updateDeadline-${taskID}" class="form" method="post">
@@ -197,7 +197,7 @@ async function edit(task, button) { // Display forms to update details when edit
         if (result.success) {
             showError(result.message, 'neutral');
         } else {
-            showError(result.message);
+            result.errors.forEach(error => showError(error));
         }
     });
 }

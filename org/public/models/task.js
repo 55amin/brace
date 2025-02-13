@@ -17,7 +17,6 @@ class Task {
     setStatus(status) {
       this.status = status;
     }
-
 }
 
 module.exports = Task;
