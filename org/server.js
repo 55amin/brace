@@ -318,9 +318,9 @@ app.post('/api/get-tasks', async (req, res) => {
     try {
         tasks.forEach(task => {
             const assignedAgents = [];
-            tasks.assignedTo.forEach(assignedAgent => { // Add each agent's username to array
-                agents.find(agent => agent.agentID === assignedAgent.agentID);
-                assignedAgents.push(assignedAgent.username);
+            task.assignedTo.forEach(assignedAgent => { // Add each agent's username to array
+                const agent = agents.find(agent => agent.agentID === assignedAgent.agentID);
+                assignedAgents.push(agent.username);
             });
 
             const creator = admins.find(admin => admin.adminID === task.creator);
