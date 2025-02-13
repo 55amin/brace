@@ -102,7 +102,7 @@ async function edit(task, button) { // Display forms to update details when edit
         });
         const result = await response.json();
 
-        const agentContainer = document.getElementById('agent-container');
+        const agentContainer = document.getElementById('agent-container-${taskID}');
         result.users.forEach(agent => { // Create checkbox input for each agent
             const agentRow = document.createElement('div');
             agentRow.className = 'agent-row';
