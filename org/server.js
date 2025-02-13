@@ -324,6 +324,9 @@ app.post('/api/get-tasks', async (req, res) => {
                 }
             });
 
+            const creator = admins.find(admin => admin.adminID === task.creator);
+            const creatorName = creator.forename + ' ' + creator.surname;
+
             taskArr.push({
                 taskID: task.taskID,
                 status: task.status,
@@ -332,8 +335,9 @@ app.post('/api/get-tasks', async (req, res) => {
                 deadline: task.deadline,
                 assignedTo: assignedAgents.join(', '),
                 creationDate: task.creationDate,
-                creator: task.creator
+                creator: creatorName
             });
+            console.log(JSON.stringify(taskArr))
         });
         res.status(200).json({ taskArr });
     } catch {

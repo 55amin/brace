@@ -15,6 +15,7 @@ function expand(task, button) { // Display full details when expand button click
     <h4 style="font-style: italic;">${task.status}</h4>
     <p>Description: ${task.desc}</p>
     <p>Creation date: ${creationDate}</p>
+    <p>Creator: ${task.creator}<p>
     <p>Deadline: ${deadline}</p>
     <p>Assigned to: ${task.assignedTo}</p>
     <button class="minimise-button" onclick="minimise(${task.taskID}, this)">Minimise</button>
