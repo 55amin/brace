@@ -319,8 +319,10 @@ app.post('/api/get-tasks', async (req, res) => {
         tasks.forEach(task => {
             const assignedAgents = [];
             task.assignedTo.forEach(agentID => { // Add each agent's username to array
-                const agent = agents.find(agent => agent.agentID === agentID);
-                assignedAgents.push(agent.username);
+                const agent = agents.find(agent => agent.agentID === Number(agentID));
+                if (agent) {
+                    assignedAgents.push(agent.username);
+                }
             });
 
             const creator = admins.find(admin => admin.adminID === task.creator);
@@ -921,11 +923,16 @@ app.post('/api/create-task', async (req, res) => {
         newTask.taskID = results.insertId;
         tasks.push(newTask);
 
-        assignedTo.forEach(agentID => { // Add task to each assigned agent
+        assignedTo.forEach(async (agentID) => { // Add task to each assigned agent
             const agent = agents.find(agent => agent.agentID === agentID);
             if (agent) {
                 agent.addTask(newTask);
+                const [agentRow] = await pool.promise().query('SELECT tasks FROM agents WHERE agent_id = ?', [agentID]);
+                const agentTasks = JSON.parse(agentRow[0].tasks || '[]');
+                agentTasks.push(newTask.taskID);
+                await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agentTasks), agentID]);
             }
+            
         });
         res.status(200).json({ success: true, task: newTask });
     } catch (err) {
@@ -988,7 +995,7 @@ app.listen(PORT, async () => {
                 if (agent) {
                     agent.addTask(task);
                 }
-        });
+            });
         });
         console.log(`Loaded ${tasks.length} tasks into memory.`);
     } catch (err) {

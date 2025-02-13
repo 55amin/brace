@@ -62,7 +62,7 @@ async function deleteTask(task, button) { // Delete task when delete task button
     }
 }
 
-function edit(task, button) { // Display forms to update details when edit button clicked
+async function edit(task, button) { // Display forms to update details when edit button clicked
     let taskRow = button.closest('.task-row');
     task = JSON.parse(taskRow.dataset.task);
     let taskID = task.taskID;
@@ -92,9 +92,114 @@ function edit(task, button) { // Display forms to update details when edit butto
         <button class="delete-button" onclick="deleteTask(${taskID}, this)">Delete task</button>
     `;
 
+    try { // Fetch all agents from in-memory array to assign task to
+        const response = await fetch(`${baseUrl}/api/get-users`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ role: 'agent' }),
+        });
+        const result = await response.json();
+
+        const agentContainer = document.getElementById('agent-container');
+        result.users.forEach(agent => { // Create checkbox input for each agent
+            const agentRow = document.createElement('div');
+            agentRow.className = 'agent-row';
+            agentRow.innerHTML = `
+                <label>
+                    <input type="checkbox" name="assignedTo" value="${agent.agentID}" id="${agent.agentID}-${taskID}">
+                    ${agent.username}
+                </label>
+            `;
+            agentContainer.appendChild(agentRow);
+        });
+    } catch (err) {
+        showError('Error fetching agents');
+    }
+
     // Call detail update APIs
-    
-    
+    document.getElementById(`updateTitle-${taskID}`).addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const title = document.getElementById(`title-${taskID}`).value.trim();
+        taskID = task.taskID;
+        const response = await fetch(`${baseUrl}/api/update-title`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ title, taskId: taskID }),
+        });
+        const result = await response.json();
+        if (result.success) {
+            showError(result.message, 'neutral');
+        } else {
+            result.errors.forEach(error => showError(error));
+        }
+    });
+
+    document.getElementById(`updateDesc-${taskID}`).addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const desc = document.getElementById(`desc-${taskID}`).value.trim();
+        taskID = task.taskID;
+        const response = await fetch(`${baseUrl}/api/update-desc`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ desc, taskId: taskID }),
+        });
+        const result = await response.json();
+        if (result.success) {
+            showError(result.message, 'neutral');
+        } else {
+            result.errors.forEach(error => showError(error));
+        }
+    });
+
+    document.getElementById(`updateDeadline-${taskID}`).addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const deadline = document.getElementById(`deadline-${taskID}`).value;
+        taskID = task.taskID;
+        const response = await fetch(`${baseUrl}/api/update-deadline`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ deadline, taskId: taskID }),
+        });
+        const result = await response.json();
+        if (result.success) {
+            showError(result.message, 'neutral');
+        } else {
+            result.errors.forEach(error => showError(error));
+        }
+    });
+
+    document.getElementById(`updateAssign-${taskID}`).addEventListener('submit', async (event) => {
+        event.preventDefault();
+        taskID = task.taskID;
+        const assignedTo = Array.from(document.querySelectorAll('#agent-container-${taskID} input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
+        if (assignedTo.length === 0) { // Ensure task is assigned to at least one agent before submission
+            showError('Task must be assigned to at least one agent');
+            submitButton.disabled = false;
+            return;
+        }
+        
+        const response = await fetch(`${baseUrl}/api/update-assign`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ assignedTo, taskId: taskID }),
+        });
+        const result = await response.json();
+        if (result.success) {
+            showError(result.message, 'neutral');
+        } else {
+            showError(result.message);
+        }
+    });
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
