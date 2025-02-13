@@ -102,7 +102,7 @@ async function edit(task, button) { // Display forms to update details when edit
         });
         const result = await response.json();
 
-        const agentContainer = document.getElementById('agent-container-${taskID}');
+        const agentContainer = document.getElementById(`agent-container-${taskID}`);
         result.users.forEach(agent => { // Create checkbox input for each agent
             const agentRow = document.createElement('div');
             agentRow.className = 'agent-row';
@@ -179,7 +179,7 @@ async function edit(task, button) { // Display forms to update details when edit
     document.getElementById(`updateAssign-${taskID}`).addEventListener('submit', async (event) => {
         event.preventDefault();
         taskID = task.taskID;
-        const assignedTo = Array.from(document.querySelectorAll('#agent-container-${taskID} input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
+        const assignedTo = Array.from(document.querySelectorAll(`#agent-container-${taskID} input[type="checkbox"]:checked`)).map(checkbox => checkbox.value);
         if (assignedTo.length === 0) { // Ensure task is assigned to at least one agent before submission
             showError('Task must be assigned to at least one agent');
             submitButton.disabled = false;
