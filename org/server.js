@@ -317,17 +317,16 @@ app.post('/api/get-tasks', async (req, res) => {
     const taskArr = [];
     try {
         tasks.forEach(task => {
-            const assignedAgents = task.assignedTo.map(agentID => {
-                const agent = agents.find(agent => agent.agentID === agentID);
-                if (agent) {
-                    return agent.username;
-                }
+            const assignedAgents = [];
+            tasks.assignedTo.forEach(assignedAgent => { // Add each agent's username to array
+                agents.find(agent => agent.agentID === assignedAgent.agentID);
+                assignedAgents.push(assignedAgent.username);
             });
 
             const creator = admins.find(admin => admin.adminID === task.creator);
             const creatorName = creator.forename + ' ' + creator.surname;
 
-            taskArr.push({
+            taskArr.push({ // Return all relevant task details
                 taskID: task.taskID,
                 status: task.status,
                 title: task.title,
@@ -337,7 +336,6 @@ app.post('/api/get-tasks', async (req, res) => {
                 creationDate: task.creationDate,
                 creator: creatorName
             });
-            console.log(JSON.stringify(taskArr))
         });
         res.status(200).json({ taskArr });
     } catch {
@@ -980,7 +978,7 @@ app.listen(PORT, async () => {
         const [rows] = await pool.promise().query('SELECT * FROM tasks ORDER BY task_id ASC');
         rows.forEach(row => {
             const task = new Task(
-                row.title, row.desc, row.created_by, row.deadline, JSON.parse(row.assigned_to), row.created_at);
+                row.title, row.description, row.created_by, row.deadline, JSON.parse(row.assigned_to), row.created_at);
             task.setTaskID(row.task_id);
             tasks.push(task);
 
