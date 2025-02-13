@@ -318,8 +318,8 @@ app.post('/api/get-tasks', async (req, res) => {
     try {
         tasks.forEach(task => {
             const assignedAgents = [];
-            task.assignedTo.forEach(assignedAgent => { // Add each agent's username to array
-                const agent = agents.find(agent => agent.agentID === assignedAgent.agentID);
+            task.assignedTo.forEach(agentID => { // Add each agent's username to array
+                const agent = agents.find(agent => agent.agentID === agentID);
                 assignedAgents.push(agent.username);
             });
 

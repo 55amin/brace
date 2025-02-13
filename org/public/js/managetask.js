@@ -94,6 +94,7 @@ function edit(task, button) { // Display forms to update details when edit butto
 
     // Call detail update APIs
     
+    
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
