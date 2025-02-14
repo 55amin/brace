@@ -124,6 +124,14 @@ app.get('/createagent.html', isAuthenticatedAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'createagent.html'));
 });
 
+app.get('/managetask.html', isAuthenticatedAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'managetask.html'));
+});
+
+app.get('/createtask.html', isAuthenticatedAdmin, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'createtask.html'));
+});
+
 app.get('/agentscreen.html', isAuthenticatedAgent, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'agentscreen.html'));
 });
