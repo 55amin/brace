@@ -70,12 +70,12 @@ async function edit(task, button) { // Display forms to update details when edit
         <h5>ID: ${taskID}</h5>
         <form id="updateTitle-${taskID}" class="form" method="post">
             <label for="title" class="field-label">Title</label>
-            <input class="text-field" maxlength="100" name="title" placeholder="Enter a new title, up to 100 characters" type="text" id="title-${taskID}" required=""/>
+            <input class="text-field" maxlength="200" name="title" placeholder="Enter a new title, up to 100 characters" type="text" id="title-${taskID}" required=""/>
             <input type="submit" class="submit-button" value="Update title"/>
         </form>
         <form id="updateDesc-${taskID}" class="form" method="post">
             <label for="description" class="field-label">Description</label>
-            <textarea class="text-field" maxlength="100" name="description" placeholder="Enter a new title, up to 100 characters" type="text" id="desc-${taskID}" required=""></textarea>
+            <textarea class="text-field" maxlength="2000" name="description" placeholder="Enter a new description, up to 2000 characters" type="text" id="desc-${taskID}" required=""></textarea>
             <input type="submit" class="submit-button" value="Update description"/>
         </form>
         <form id="updateDeadline-${taskID}" class="form" method="post">

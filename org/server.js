@@ -1079,7 +1079,7 @@ app.post('/api/create-task', async (req, res) => {
             if (agent) {
                 agent.addTask(newTask);
                 const [agentRow] = await pool.promise().query('SELECT tasks FROM agents WHERE agent_id = ?', [agentID]);
-                const agentTasks = JSON.parse(agentRow[0].tasks || '[]');
+                const agentTasks = JSON.parse(agentRow[0].tasks || '[]'); // Ensure any existing tasks aren't overwritten
                 agentTasks.push(newTask.taskID);
                 await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agentTasks), agentID]);
             }

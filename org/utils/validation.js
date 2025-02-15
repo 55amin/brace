@@ -64,22 +64,22 @@ function validatePassword(password) {
 }
 
 function validateTitle(title) {
-    const regex = /^[A-Za-z0-9\s.,'\-:;&£$(){}[\]+=@]{1,100}$/;
+    const regex = /^[A-Za-z0-9\s.,'\-:;&£$(){}[\]+=@]{1,200}$/;
     if (!regex.test(title)) {
         return {
             isValid: false,
-            error: "Invalid title. Title must be 1-100 characters long."
+            error: "Invalid title. Title must be 1-200 characters long."
         };
     }
     return { isValid: true, value: title };
 }
 
 function validateDesc(desc) {
-    const regex = /^[A-Za-z0-9\s.,'\-:;&£$(){}[\]+=@]{1,600}$/;
+    const regex = /^[A-Za-z0-9\s.,'\-:;&£$(){}[\]+=@]{1,2000}$/;
     if (!regex.test(desc)) {
         return {
             isValid: false,
-            error: "Invalid description. Description must be 1-600 characters long."
+            error: "Invalid description. Description must be 1-2000 characters long."
         };
     }
     return { isValid: true, value: desc };
