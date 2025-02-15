@@ -93,7 +93,7 @@ function isAuthenticatedAgent(req, res, next) { // Check if session exists and u
 }
 
 app.get('/', (req, res) => {
-    res.redirect('/index.html'); // Redirect to your main page
+    res.redirect('/index.html'); 
 });
 
 app.get('/adminscreen.html', isAuthenticatedAdmin, (req, res) => {
