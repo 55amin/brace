@@ -11,9 +11,9 @@ const {
     validateDesc
 } = require('./utils/validation');
 const nodemailer = require('nodemailer');
-const crypto = require('crypto');
 const mysql = require('mysql2');
 const dotenv = require('dotenv');
+const { error } = require('console');
 dotenv.config();
 
 const app = express();
@@ -62,6 +62,14 @@ app.get('/', (req, res) => {
     res.redirect('/index.html'); 
 });
 
+app.get('/chat.html', (req, res) => { // Serve chat page based on customer's session and details
+    if (req.session.user && req.session.user.customerID) {
+        res.sendFile(path.join(__dirname, 'public', 'chat.html'));
+    } else {
+        res.redirect('/index.html'); // Redirect to registration page if customer does not have session 
+    }
+});
+
 // Register customer
 app.post('/api/customer-reg', async (req, res) => {
     const { username, email } = req.body;
@@ -81,22 +89,12 @@ app.post('/api/customer-reg', async (req, res) => {
             const existingCustomer = rowsEmail[0];
             const customer = customers.find(customer => customer.customerID === existingCustomer.customer_id);
 
-            if (customer && (customer.ticket === null)) { // Customers without open tickets can open a ticket
+            if (customer && (customer.ticket === null)) { // Customers without open ticket can open a ticket
                 req.session.user = { email: validatedEmail.value, customerID: customer.customerID };
                 return res.status(200).json({ success: true, message: 'Customer already registered but does not have a ticket' });
-            } else {
-                // Customer has tickets, send verification email
-                const code = crypto.randomBytes(3).toString('hex').toUpperCase(); // Generate 6 character alphanumeric code
-                req.session.verificationCode = verificationCode;
-
-                await transporter.sendMail({
-                    from: `Brace for Techmedic <${process.env.EMAIL_ADDRESS}>`,
-                    to: validatedEmail.value,
-                    subject: 'Brace: Access your ticket',
-                    text: `To access your ticket, enter this verification code: ${code}\n\nThis code will expire in 10 minutes.\n\nBrace for Techmedic`;
-                });
-
-                return res.status(200).json({ success: true, message: 'Verification code sent to email' });
+            } else if (customer && customer.ticket) { // Customers with open ticket cannnot open another ticket
+                req.session.user = { email: validatedEmail.value, customerID: customer.customerID };
+                return res.status(400).json({ success: false, error: 'Customer already has ticket open' });
             }
         }
 

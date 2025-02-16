@@ -24,6 +24,8 @@ customerReg.addEventListener('submit', async (event) => {
         const result = await response.json();
         if (result.success) { // Redirect customer to ticket creation page
             window.location.href = 'ticketcreation.html';
+        } else if (result.error === 'Customer already has ticket open') {
+            window.location.href = 'chat.html';
         }
     } catch (err) {
         showError('Failed to register customer');
