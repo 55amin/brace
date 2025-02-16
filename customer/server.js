@@ -62,6 +62,10 @@ app.get('/', (req, res) => {
     res.redirect('/index.html'); 
 });
 
+app.get('/ticketcreation.html', (req, res) => {
+    res.redirect('/ticketcreation.html');
+});
+
 app.get('/chat.html', (req, res) => { // Serve chat page based on customer's session and details
     if (req.session.user && req.session.user.customerID) {
         res.sendFile(path.join(__dirname, 'public', 'chat.html'));
