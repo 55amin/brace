@@ -11,6 +11,7 @@ const {
     validateDesc
 } = require('./utils/validation');
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 const mysql = require('mysql2');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -77,7 +78,26 @@ app.post('/api/customer-reg', async (req, res) => {
             'SELECT COUNT(*) as count FROM customers WHERE email = ?',
             [validatedEmail.value]);
         if (rowsEmail[0].count > 0) {
-            return res.status(400).json({ success: true, message: 'Customer already registered' });
+            const existingCustomer = rowsEmail[0];
+            const customer = customers.find(customer => customer.customerID === existingCustomer.customer_id);
+
+            if (customer && (customer.ticket === null)) { // Customers without open tickets can open a ticket
+                req.session.user = { email: validatedEmail.value, customerID: customer.customerID };
+                return res.status(200).json({ success: true, message: 'Customer already registered but does not have a ticket' });
+            } else {
+                // Customer has tickets, send verification email
+                const code = crypto.randomBytes(3).toString('hex').toUpperCase(); // Generate 6 character alphanumeric code
+                req.session.verificationCode = verificationCode;
+
+                await transporter.sendMail({
+                    from: `Brace for Techmedic <${process.env.EMAIL_ADDRESS}>`,
+                    to: validatedEmail.value,
+                    subject: 'Brace: Access your ticket',
+                    text: `To access your ticket, enter this verification code: ${code}\n\nThis code will expire in 10 minutes.\n\nBrace for Techmedic`;
+                });
+
+                return res.status(200).json({ success: true, message: 'Verification code sent to email' });
+            }
         }
 
         // Insert customer details into database
@@ -119,7 +139,7 @@ app.listen(PORT, async () => {
             customer.setCustomerID(row.customer_id);
             if (row.ticket_id) {
                 const ticket = tickets.find(ticket => ticket.ticketID === row.ticket_id);
-                if (ticket) {
+                if (ticket && ticket.status !== 'Completed') {
                     customer.openTicket(ticket);
                 }
             }

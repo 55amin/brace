@@ -2,7 +2,7 @@ class Customer {
     constructor(username, email, registerDate) {
         this.username = username;
         this.email = email;
-        this.ticket = {}; // Tickets stored in dictionary so new ticket can be opened whilst closed ticket is still stored
+        this.ticket;
         this.customerID = null;
         this.registerDate = registerDate;
     }
@@ -11,16 +11,12 @@ class Customer {
         this.customerID = customerID;
     }
 
-    openTicket(ticket) {
-        this.ticket[ticket] = 'Open';
-    }
-
-    closeTicket(ticket) {
-        this.ticket[ticket] = 'Closed';
+    addTicket(ticket) {
+        this.ticket = ticket;
     }
 
     removeTicket(ticket) {
-        delete this.ticket[ticket];
+        this.ticket = null;
     }
 }
 
