@@ -32,7 +32,7 @@ const pool = mysql.createPool({ // Configure database connection
 
 const sessionStore = new MySQLStore({ // Configure MySQL session store
     clearExpired: true,
-    expiration: 1000 * 60 * 60 // Sessions expire after 1 hour of inactivity
+    expiration: 1000 * 60 * 60 * 24 // Sessions expire after 24 hours of inactivity
 }, pool);
 
 app.set('trust proxy', 1);
@@ -43,7 +43,7 @@ app.use(session({ // Configure user session
     saveUninitialized: false,
     cookie: {
         secure: true,
-        maxAge: 1000 * 60 * 60
+        maxAge: 1000 * 60 * 60 * 24
     }
 }));
 
@@ -73,13 +73,11 @@ app.post('/api/customer-reg', async (req, res) => {
         return res.status(400).json({ success: false, errors });
     }
     try { 
-        const [rowsEmail] = await pool.promise().query(
+        const [rowsEmail] = await pool.promise().query( // Check if email address exists in database
             'SELECT COUNT(*) as count FROM customers WHERE email = ?',
-            [validatedEmail.value] // Check if email address exists in database
-        );
+            [validatedEmail.value]);
         if (rowsEmail[0].count > 0) {
-            errors.push('Email address already registered');
-            return res.status(400).json({ success: false, errors });
+            return res.status(400).json({ success: true, message: 'Customer already registered' });
         }
 
         // Insert customer details into database
@@ -87,7 +85,12 @@ app.post('/api/customer-reg', async (req, res) => {
         const values = [validatedUsername.value, validatedEmail.value, new Date()];
         const [results] = await pool.promise().query(query, values);
 
-        req.session.user = { email: validatedEmail.value, adminID: admin.adminID }; // Create session for user
+        // Create new customer instance and add customerID from database
+        const newCustomer = new Customer(validatedUsername.value, validatedEmail.value, new Date());
+        newCustomer.setCustomerID(results.insertId);
+        customers.push(newCustomer);
+
+        req.session.user = { email: validatedEmail.value, customerID: newCustomer.customerID }; // Create session for customer
         res.status(200).json({ success: true, message: 'Customer registered successfully' });
     } catch (error) {
         console.error('Error registering customer:', error);
@@ -97,7 +100,33 @@ app.post('/api/customer-reg', async (req, res) => {
 
 
 // Start server
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
+
+    try { // Load customers from database into memory
+        const [rows] = await pool.promise().query('SELECT * FROM customers ORDER BY customer_id ASC');
+        for (const row of rows) {
+            if (Date(row.registered_at) < (new Date() - 7) ) {
+                const [ticketRows] = await pool.promise().query('SELECT COUNT(*) as count FROM tickets WHERE customer_id = ?', [row.customer_id]);
+                if (ticketRows[0].count === 0) { // Delete customer from database
+                    await pool.promise().query('DELETE FROM customers WHERE customer_id = ?', [row.customer_id]);
+                    continue; // Skip adding customer to in-memory array
+                }
+            }
+
+            const customer = new Customer(row.username, row.email, row.registered_at);
+            customer.setCustomerID(row.customer_id);
+            if (row.ticket_id) {
+                const ticket = tickets.find(ticket => ticket.ticketID === row.ticket_id);
+                if (ticket) {
+                    customer.openTicket(ticket);
+                }
+            }
+            customers.push(customer);
+        }
+        console.log(`Loaded ${customers.length} customers into memory.`);
+    } catch (err) {
+        console.error('Error loading customers from database:', err);
+    }
 });

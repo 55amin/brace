@@ -21,9 +21,7 @@ customerReg.addEventListener('submit', async (event) => {
             },
             body: JSON.stringify({ username, email }),
         });
-
         const result = await response.json();
-
         if (result.success) { // Redirect customer to ticket creation page
             window.location.href = 'ticketcreation.html';
         }
