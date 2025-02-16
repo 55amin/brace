@@ -217,7 +217,7 @@ button:hover, .login-button:hover, .submit-button:hover, .reset-password:hover, 
   border-radius: 10px;
 }
 
-.admin-row h5, .admin-row h4, .agent-row h5, .agent-row h4, .task-row h5, .task-row h4, {
+.admin-row h5, .admin-row h4, .agent-row h5, .agent-row h4, .task-row h5, .task-row h4 {
   margin: 15px;
 }
 

@@ -96,7 +96,7 @@ html, body {
 }
 
 textarea {
-  width: 98 %;
+  width: 98%;
   resize: vertical;
   font-family: 'Arial', sans-serif;
 }
@@ -190,7 +190,7 @@ button:hover, .login-button:hover, .submit-button:hover, .chat-input button:hove
   flex: 1 1 auto;
   position: fixed;
   height: 60%;
-  width: 98 %;
+  width: 98%;
   top: 26%;
   bottom: 20%;
   right: 0;
@@ -273,12 +273,11 @@ button:hover, .login-button:hover, .submit-button:hover, .chat-input button:hove
   margin: 5px;
   position: fixed;
   height: 40px;
-  width: 98 %;
+  width: 98%;
   bottom: 0;
   left: 0;
   right: 0;
 }
-
 
 .chat-input input {
   flex: 1;

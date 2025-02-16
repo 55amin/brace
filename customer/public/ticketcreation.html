@@ -25,7 +25,7 @@
     </div>
     <p class="paragraph">Enter the details of your issue to open a ticket and connect with an agent.</p>
     <div class="form-block">
-        <form id="ticketcreation" name="ticketcreation" action="chat.html" method="get" class="form">
+        <form id="ticketCreation" name="ticketcreation" method="post" class="form">
             <label for="Title" class="field-label">Title</label>
             <input class="text-field" maxlength="100" name="Title" placeholder="Enter a title for the ticket, up to 100 characters" type="text" id="Username" required=""/>
             <label for="Desc" class="field-label-2">Description</label>
@@ -33,27 +33,18 @@
             <label for="Ticket-type" class="field-label-2">Ticket type</label>
             <select id="Ticket-type" name="Ticket-type">
                 <option value="" disabled selected>Select a ticket type</option>
-                <option value="pc">PC/Laptop hardware</option>
-                <option value="mobile">Mobile phone hardware</option>
-                <option value="windows">Windows</option>
-                <option value="mac">MacOS</option>
-                <option value="android/ios">Android/iOS</option>
-                <option value="application">Application</option>
-                <option value="network">Network</option>
-                <option value="miscellaneous">Miscellaneous</option>
+                <option value="PC/laptop hardware">PC/laptop hardware</option>
+                <option value="Mobile phoen hardware">Mobile phone hardware</option>
+                <option value="Windows">Windows</option>
+                <option value="Mac">MacOS</option>
+                <option value="Android/iOS">Android/iOS</option>
+                <option value="Application">Application</option>
+                <option value="Network">Network</option>
+                <option value="Miscellaneous">Miscellaneous</option>
             </select>
             <input type="submit" class="submit-button" value="Open ticket"/>
         </form>
-        <div class="success-message">
-            <div class="text-block-2">
-                <br/>Details submitted. <br/><br/>Loading chat...<br/>
-            </div>
-        </div>
-        <div class="error-message">
-            <div class="text-block">
-                Unable to proceed. <br/>Error:<br/>
-            </div>
-        </div>
     </div>
+    <div id="error-container" class="error-container"></div>
 </body>
 </html>

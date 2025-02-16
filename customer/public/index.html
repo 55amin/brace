@@ -22,23 +22,15 @@
     </div>
     <p class="paragraph">Welcome to Techmedic's Brace ticket portal. Enter a username and your email to continue to ticket creation.</p>
     <div class="form-block">
-        <form id="customerreg" name="customerreg" action="ticketcreation.html" method="get" class="form">
-            <label for="Username" class="field-label">Username</label>
-            <input class="text-field" maxlength="20" name="Username" placeholder="Enter your username, up to 20 characters" type="text" id="Username" required=""/>
+        <form id="customerReg" name="customerreg" method="post" class="form">
+            <label for="username" class="field-label">Username</label>
+            <input class="text-field" maxlength="20" name="username" placeholder="Enter your username, up to 20 characters" type="text" id="username" required=""/>
             <label for="email" class="field-label-2">Email address</label>
-            <input class="text-field-2" maxlength="256" name="email" placeholder="Enter your email address to receive updates about your ticket" type="email" id="email" required=""/>
+            <input class="text-field-2" maxlength="320" name="email" placeholder="Enter your email address to receive updates about your ticket" type="email" id="email" required=""/>
             <input type="submit" class="submit-button" value="Continue to ticket creation"/>
         </form>
-        <div class="success-message">
-            <div class="text-block-2">
-                <br/>Details submitted. <br/><br/>Loading ticket creation...<br/>
-            </div>
-        </div>
-        <div class="error-message">
-            <div class="text-block">
-                Unable to proceed. <br/>Error:<br/>
-            </div>
-        </div>
     </div>
+    <div id="error-container" class="error-container"></div>
+    <script src="js/index.js"></script>
 </body>
 </html>
