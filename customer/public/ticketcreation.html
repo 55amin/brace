@@ -26,12 +26,12 @@
     <p class="paragraph">Enter the details of your issue to open a ticket and connect with an agent.</p>
     <div class="form-block">
         <form id="ticketCreation" name="ticketcreation" method="post" class="form">
-            <label for="Title" class="field-label">Title</label>
-            <input class="text-field" maxlength="100" name="Title" placeholder="Enter a title for the ticket, up to 100 characters" type="text" id="Username" required=""/>
-            <label for="Desc" class="field-label-2">Description</label>
-            <textarea id="description" maxlength="600" name="description" rows="4" placeholder="Enter a description for the ticket, up to 600 characters"></textarea>
-            <label for="Ticket-type" class="field-label-2">Ticket type</label>
-            <select id="Ticket-type" name="Ticket-type">
+            <label for="title" class="field-label">Title</label>
+            <input class="text-field" id="title" maxlength="200" name="title" placeholder="Enter a title for the ticket, up to 200 characters" type="text" required=""/>
+            <label for="description" class="field-label-2">Description</label>
+            <textarea id="desc" maxlength="2000" name="description" rows="6" placeholder="Enter a description for the ticket, up to 2000 characters"></textarea>
+            <label for="type" class="field-label-2">Ticket type</label>
+            <select id="type" name="type">
                 <option value="" disabled selected>Select a ticket type</option>
                 <option value="PC/laptop hardware">PC/laptop hardware</option>
                 <option value="Mobile phoen hardware">Mobile phone hardware</option>
@@ -42,9 +42,10 @@
                 <option value="Network">Network</option>
                 <option value="Miscellaneous">Miscellaneous</option>
             </select>
-            <input type="submit" class="submit-button" value="Open ticket"/>
+            <input type="submit" class="submit-button" id="submit-button" value="Open ticket"/>
         </form>
     </div>
     <div id="error-container" class="error-container"></div>
+    <script type="module" src="js/ticketcreation.js"></script>
 </body>
 </html>

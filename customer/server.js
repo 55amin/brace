@@ -4,6 +4,7 @@ const cors = require('cors');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const Customer = require('./public/models/customer');
+const Ticket = require('./public/models/ticket')
 const {
     validateUsername,
     validateEmail,
@@ -13,7 +14,6 @@ const {
 const nodemailer = require('nodemailer');
 const mysql = require('mysql2');
 const dotenv = require('dotenv');
-const { error } = require('console');
 dotenv.config();
 
 const app = express();
