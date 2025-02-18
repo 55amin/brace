@@ -186,7 +186,7 @@ app.listen(PORT, async () => {
 
         for (const row of customerRows) {
             if (new Date(row.registered_at) < weekAgo) {
-                const [ticketCount] = await pool.promise().query('SELECT COUNT(*) as count FROM tickets WHERE customer_id = ?', [row.customer_id]);
+                const [ticketCount] = await pool.promise().query('SELECT COUNT(*) as count FROM tickets WHERE created_by = ?', [row.customer_id]);
                 if (ticketCount[0].count === 0) { // Delete customer from database
                     await pool.promise().query('DELETE FROM customers WHERE customer_id = ?', [row.customer_id]);
                     continue; // Skip adding customer to in-memory array
@@ -204,7 +204,7 @@ app.listen(PORT, async () => {
                 continue; // Skip adding ticket to in-memory array
             }
 
-            const ticket = new Ticket(row.title, row.description, row.customer_id, row.type, row.created_at);
+            const ticket = new Ticket(row.title, row.description, row.created_by, row.type, row.created_at);
             ticket.setTicketID(row.ticket_id);
             tickets.push(ticket);
 
