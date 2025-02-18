@@ -57,6 +57,7 @@ const transporter = nodemailer.createTransport({ // Configure email service
 });
 
 const customers = [];
+const tickets = [];
 
 app.get('/', (req, res) => {
     res.redirect('/index.html'); 
@@ -120,18 +121,73 @@ app.post('/api/customer-reg', async (req, res) => {
     }
 });
 
+// Create ticket
+app.post('/api/create-ticket', async (req, res) => {
+    const { title, desc, type } = req.body;
+    const validatedTitle = validateTitle(title);
+    const validatedDesc = validateDesc(desc);
+    const errors = []; // Push validation error messages to array
+    const creationDate = new Date();
+    const creator = req.session.user.customerID;
+
+    if (!validatedTitle.isValid) errors.push(validatedTitle.error);
+    if (!validatedDesc.isValid) errors.push(validatedDesc.error);
+    if (!creator) errors.push('Associated customer not found')
+    if (errors.length > 0) {
+        return res.status(400).json({ success: false, errors });
+    }
+
+    try { // Insert ticket details into database
+        const query = 'INSERT INTO tickets (title, description, type, created_at, created_by) VALUES (?, ?, ?, ?, ?)';
+        const values = [
+            validatedTitle.value,
+            validatedDesc.value,
+            type,
+            creationDate,
+            creator
+        ];
+        const [results] = await pool.promise().query(query, values);
+
+        const newTicket = new Ticket( // Create new ticket instance and add ticketID from database
+            validatedTitle.value,
+            validatedDesc.value,
+            creator,
+            type,
+            creationDate
+        );
+        newTicket.setTicketID(results.insertId);
+        tickets.push(newTicket);
+
+        const customer = customers.find(customer => customer.customerID === creator);
+        if (customer) { // Add ticket to associated customer
+            customer.addTicket(newTicket);
+            await pool.promise().query('UPDATE customers SET ticket_id = ? WHERE customer_id = ?',
+                [newTicket.ticketID, customer.customerID]);
+        }
+
+        res.status(200).json({ success: true, message: 'Ticket created successfully', ticketId: results.insertId });
+    } catch (error) {
+        console.error('Error creating ticket:', error);
+        res.status(500).json({ success: false, message: 'Failed to create ticket' });
+    }
+});
+
 
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
 
-    try { // Load customers from database into memory
-        const [rows] = await pool.promise().query('SELECT * FROM customers ORDER BY customer_id ASC');
-        for (const row of rows) {
-            if (Date(row.registered_at) < (new Date() - 7) ) {
-                const [ticketRows] = await pool.promise().query('SELECT COUNT(*) as count FROM tickets WHERE customer_id = ?', [row.customer_id]);
-                if (ticketRows[0].count === 0) { // Delete customer from database
+    try { // Load customers and tickets from database into memory
+        const [customerRows] = await pool.promise().query('SELECT * FROM customers ORDER BY customer_id ASC');
+        const [ticketRows] = await pool.promise().query('SELECT * FROM tickets ORDER BY ticket_id ASC');
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+
+        for (const row of customerRows) {
+            if (new Date(row.registered_at) < weekAgo) {
+                const [ticketCount] = await pool.promise().query('SELECT COUNT(*) as count FROM tickets WHERE customer_id = ?', [row.customer_id]);
+                if (ticketCount[0].count === 0) { // Delete customer from database
                     await pool.promise().query('DELETE FROM customers WHERE customer_id = ?', [row.customer_id]);
                     continue; // Skip adding customer to in-memory array
                 }
@@ -139,16 +195,48 @@ app.listen(PORT, async () => {
 
             const customer = new Customer(row.username, row.email, row.registered_at);
             customer.setCustomerID(row.customer_id);
-            if (row.ticket_id) {
-                const ticket = tickets.find(ticket => ticket.ticketID === row.ticket_id);
-                if (ticket && ticket.status !== 'Completed') {
-                    customer.openTicket(ticket);
-                }
-            }
             customers.push(customer);
         }
-        console.log(`Loaded ${customers.length} customers into memory.`);
+
+        for (const row of ticketRows) {
+            if ((new Date(row.created_at) < weekAgo) && row.status === 'Completed') { // Delete ticket from database
+                await pool.promise().query('DELETE FROM tickets WHERE ticket_id = ?', [row.ticket_id]);
+                continue; // Skip adding ticket to in-memory array
+            }
+
+            const ticket = new Ticket(row.title, row.description, row.customer_id, row.type, row.created_at);
+            ticket.setTicketID(row.ticket_id);
+            tickets.push(ticket);
+
+            if (row.triage === 1) { // Triage in-memory ticket if ticket in database triaged
+                ticket.triage();
+            }
+            if (row.priority > 1) { // Set correct priority for in-memory ticket based on priority of ticket in database 
+                ticket.setPriority (row.priority);
+            }
+
+
+            const customer = customers.find(customer => customer.customerID === row.customer_id);
+            if (customer) {
+                customer.addTicket(ticket);
+            }
+        }
+        console.log(`Loaded ${customers.length} customers and ${tickets.length} tickets into memory.`);
     } catch (err) {
-        console.error('Error loading customers from database:', err);
+        console.error('Error loading customers and tickets from database:', err);
     }
+
+    setInterval(async () => { // Check if ticket deadlines have passed every minute
+        try {
+            for (const ticket of tickets) {
+                const currentDate = new Date();
+                if ((currentDate > ticket.deadline) && (ticket.priority < 3)) { // Raise priority accordingly in memory and database
+                    ticket.raisePriority();
+                    await pool.promise().query('UPDATE tickets SET priority = ? WHERE ticket_id = ?', [ticket.priority, ticket.ticketID]);
+                }
+            }
+        } catch (err) {
+            console.error('Error updating ticket priorities:', err);
+        }
+    }, 60 * 1000); 
 });

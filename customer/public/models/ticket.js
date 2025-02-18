@@ -14,7 +14,7 @@ class Ticket {
         this.ticketID = null;
     }
 
-    setTaskID(ticketID) {
+    setTicketID(ticketID) {
         this.ticketID = ticketID;
     }
 
@@ -29,6 +29,14 @@ class Ticket {
     raisePriority() {
         if (this.priority < 3) {
             this.priority++;
+        }
+    }
+
+    setPriority(priority) {
+        if (priority > 3 || priority < 0) {
+            return;
+        } else {
+            this.priority = priority;
         }
     }
 
