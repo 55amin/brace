@@ -139,13 +139,14 @@ app.post('/api/create-ticket', async (req, res) => {
     }
 
     try { // Insert ticket details into database
-        const query = 'INSERT INTO tickets (title, description, type, created_at, created_by) VALUES (?, ?, ?, ?, ?)';
+        const query = 'INSERT INTO tickets (title, description, type, created_at, created_by, priority_level) VALUES (?, ?, ?, ?, ?, ?)';
         const values = [
             validatedTitle.value,
             validatedDesc.value,
             type,
             creationDate,
-            creator
+            creator,
+            1
         ];
         const [results] = await pool.promise().query(query, values);
 
@@ -158,12 +159,12 @@ app.post('/api/create-ticket', async (req, res) => {
         );
         newTicket.setTicketID(results.insertId);
         tickets.push(newTicket);
+        await pool.promise().query('UPDATE tickets SET deadline = ? WHERE ticket_id = ?', [newTicket.deadline, newTicket.ticketID]);
 
         const customer = customers.find(customer => customer.customerID === creator);
         if (customer) { // Add ticket to associated customer
             customer.addTicket(newTicket);
-            await pool.promise().query('UPDATE customers SET ticket_id = ? WHERE customer_id = ?',
-                [newTicket.ticketID, customer.customerID]);
+            await pool.promise().query('UPDATE customers SET ticket_id = ? WHERE customer_id = ?', [newTicket.ticketID, customer.customerID]);
         }
 
         res.status(200).json({ success: true, message: 'Ticket created successfully', ticketId: results.insertId });
@@ -213,7 +214,7 @@ app.listen(PORT, async () => {
                 ticket.triage();
             }
             if (row.priority > 1) { // Set correct priority for in-memory ticket based on priority of ticket in database 
-                ticket.setPriority (row.priority);
+                ticket.setPriority(row.priority);
             }
 
 

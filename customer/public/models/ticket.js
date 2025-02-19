@@ -8,9 +8,10 @@ class Ticket {
         this.deadline.setDate(this.deadline.getDate() + 1);
         this.assignedTo = null;
         this.status = 'Unassigned';
-        this.priority = 0;
+        this.priority = 1;
         this.triage = false;
         this.creationDate = creationDate;
+        this.completionDate = null;
         this.ticketID = null;
     }
 
@@ -33,7 +34,7 @@ class Ticket {
     }
 
     setPriority(priority) {
-        if (priority > 3 || priority < 0) {
+        if (priority > 3 || priority < 1) {
             return;
         } else {
             this.priority = priority;
