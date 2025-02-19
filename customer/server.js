@@ -86,12 +86,12 @@ app.post('/api/customer-reg', async (req, res) => {
     if (errors.length > 0) {
         return res.status(400).json({ success: false, errors });
     }
-    
+
     try { 
         const [rowsEmail] = await pool.promise().query( // Check if email address exists in database
-            'SELECT COUNT(*) as count FROM customers WHERE email = ?',
+            'SELECT * FROM customers WHERE email = ?',
             [validatedEmail.value]);
-        if (rowsEmail[0].count > 0) {
+        if (rowsEmail[0].length > 0) {
             const existingCustomer = rowsEmail[0];
             const customer = customers.find(customer => customer.customerID === existingCustomer.customer_id);
 
