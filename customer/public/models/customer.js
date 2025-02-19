@@ -2,7 +2,7 @@ class Customer {
     constructor(username, email, registerDate) {
         this.username = username;
         this.email = email;
-        this.ticket;
+        this.ticket = null;
         this.customerID = null;
         this.registerDate = registerDate;
     }
