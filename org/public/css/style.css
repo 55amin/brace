@@ -344,16 +344,15 @@ input:checked + .slider:before {
 /* Chat styles */
 .chat-interface {
   display: flex;
-  flex: 1 1 auto;
+  flex-direction: column;
   position: fixed;
-  height: 79%;
-  width: auto;
-  right: 0;
-  left: 0;
-  margin: 10px 5px 10px 5px;
+  top: 20%;
+  bottom: 8%;
+  left: 0.2%;
+  right: 0.2%;
+  margin: 10px;
   padding: 6px;
-  margin-bottom: 15px;
-  border: 3px solid #452fd0;  
+  border: 3px solid #452fd0;
   background-color: #97c3ff;
   border-radius: 10px;
   font-size: 14px;
