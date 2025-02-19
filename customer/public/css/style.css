@@ -179,6 +179,11 @@ button:hover, .login-button:hover, .submit-button:hover, .chat-input button:hove
     left: 86%;
   }
 
+  .div-block {
+    width: 80%;
+    height: auto;
+  }
+
   .login-title {
     visibility: hidden;
   }
@@ -189,10 +194,8 @@ button:hover, .login-button:hover, .submit-button:hover, .chat-input button:hove
   display: flex;
   flex: 1 1 auto;
   position: fixed;
-  height: 60%;
-  width: 98%;
-  top: 26%;
-  bottom: 20%;
+  height: 79%;
+  width: auto;
   right: 0;
   left: 0;
   margin: 10px 5px 10px 5px;
@@ -273,7 +276,7 @@ button:hover, .login-button:hover, .submit-button:hover, .chat-input button:hove
   margin: 5px;
   position: fixed;
   height: 40px;
-  width: 98%;
+  width: auto;
   bottom: 0;
   left: 0;
   right: 0;

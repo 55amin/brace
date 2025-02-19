@@ -346,10 +346,8 @@ input:checked + .slider:before {
   display: flex;
   flex: 1 1 auto;
   position: fixed;
-  height: 70%;
-  width: 98%;
-  top: 16%;
-  bottom: 20%;
+  height: 79%;
+  width: auto;
   right: 0;
   left: 0;
   margin: 10px 5px 10px 5px;
@@ -431,7 +429,7 @@ input:checked + .slider:before {
   margin: 5px;
   position: fixed;
   height: 40px;
-  width: 98%;
+  width: auto;
   bottom: 0;
   left: 0;
   right: 0;
