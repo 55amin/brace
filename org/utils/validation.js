@@ -64,7 +64,7 @@ function validatePassword(password) {
 }
 
 function validateTitle(title) {
-    const regex = /^[A-Za-z0-9\s.,'\-:;&£$(){}[\]+=@]{1,200}$/;
+    const regex = /^[A-Za-z0-9\s.,'"\-:;&£$(){}[\]+=@!?*%\/|]{1,200}$/;
     if (!regex.test(title)) {
         return {
             isValid: false,
@@ -75,7 +75,7 @@ function validateTitle(title) {
 }
 
 function validateDesc(desc) {
-    const regex = /^[A-Za-z0-9\s.,'\-:;&£$(){}[\]+=@]{1,2000}$/;
+    const regex = /^[A-Za-z0-9\s.,'"\-:;&£$(){}[\]+=@!?*%\/|]{1,2000}$/;
     if (!regex.test(desc)) {
         return {
             isValid: false,
