@@ -90,9 +90,9 @@ app.post('/api/customer-reg', async (req, res) => {
     try { 
         const [rowsEmail] = await pool.promise().query( // Check if email address exists in database
             'SELECT * FROM customers WHERE email = ?', [validatedEmail.value]);
-        if (rowsEmail) {
+        if (rowsEmail.length > 0) {
             const existingCustomer = rowsEmail[0];
-            const customer = customers.find(customer => customer.customerID === existingCustomer.customer_id);
+            const customer = customers.find(customer => customer.customerID == existingCustomer.customer_id);
 
             if (customer && (customer.ticket === null)) { // Customers without open ticket can open a ticket
                 req.session.user = { email: validatedEmail.value, customerID: customer.customerID };
