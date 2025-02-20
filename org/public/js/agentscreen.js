@@ -93,10 +93,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const dropdownMenu = document.getElementById('dropdown-menu');
-    tickets.forEach(ticket => {
+    tasks.forEach(task => { // Add tasks to dropdown menu
         const option = document.createElement('option');
-        option.value = ticket.text;
-        option.innerText = `Day ${ticket.day}: ${ticket.text}`;
+        option.value = `Task ${task.taskID}: ${task.title}`;
+        option.innerText = `Task ${task.taskID}: ${task.title}`;
+        option.style.backgroundColor = '#009d00';
+        option.style.color = 'black';
+        dropdownMenu.appendChild(option);
+    });
+
+    tickets.forEach(ticket => { // Add tickets to dropdown menu
+        const option = document.createElement('option');
+        option.value = `Ticket ${ticket.ticketID}: ${ticket.title}`;
+        option.innerText = `Ticket ${ticket.ticketID}: ${ticket.title}`;
+        if (ticket.priority === 1) {
+            option.style.backgroundColor = 'yellow';
+            option.style.color = 'black';
+        } else if (ticket.priority === 2) {
+            option.style.backgroundColor = 'orange';
+            option.style.color = 'black';
+        } else if (ticket.priority === 3) {
+            option.style.backgroundColor = 'red';
+            option.style.color = 'black';
+        }
         dropdownMenu.appendChild(option);
     });
 
