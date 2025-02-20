@@ -257,7 +257,7 @@ input[type="time"] {
   height: 80%;
 }
 
-.calendar-day {
+.day {
   padding: 6px;
   background-color: #0063a0;
   border: 3px solid #452fd0;
@@ -265,12 +265,26 @@ input[type="time"] {
   text-align: center;
 }
 
-.calendar-day-header {
+.empty {
+  background-color: #3b505e;
+}
+
+.day-header {
   font-weight: bold;
   margin-bottom: 5px;
 }
 
 .ticket {
+  background-color: #a9f5ff;
+  border: 3px solid #452fd0;
+  border-radius: 10px;
+  padding: 5px;
+  margin-top: 5px;
+  font-size: 12px;
+  color: black;
+}
+
+.task {
   background-color: #a9f5ff;
   border: 3px solid #452fd0;
   border-radius: 10px;
