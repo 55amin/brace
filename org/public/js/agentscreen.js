@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const tasksForDay = tasks.filter(task => new Date(task.deadline).getDate() === i);
-        if (tasksForDay.length > 0) {
+        if (tasksForDay.length > 0) { // Create colored dot with number of tasks
             const taskDot = document.createElement('div');
             taskDot.className = 'task-dot';
             taskDot.innerText = tasksForDay.length;
@@ -73,13 +73,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const ticketsForDay = tickets.filter(ticket => new Date(ticket.deadline).getDate() === i);
-        if (ticketsForDay.length > 0) {
+        if (ticketsForDay.length > 0) { // Create colored dot with number of tickets
             const ticketDot = document.createElement('div');
             ticketDot.className = 'ticket-dot';
             ticketDot.innerText = ticketsForDay.length;
             const highestPriority = Math.max(...ticketsForDay.map(ticket => ticket.priority));
             if (highestPriority === 1) {
                 ticketDot.style.backgroundColor = 'yellow';
+                ticketDot.style.color = 'black';
             } else if (highestPriority === 2) {
                 ticketDot.style.backgroundColor = 'orange';
             } else if (highestPriority === 3) {
