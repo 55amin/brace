@@ -29,84 +29,23 @@
             </div>
         </div>
     </div>
-
+    <div id="error-container" class="error-container"></div>
     <div class="toggle-container">
+        <p id="month-year"></p>
         <label class="switch">
             <input title="Switch schedule view" type="checkbox" id="viewToggle">
             <span class="slider round"></span>
         </label>
-        <span>Switch schedule view</span>
+        <p>Switch schedule view</p>
     </div>
     <div class="calendar-container" id="calendarContainer">
         <div id="calendar"></div>
     </div>
     <div class="dropdown-container" id="dropdownContainer">
-        <select title="ticket-dropdown" id="ticketDropdown">
-            <option value="">Select a ticket</option>
+        <select title="dropdown" id="dropdown-menu">
+            <option disabled selected value="">Select a ticket</option>
         </select>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const calendar = document.getElementById('calendar');
-            const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-            const daysInMonth = 30; 
-
-            daysOfWeek.forEach(day => {
-                const dayHeader = document.createElement('div');
-                dayHeader.className = 'calendar-day calendar-day-header';
-                dayHeader.innerText = day;
-                calendar.appendChild(dayHeader);
-            });
-
-            const tickets = [
-                { day: 5, text: 'T-20241205-009' },
-                { day: 9, text: 'T-20241209-005' },
-                { day: 10, text: 'T-20241210-033' },
-                { day: 15, text: 'T-20241215-012' },
-                { day: 18, text: 'T-20241218-004' },
-                { day: 23, text: 'T-20241223-027' }
-            ];
-
-            for (let i = 1; i <= daysInMonth; i++) {
-                const day = document.createElement('div');
-                day.className = 'calendar-day';
-                day.innerText = i;
-
-                tickets.forEach(ticket => {
-                    if (ticket.day === i) {
-                        const ticketElement = document.createElement('div');
-                        ticketElement.className = 'ticket';
-                        ticketElement.innerText = ticket.text;
-                        day.appendChild(ticketElement);
-                    }
-                });
-                calendar.appendChild(day);
-            }
-
-            const ticketDropdown = document.getElementById('ticketDropdown');
-            tickets.forEach(ticket => {
-                const option = document.createElement('option');
-                option.value = ticket.text;
-                option.innerText = `Day ${ticket.day}: ${ticket.text}`;
-                ticketDropdown.appendChild(option);
-            });
-
-            const viewToggle = document.getElementById('viewToggle');
-            const calendarContainer = document.getElementById('calendarContainer');
-            const dropdownContainer = document.getElementById('dropdownContainer');
-
-            viewToggle.addEventListener('change', function() {
-                if (this.checked) {
-                    calendarContainer.style.display = 'none';
-                    dropdownContainer.style.display = 'block';
-                } else {
-                    calendarContainer.style.display = 'block';
-                    dropdownContainer.style.display = 'none';
-                }
-            });
-        });
-    </script>
-<script src="../js/adminscreen.js"></script>
+    <script type="module" src="../js/adminscreen.js"></script>
 </body>
 </html>
