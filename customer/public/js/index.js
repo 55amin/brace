@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ username, email }),
             });
             const result = await response.json();
+            
             if (result.success) { // Redirect customer to ticket creation page
                 window.location.href = 'ticketcreation.html';
             } else if (result.error === 'Customer already has ticket open') {

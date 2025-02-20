@@ -24,9 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify(ticketData),
             });
-
             const result = await response.json();
-
+            
             if (result.success) { // Redirect customer to chat page
                 window.location.replace('chat.html');
             } else {

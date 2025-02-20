@@ -214,8 +214,6 @@ app.listen(PORT, async () => {
             if (row.priority > 1) { // Set correct priority for in-memory ticket based on priority of ticket in database 
                 ticket.setPriority(row.priority);
             }
-
-
             const customer = customers.find(customer => customer.customerID === row.customer_id);
             if (customer) {
                 customer.addTicket(ticket);
