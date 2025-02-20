@@ -11,6 +11,7 @@ class Agent {
         this.availability = 'Offline';
         this.workload = 0;
         this.tasks = [];
+        this.ticket = null;
     }
 
     setAgentID(agentID) {
@@ -64,6 +65,14 @@ class Agent {
         if (index > -1) {
             this.tasks.splice(index, 1);
         }
+    }
+
+    assignTicket(ticket) {
+        this.ticket = ticket;
+    }
+
+    completeTicket(ticket) {
+        this.ticket = null;
     }
 }
 

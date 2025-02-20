@@ -1,4 +1,5 @@
 const baseUrl = window.location.origin;
+import { showError } from '../helpers/showError.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const calendar = document.getElementById('calendar');
@@ -29,15 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
         emptySlot.className = 'day empty';
         calendar.appendChild(emptySlot);
     }
-
-    const tickets = [
-        { day: 5, text: 'T-20241205-009' },
-        { day: 9, text: 'T-20241209-005' },
-        { day: 10, text: 'T-20241210-033' },
-        { day: 15, text: 'T-20241215-012' },
-        { day: 18, text: 'T-20241218-004' },
-        { day: 23, text: 'T-20241223-027' }
-    ];
 
     for (let i = 1; i <= daysInMonth; i++) { // Create days in calendar
         const day = document.createElement('div');

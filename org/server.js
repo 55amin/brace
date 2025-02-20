@@ -357,6 +357,44 @@ app.post('/api/get-tasks', async (req, res) => {
     }
 });
 
+// Return all tickets and relevant information about the associated customers
+app.post('/api/get-tickets', async (req, res) => {
+    const ticketArr = [];
+    const user = req.session.user;
+
+    try {
+        tickets.forEach(ticket => { 
+            if (user && user.agentID) { // If requestor is an agent, check access level
+                const agent = agents.find(agent => agent.agentID === user.agentID);
+                if ((agent && agent.accessLevel === 1) && ticket.triage === true) {
+                    return; // Level 1 agents cannot view triaged tickets
+                }
+            }
+
+            const customer = customers.find(customer => customer.customerID === ticket.creator);
+            if (customer) {
+                ticketArr.push({
+                    ticketID: ticket.ticketID,
+                    status: ticket.status,
+                    title: ticket.title,
+                    desc: ticket.desc,
+                    type: ticket.type,
+                    deadline: ticket.deadline,
+                    creationDate: ticket.creationDate,
+                    priority: ticket.priority,
+                    triage: ticket.triage,
+                    customerID: customer.customerID,
+                    customerUsername: customer.username,
+                    customerEmail: customer.email
+                });
+            }
+        });
+        res.status(200).json({ ticketArr });
+    } catch {
+        res.status(500).json({ error: 'Failed to fetch tickets' });
+    }
+});
+
 
 // Delete user from database and memory
 app.post('/api/delete-user', async (req, res) => {
