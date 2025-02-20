@@ -1,9 +1,10 @@
 const baseUrl = window.location.origin;
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     const calendar = document.getElementById('calendar');
     const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const currentDate = new Date();
+    const currentDay = currentDate.getDate();
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -13,8 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
-    const monthYear = document.createElement('div');
-    monthYear.className = 'month-year';
+    const monthYear = document.getElementById('month-year');
     monthYear.innerText = `${monthNames[currentMonth]} ${currentYear}`;
     calendar.appendChild(monthYear);
 
@@ -44,6 +44,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const day = document.createElement('div');
         day.className = 'day';
         day.innerText = i;
+        if (i === currentDay) { // Highlight current day
+            day.classList.add('current-day');
+        }
 
         tickets.forEach(ticket => {
             if (ticket.day === i) {
@@ -57,19 +60,19 @@ document.addEventListener('DOMContentLoaded', function() {
         calendar.appendChild(day);
     }
 
-    const ticketDropdown = document.getElementById('ticketDropdown');
+    const dropdownMenu = document.getElementById('dropdown-menu');
     tickets.forEach(ticket => {
         const option = document.createElement('option');
         option.value = ticket.text;
         option.innerText = `Day ${ticket.day}: ${ticket.text}`;
-        ticketDropdown.appendChild(option);
+        dropdownMenu.appendChild(option);
     });
 
     const viewToggle = document.getElementById('viewToggle');
     const calendarContainer = document.getElementById('calendarContainer');
     const dropdownContainer = document.getElementById('dropdownContainer');
 
-    viewToggle.addEventListener('change', function() {
+    viewToggle.addEventListener('change', () => {
         if (this.checked) {
             calendarContainer.style.display = 'none';
             dropdownContainer.style.display = 'block';
