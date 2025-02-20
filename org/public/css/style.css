@@ -279,24 +279,31 @@ input[type="time"] {
   margin-bottom: 5px;
 }
 
-.ticket {
-  background-color: #a9f5ff;
-  border: 3px solid #452fd0;
-  border-radius: 10px;
-  padding: 5px;
-  margin-top: 5px;
-  font-size: 12px;
-  color: black;
+.task-dot {
+  background-color: rgb(0, 157, 0);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 5px;
+  right: 5px;
 }
 
-.task {
-  background-color: #a9f5ff;
-  border: 3px solid #452fd0;
-  border-radius: 10px;
-  padding: 5px;
-  margin-top: 5px;
-  font-size: 12px;
-  color: black;
+.ticket-dot {
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 5px;
+  left: 5px;
 }
 
 .toggle-container {

@@ -1,7 +1,32 @@
 const baseUrl = window.location.origin;
 import { showError } from '../helpers/showError.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    let tasks = [];
+    let tickets = [];
+    try { // Fetch tasks and tickets from in-memory arrays
+        const tasksResponse = await fetch(`${baseUrl}/api/get-tasks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        const tasksResult = await tasksResponse.json();
+        tasks = tasksResult.taskArr;
+
+        const ticketsResponse = await fetch(`${baseUrl}/api/get-tickets`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        const ticketsResult = await ticketsResponse.json();
+        tickets = ticketsResult.ticketArr;
+    } catch (error) {
+        showError('Failed to fetch tasks and/or tickets');
+        console.error('Error fetching tasks and/or tickets:', error);
+    }
+
     const calendar = document.getElementById('calendar');
     const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const currentDate = new Date();
@@ -39,14 +64,30 @@ document.addEventListener('DOMContentLoaded', () => {
             day.classList.add('current-day');
         }
 
-        tickets.forEach(ticket => {
-            if (ticket.day === i) {
-                const ticketElement = document.createElement('div');
-                ticketElement.className = 'ticket';
-                ticketElement.innerText = ticket.text;
-                day.appendChild(ticketElement);
+        const tasksForDay = tasks.filter(task => new Date(task.deadline).getDate() === i);
+        if (tasksForDay.length > 0) {
+            const taskDot = document.createElement('div');
+            taskDot.className = 'task-dot';
+            taskDot.innerText = tasksForDay.length;
+            day.appendChild(taskDot);
+        }
+
+        const ticketsForDay = tickets.filter(ticket => new Date(ticket.deadline).getDate() === i);
+        if (ticketsForDay.length > 0) {
+            const ticketDot = document.createElement('div');
+            ticketDot.className = 'ticket-dot';
+            ticketDot.innerText = ticketsForDay.length;
+            const highestPriority = Math.max(...ticketsForDay.map(ticket => ticket.priority));
+            if (highestPriority === 1) {
+                ticketDot.style.backgroundColor = 'yellow';
+            } else if (highestPriority === 2) {
+                ticketDot.style.backgroundColor = 'orange';
+            } else if (highestPriority === 3) {
+                ticketDot.style.backgroundColor = 'red';
             }
-        });
+            day.appendChild(ticketDot);
+        }
+
         calendar.appendChild(day);
     }
 
