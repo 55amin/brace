@@ -310,6 +310,7 @@ input[type="time"] {
   display: inline-block;
   width: 60px;
   height: 34px;
+  margin-left: 10px;
   margin-right: 10px;
 }
 
@@ -356,7 +357,7 @@ input:checked + .slider:before {
   display: none;
 }
 
-#ticketDropdown {
+#dropdown-menu {
   width: 100%;
 }
 

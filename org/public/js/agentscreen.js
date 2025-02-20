@@ -2,7 +2,7 @@ const baseUrl = window.location.origin;
 
 document.addEventListener('DOMContentLoaded', () => {
     const calendar = document.getElementById('calendar');
-    const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const currentDate = new Date();
     const currentDay = currentDate.getDate();
     const currentMonth = currentDate.getMonth();
@@ -55,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 day.appendChild(ticketElement);
             }
         });
-
         calendar.appendChild(day);
     }
 
@@ -71,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const calendarContainer = document.getElementById('calendarContainer');
     const dropdownContainer = document.getElementById('dropdownContainer');
 
-    viewToggle.addEventListener('change', (event) => {
+    viewToggle.addEventListener('change', (event) => { // Display different view based on toggle
         if (event.target.checked) {
             calendarContainer.style.display = 'none';
             dropdownContainer.style.display = 'block';
