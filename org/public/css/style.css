@@ -270,9 +270,8 @@ input[type="time"] {
 }
 
 .current-day {
-  background-color: #background-color: #0063a0;
-  border: 3px solid #452fd0;;
-  border: 3px solid #1b00c8;
+  background-color: #0528be;
+  border: 3px solid #2200ff;
 }
 
 .day-header {

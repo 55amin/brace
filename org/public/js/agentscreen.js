@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
     const monthYear = document.getElementById('month-year');
     monthYear.innerText = `${monthNames[currentMonth]} ${currentYear}`;
-    calendar.appendChild(monthYear);
 
     daysOfWeek.forEach(day => {  // Create headings for days
         const dayHeader = document.createElement('div');
@@ -72,8 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const calendarContainer = document.getElementById('calendarContainer');
     const dropdownContainer = document.getElementById('dropdownContainer');
 
-    viewToggle.addEventListener('change', () => {
-        if (this.checked) {
+    viewToggle.addEventListener('change', (event) => {
+        if (event.target.checked) {
             calendarContainer.style.display = 'none';
             dropdownContainer.style.display = 'block';
         } else {
