@@ -199,8 +199,10 @@ app.listen(PORT, async () => {
         }
 
         for (const row of ticketRows) {
-            if ((new Date(row.created_at) < weekAgo) && row.status === 'Completed') { // Delete ticket from database
-                await pool.promise().query('DELETE FROM tickets WHERE ticket_id = ?', [row.ticket_id]);
+            if (row.status === 'Completed') {
+                if (new Date(row.created_at) < weekAgo) { // Delete ticket from database
+                    await pool.promise().query('DELETE FROM tickets WHERE ticket_id = ?', [row.ticket_id]);
+                }
                 continue; // Skip adding ticket to in-memory array
             }
 
