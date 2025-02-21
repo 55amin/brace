@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             day.appendChild(taskDot);
         }
 
-        const ticketsForDay = tickets.filter(ticket => new Date(ticket.deadline).getDate() === i);
+        const ticketsForDay = tickets.filter(ticket => new Date(ticket.creationDate).getDate() === i);
         if (ticketsForDay.length > 0) { // Create colored dot with number of tickets
             const ticketDot = document.createElement('div');
             ticketDot.className = 'ticket-dot';
