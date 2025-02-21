@@ -94,6 +94,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             expansionContainer.innerHTML = '';
 
             tasksForDay.forEach(task => { // Display expanded details for each task due on day
+                const taskCreation = new Date(task.creationDate).toLocaleString();
+                const taskDeadline = new Date(task.deadline).toLocaleString();
                 const taskBox = document.createElement('div');
                 taskBox.className = 'task-box';
                 taskBox.innerHTML = `
@@ -101,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p>Status: ${task.status}</p>
                     <p>Title: ${task.title}</p>
                     <p>Description: ${task.desc}</p>
-                    <p>Creation date: ${task.creationDate} || Deadline: ${task.deadline}</p>
+                    <p>Creation date: ${taskCreation} || Deadline: ${taskDeadline}</p>
                     <p>Creator: ${task.creator}</p>
                     <button class="complete-task">Complete task</button>
                 `;
@@ -109,6 +111,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             ticketsForDay.forEach(ticket => { // Display expanded details for each ticket created on day
+                const ticketCreation = new Date(ticket.creationDate).toLocaleString();
+                const ticketDeadline = new Date(ticket.deadline).toLocaleString();
                 if (ticket.triage) {
                     ticket.triage = 'Yes';
                 } else {
@@ -124,9 +128,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p>Description: ${ticket.desc}</p>
                     <p>Type: ${ticket.type}</p>
                     <p>Priority: ${ticket.priority}</p>
-                    <p>Creation date: ${ticket.creationDate} || Deadline: ${ticket.deadline}</p>
-                    <p>Customer ID: ${ticket.creatorID} || Customer username: ${ticket.creatorUsername}</p>
-                    <p>Customer email address: ${ticket.creatorEmail}</p>
+                    <p>Creation date: ${ticketCreation} || Deadline: ${ticketDeadline}</p>
+                    <p>Customer ID: ${ticket.customerID} || Customer username: ${ticket.customerUsername}</p>
+                    <p>Customer email address: ${ticket.customerEmail}</p>
                     <button class="self-assign">Self-assign ticket</button>
                 `; 
 
