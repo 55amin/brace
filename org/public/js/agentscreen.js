@@ -89,6 +89,58 @@ document.addEventListener('DOMContentLoaded', async () => {
             day.appendChild(ticketDot);
         }
 
+        day.addEventListener('click', () => {
+            const expansionContainer = document.getElementById('expansionContainer');
+            expansionContainer.innerHTML = '';
+
+            tasksForDay.forEach(task => { // Display expanded details for each task due on day
+                const taskBox = document.createElement('div');
+                taskBox.className = 'task-box';
+                taskBox.innerHTML = `
+                    <p>Task ID: ${task.taskID}</p>
+                    <p>Status: ${task.status}</p>
+                    <p>Title: ${task.title}</p>
+                    <p>Description: ${task.desc}</p>
+                    <p>Creation date: ${task.creationDate} || Deadline: ${task.deadline}</p>
+                    <p>Creator: ${task.creator}</p>
+                    <button class="complete-task">Complete task</button>
+                `;
+                expansionContainer.appendChild(taskBox);
+            });
+
+            ticketsForDay.forEach(ticket => { // Display expanded details for each ticket created on day
+                if (ticket.triage) {
+                    ticket.triage = 'Yes';
+                } else {
+                    ticket.triage = 'No';
+                }
+
+                const ticketBox = document.createElement('div');
+                ticketBox.className = 'ticket-box';
+                ticketBox.innerHTML = `
+                    <p>Ticket ID: ${ticket.ticketID}</p>
+                    <p>Status: ${ticket.status} || Triaged: ${ticket.triage}</p>
+                    <p>Title: ${ticket.title}</p>
+                    <p>Description: ${ticket.desc}</p>
+                    <p>Type: ${ticket.type}</p>
+                    <p>Priority: ${ticket.priority}</p>
+                    <p>Creation date: ${ticket.creationDate} || Deadline: ${ticket.deadline}</p>
+                    <p>Customer ID: ${ticket.creatorID} || Customer username: ${ticket.creatorUsername}</p>
+                    <p>Customer email address: ${ticket.creatorEmail}</p>
+                    <button class="self-assign">Self-assign ticket</button>
+                `; 
+
+                const selfAssign = ticketBox.querySelector('.self-assign');
+                // Prevent assigned tickets from being reassigned or taken by assigned user
+                if (ticket.status === 'In progress') {
+                    selfAssign.disabled = true;
+                    selfAssign.style.backgroundColor = '#3b505e';
+                }
+
+                expansionContainer.appendChild(ticketBox);
+            });
+        });
+
         calendar.appendChild(day);
     }
 
