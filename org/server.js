@@ -395,6 +395,40 @@ app.post('/api/get-tickets', async (req, res) => {
     }
 });
 
+// Check if a user is assigned to a ticket
+app.post('/api/check-assign', async (req, res) => {
+    const user = req.session.user;
+    const assignedTickets = [];
+
+    if (user && user.agentID) {
+        try {
+            tickets.forEach(ticket => {
+                if (ticket.assignedTo.includes(user.agentID)) {
+                    assignedTickets.push(ticket);
+                }
+            });
+            res.status(200).json({ userTickets: assignedTickets });
+        } catch (error) {
+            console.error('Error checking assigned tickets:', error);
+            res.status(500).json({ error: 'Failed to check assigned tickets' });
+        }
+    } else if (user && user.adminID) {
+        try {
+            tickets.forEach(ticket => {
+                if (ticket.assignedTo.includes(user.adminID)) {
+                    assignedTickets.push(ticket);
+                }
+            });
+            res.status(200).json({ userTickets: assignedTickets });
+        } catch (error) {
+            console.error('Error checking assigned tickets:', error);
+            res.status(500).json({ error: 'Failed to check assigned tickets' });
+        }
+    } else {
+        res.status(400).json({ error: 'User unauthenticated or unauthorised' });
+    }
+});
+
 
 // Delete user from database and memory
 app.post('/api/delete-user', async (req, res) => {

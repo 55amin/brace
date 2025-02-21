@@ -22,6 +22,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         const ticketsResult = await ticketsResponse.json();
         tickets = ticketsResult.ticketArr;
+
+        const userTicketsResponse = await fetch(`${baseUrl}/api/check-assign`, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }); // Check if user already assigned to ticket
+        const userTicketsResult = await userTicketsResponse.json();
+        userTickets = userTicketsResult.userTickets;
     } catch (error) {
         showError('Failed to fetch tasks and/or tickets');
         console.error('Error fetching tasks and/or tickets:', error);
@@ -136,7 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const selfAssign = ticketBox.querySelector('.self-assign');
                 // Prevent assigned tickets from being reassigned or taken by assigned user
-                if (ticket.status === 'In progress') {
+                if (ticket.status === 'In progress' || userTickets.length > 0) {
                     selfAssign.disabled = true;
                     selfAssign.style.backgroundColor = '#3b505e';
                 }
