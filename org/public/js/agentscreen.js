@@ -15,16 +15,37 @@ async function checkAssign() {
     userTickets = userTicketsResult.userTickets;
 }
 
+async function completeTask(taskID) {
+    try {
+        const response = await fetch(`${baseUrl}/api/complete-task`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ taskId: taskID })
+        });
+        const result = await response.json();
+        if (result.success) {
+            window.location.reload();
+        } else {
+            showError('Failed to complete task');
+        }
+    } catch (error) {
+        showError('Failed to complete task');
+        console.error('Error completing task:', error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     try { // Fetch tasks and tickets from in-memory arrays
-        const tasksResponse = await fetch(`${baseUrl}/api/get-tasks`, {
+        const tasksResponse = await fetch(`${baseUrl}/api/get-user-tasks`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             }
         });
         const tasksResult = await tasksResponse.json();
-        tasks = tasksResult.taskArr;
+        tasks = tasksResult.userTasks;
 
         const ticketsResponse = await fetch(`${baseUrl}/api/get-tickets`, {
             method: 'POST',
@@ -80,6 +101,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const tasksForDay = tasks.filter(task => new Date(task.deadline).getDate() === i);
         if (tasksForDay.length > 0) { // Create colored dot with number of tasks
+            for (const task of tasksForDay) {
+                if (task.status === 'Completed') { // Remove completed tasks from array
+                    tasksForDay.splice(tasksForDay.indexOf(task), 1);
+                }
+            }
+
             const taskDot = document.createElement('div');
             taskDot.className = 'task-dot';
             taskDot.innerText = tasksForDay.length;
@@ -88,6 +115,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const ticketsForDay = tickets.filter(ticket => new Date(ticket.creationDate).getDate() === i);
         if (ticketsForDay.length > 0) { // Create colored dot with number of tickets
+            for (const ticket of ticketsForDay) {
+                if (ticket.status === 'Completed') { // Remove completed tickets from array
+                    ticketsForDay.splice(ticketsForDay.indexOf(ticket), 1);
+                }
+            }
+
             const ticketDot = document.createElement('div');
             ticketDot.className = 'ticket-dot';
             ticketDot.innerText = ticketsForDay.length;
@@ -119,20 +152,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p>Description: ${task.desc}</p>
                     <p>Creation date: ${taskCreation} || Deadline: ${taskDeadline}</p>
                     <p>Creator: ${task.creator}</p>
-                    <button class="complete-task">Complete task</button>
+                    <button class="complete-task" id="complete-${task.taskID}">Complete task</button>
                 `;
                 expansionContainer.appendChild(taskBox);
+
+                const completeTaskBtn = document.getElementById(`complete-${task.taskID}`);
+                completeTaskBtn.addEventListener('click', async () => {
+                    await completeTask(task.taskID);
+                });
             });
 
             ticketsForDay.forEach(ticket => { // Display expanded details for each ticket created on day
-                const ticketCreation = new Date(ticket.creationDate).toLocaleString();
-                const ticketDeadline = new Date(ticket.deadline).toLocaleString();
                 if (ticket.triage) {
                     ticket.triage = 'Yes';
                 } else {
                     ticket.triage = 'No';
                 }
 
+                const ticketCreation = new Date(ticket.creationDate).toLocaleString();
+                const ticketDeadline = new Date(ticket.deadline).toLocaleString();
                 const ticketBox = document.createElement('div');
                 ticketBox.className = 'ticket-box';
                 ticketBox.innerHTML = `
@@ -162,6 +200,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const dropdownMenu = document.getElementById('dropdown-menu');
     tasks.forEach(task => { // Add tasks to dropdown menu
+        if (task.status === 'Completed') { // Skip completed tasks
+            return;
+        }
+
         const option = document.createElement('option');
         option.value = `Task ${task.taskID}`;
         option.innerText = `Task ${task.taskID}: ${task.title}`;
@@ -171,6 +213,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     tickets.forEach(ticket => { // Add tickets to dropdown menu
+        if (ticket.status === 'Completed') { // Skip completed tickets
+            return;
+        }
+
         const option = document.createElement('option');
         option.value = `Ticket ${ticket.ticketID}`;
         option.innerText = `Ticket ${ticket.ticketID}: ${ticket.title}`;
@@ -210,6 +256,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <button class="complete-task">Complete task</button>
                 `;
                 expansionContainer.appendChild(taskBox);
+
+                const completeTaskBtn = taskBox.querySelector('.complete-task');
+                completeTaskBtn.addEventListener('click', async () => {
+                    await completeTask(task.taskID);
+                });
             }
         } else if (type === 'Ticket') {
             const ticket = tickets.find(ticket => ticket.ticketID === Number(id));

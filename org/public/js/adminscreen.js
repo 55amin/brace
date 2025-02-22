@@ -70,6 +70,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const ticketsForDay = tickets.filter(ticket => new Date(ticket.creationDate).getDate() === i);
         if (ticketsForDay.length > 0) { // Create colored dot with number of tickets
+            for (const ticket of ticketsForDay) {
+                if (ticket.status === 'Completed') { // Remove completed tickets from array
+                    ticketsForDay.splice(ticketsForDay.indexOf(ticket), 1);
+                }
+            }
+
             const ticketDot = document.createElement('div');
             ticketDot.className = 'ticket-dot';
             ticketDot.innerText = ticketsForDay.length;
@@ -90,14 +96,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             expansionContainer.innerHTML = '';
 
             ticketsForDay.forEach(ticket => { // Display expanded details for each ticket created on day
-                const ticketCreation = new Date(ticket.creationDate).toLocaleString();
-                const ticketDeadline = new Date(ticket.deadline).toLocaleString();
                 if (ticket.triage) {
                     ticket.triage = 'Yes';
                 } else {
                     ticket.triage = 'No';
                 }
 
+                const ticketCreation = new Date(ticket.creationDate).toLocaleString();
+                const ticketDeadline = new Date(ticket.deadline).toLocaleString();
                 const ticketBox = document.createElement('div');
                 ticketBox.className = 'ticket-box';
                 ticketBox.innerHTML = `
@@ -127,6 +133,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const dropdownMenu = document.getElementById('dropdown-menu');
     tickets.forEach(ticket => { // Add tickets to dropdown menu
+        if (ticket.status === 'Completed') {
+            return;
+        }
+
         const option = document.createElement('option');
         option.value = `Ticket ${ticket.ticketID}`;
         option.innerText = `Ticket ${ticket.ticketID}: ${ticket.title}`;

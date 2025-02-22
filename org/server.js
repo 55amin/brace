@@ -357,6 +357,36 @@ app.post('/api/get-tasks', async (req, res) => {
     }
 });
 
+// Return a user's tasks
+app.post('/api/get-user-tasks', async (req, res) => {
+    const userTasks = [];
+    const agentID = req.session.user.agentID;
+    try {
+        const agent = agents.find(agent => agent.agentID === agentID);
+        if (agent) {
+            agent.tasks.forEach(taskID => {
+                const task = tasks.find(task => task.taskID === taskID);
+                if (task) {
+                    const creator = admins.find(admin => admin.adminID === task.creator);
+                    const creatorName = creator.forename + ' ' + creator.surname;
+                    userTasks.push({ // Return all relevant task details
+                        taskID: task.taskID,
+                        status: task.status,
+                        title: task.title,
+                        desc: task.desc,
+                        deadline: task.deadline,
+                        creationDate: task.creationDate,
+                        creator: creatorName
+                    });
+                }
+            });
+            res.status(200).json({ userTasks });
+        }
+    } catch {
+        res.status(500).json({ error: 'Failed to fetch user tasks' });
+    }
+});
+
 // Return all tickets and relevant information about the associated customers
 app.post('/api/get-tickets', async (req, res) => {
     const ticketArr = [];
@@ -427,7 +457,6 @@ app.post('/api/check-assign', async (req, res) => {
     }
 });
 
-
 // Delete user from database and memory
 app.post('/api/delete-user', async (req, res) => {
     const { role, userId } = req.body;
@@ -460,17 +489,18 @@ app.post('/api/delete-task', async (req, res) => {
     const { taskId } = req.body;
     try {
         const task = tasks.find(task => task.taskID === taskId);
-            if (task) {
-                task.splice(tasks.indexOf(task), 1);
-                await pool.promise().query('DELETE FROM tasks WHERE task_id = ?', [taskId]);
-            }
-        // Remove task from each assigned agent's tasks array
-        task.assignedTo.forEach(agentID => {
-            const agent = agents.find(agent => agent.agentID === agentID);
-            if (agent) {
-                agent.removeTask(task);
-            }
-        });
+        if (task) {
+            tasks.splice(tasks.indexOf(task), 1);
+            await pool.promise().query('DELETE FROM tasks WHERE task_id = ?', [taskId]);
+
+            task.assignedTo.forEach(async (agentID) => { // Remove task from each assigned agent's tasks array
+                const agent = agents.find(agent => agent.agentID === agentID);
+                if (agent) {
+                    agent.removeTask(task);
+                    await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
+                }
+            });
+        }
         res.status(200).json({ success: true, message: 'Task deleted successfully' });
     } catch (err) {
         console.error('Error deleting task:', err);
@@ -619,6 +649,65 @@ app.post('/api/create-agent', async (req, res) => {
             success: false, 
             errors: ['Failed to create agent account'] 
         });
+    }
+});
+
+// Create task
+app.post('/api/create-task', async (req, res) => {
+    const { title, desc, deadline, assignedTo } = req.body;
+    const validatedTitle = validateTitle(title);
+    const validatedDesc = validateDesc(desc);
+    const validatedDeadline = validateDeadline(deadline);
+    const errors = [];
+    const creationDate = new Date();
+    const creator = req.session.user.adminID;
+
+    if (!validatedTitle.isValid) errors.push(validatedTitle.error);
+    if (!validatedDesc.isValid) errors.push(validatedDesc.error);
+    if (!validatedDeadline.isValid) errors.push(validatedDeadline.error);
+    if (!assignedTo) errors.push('Task must be assigned to at least one agent')
+    if (errors.length > 0) {
+        return res.status(400).json({ success: false, errors });
+    }
+
+    try {
+        const query = 'INSERT INTO tasks (title, description, deadline, assigned_to, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?)';
+        const values = [
+            validatedTitle.value,
+            validatedDesc.value,
+            validatedDeadline.value,
+            JSON.stringify(assignedTo),
+            creationDate,
+            creator
+        ];
+        const [results] = await pool.promise().query(query, values);
+
+        const newTask = new Task( // Create new task instance and add taskID from database
+            validatedTitle.value,
+            validatedDesc.value,
+            creator,
+            validatedDeadline.value,
+            assignedTo,
+            creationDate
+        );
+        newTask.taskID = results.insertId;
+        tasks.push(newTask);
+
+        assignedTo.forEach(async (agentID) => { // Add task to each assigned agent
+            const agent = agents.find(agent => agent.agentID === agentID);
+            if (agent) {
+                agent.addTask(newTask);
+                const [agentRow] = await pool.promise().query('SELECT tasks FROM agents WHERE agent_id = ?', [agentID]);
+                const agentTasks = JSON.parse(agentRow[0].tasks || '[]'); // Ensure any existing tasks aren't overwritten
+                agentTasks.push(newTask.taskID);
+                await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agentTasks), agentID]);
+            }
+            
+        });
+        res.status(200).json({ success: true, task: newTask });
+    } catch (err) {
+        console.error('Error creating task:', err);
+        res.status(500).json({ success: false, errors: ['Failed to create task'] });
     }
 });
 
@@ -1080,89 +1169,25 @@ app.post('/api/update-assign', async (req, res) => {
     }
 });
 
-// Delete task
-app.post('/api/delete-task', async (req, res) => {
+// Complete task
+app.post('/api/complete-task', async (req, res) => {
     const { taskId } = req.body;
+    const agentId = req.session.user.agentID;
     try {
         const task = tasks.find(task => task.taskID === taskId);
-        if (task) {
-            tasks.splice(tasks.indexOf(task), 1);
-            await pool.promise().query('DELETE FROM tasks WHERE task_id = ?', [taskId]);
-
-            task.assignedTo.forEach(async (agentID) => { // Remove task from each assigned agent's tasks array
-                const agent = agents.find(agent => agent.agentID === agentID);
-                if (agent) {
-                    agent.removeTask(task);
-                    const [agentRow] = await pool.promise().query('SELECT tasks FROM agents WHERE agent_id = ?', [agentID]);
-                    const agentTasks = JSON.parse(agentRow[0].tasks || '[]');
-                    const updatedTasks = agentTasks.filter(id => id !== taskId);
-                    await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(updatedTasks), agentID]);
-                }
-            });
+        if (task) { // Update task status in memory and database
+            task.setStatus('Completed');
+            await pool.promise().query('UPDATE tasks SET status = ? WHERE task_id = ?', ['Completed', taskId]);
         }
-        res.status(200).json({ success: true, message: 'Task deleted successfully' });
+        const agent = agents.find(agent => agent.agentID === agentId);
+        if (task.assignedTo.includes(agentId)) { // Remove task from agent's tasks array
+            agent.removeTask(task);
+            await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentId]);
+        }
+        res.status(200).json({ success: true, message: 'Task completed successfully' });
     } catch (err) {
-        console.error('Error deleting task:', err);
-        res.status(500).json({ success: false, message: 'Failed to delete task' });
-    }
-});
-
-// Create task
-app.post('/api/create-task', async (req, res) => {
-    const { title, desc, deadline, assignedTo } = req.body;
-    const validatedTitle = validateTitle(title);
-    const validatedDesc = validateDesc(desc);
-    const validatedDeadline = validateDeadline(deadline);
-    const errors = [];
-    const creationDate = new Date();
-    const creator = req.session.user.adminID;
-
-    if (!validatedTitle.isValid) errors.push(validatedTitle.error);
-    if (!validatedDesc.isValid) errors.push(validatedDesc.error);
-    if (!validatedDeadline.isValid) errors.push(validatedDeadline.error);
-    if (!assignedTo) errors.push('Task must be assigned to at least one agent')
-    if (errors.length > 0) {
-        return res.status(400).json({ success: false, errors });
-    }
-
-    try {
-        const query = 'INSERT INTO tasks (title, description, deadline, assigned_to, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?)';
-        const values = [
-            validatedTitle.value,
-            validatedDesc.value,
-            validatedDeadline.value,
-            JSON.stringify(assignedTo),
-            creationDate,
-            creator
-        ];
-        const [results] = await pool.promise().query(query, values);
-
-        const newTask = new Task( // Create new task instance and add taskID from database
-            validatedTitle.value,
-            validatedDesc.value,
-            creator,
-            validatedDeadline.value,
-            assignedTo,
-            creationDate
-        );
-        newTask.taskID = results.insertId;
-        tasks.push(newTask);
-
-        assignedTo.forEach(async (agentID) => { // Add task to each assigned agent
-            const agent = agents.find(agent => agent.agentID === agentID);
-            if (agent) {
-                agent.addTask(newTask);
-                const [agentRow] = await pool.promise().query('SELECT tasks FROM agents WHERE agent_id = ?', [agentID]);
-                const agentTasks = JSON.parse(agentRow[0].tasks || '[]'); // Ensure any existing tasks aren't overwritten
-                agentTasks.push(newTask.taskID);
-                await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agentTasks), agentID]);
-            }
-            
-        });
-        res.status(200).json({ success: true, task: newTask });
-    } catch (err) {
-        console.error('Error creating task:', err);
-        res.status(500).json({ success: false, errors: ['Failed to create task'] });
+        console.error('Error completing task:', err);
+        res.status(500).json({ success: false, message: 'Failed to complete task' });
     }
 });
 
