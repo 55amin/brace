@@ -154,18 +154,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     selfAssign.disabled = true;
                     selfAssign.style.backgroundColor = '#3b505e';
                 }
-
                 expansionContainer.appendChild(ticketBox);
             });
         });
-
         calendar.appendChild(day);
     }
 
     const dropdownMenu = document.getElementById('dropdown-menu');
     tasks.forEach(task => { // Add tasks to dropdown menu
         const option = document.createElement('option');
-        option.value = `Task ${task.taskID}: ${task.title}`;
+        option.value = `Task ${task.taskID}`;
         option.innerText = `Task ${task.taskID}: ${task.title}`;
         option.style.backgroundColor = '#009d00';
         option.style.color = 'black';
@@ -174,7 +172,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     tickets.forEach(ticket => { // Add tickets to dropdown menu
         const option = document.createElement('option');
-        option.value = `Ticket ${ticket.ticketID}: ${ticket.title}`;
+        option.value = `Ticket ${ticket.ticketID}`;
         option.innerText = `Ticket ${ticket.ticketID}: ${ticket.title}`;
         if (ticket.priority === 1) {
             option.style.backgroundColor = 'yellow';
@@ -187,6 +185,67 @@ document.addEventListener('DOMContentLoaded', async () => {
             option.style.color = 'black';
         }
         dropdownMenu.appendChild(option);
+    });
+
+    dropdownMenu.addEventListener('change', (event) => {
+        const selectedValue = event.target.value;
+        const expansionContainer = document.getElementById('expansionContainer');
+        expansionContainer.innerHTML = '';
+        const [type, id] = selectedValue.split(' ');
+
+        if (type === 'Task') {
+            const task = tasks.find(task => task.taskID === Number(id));
+            if (task) {
+                const taskCreation = new Date(task.creationDate).toLocaleString();
+                const taskDeadline = new Date(task.deadline).toLocaleString();
+                const taskBox = document.createElement('div');
+                taskBox.className = 'task-box';
+                taskBox.innerHTML = `
+                    <p>Task ID: ${task.taskID}</p>
+                    <p>Status: ${task.status}</p>
+                    <p>Title: ${task.title}</p>
+                    <p>Description: ${task.desc}</p>
+                    <p>Creation date: ${taskCreation} || Deadline: ${taskDeadline}</p>
+                    <p>Creator: ${task.creator}</p>
+                    <button class="complete-task">Complete task</button>
+                `;
+                expansionContainer.appendChild(taskBox);
+            }
+        } else if (type === 'Ticket') {
+            const ticket = tickets.find(ticket => ticket.ticketID === Number(id));
+            if (ticket) {
+                const ticketCreation = new Date(ticket.creationDate).toLocaleString();
+                const ticketDeadline = new Date(ticket.deadline).toLocaleString();
+                if (ticket.triage) {
+                    ticket.triage = 'Yes';
+                } else {
+                    ticket.triage = 'No';
+                }
+
+                const ticketBox = document.createElement('div');
+                ticketBox.className = 'ticket-box';
+                ticketBox.innerHTML = `
+                    <p>Ticket ID: ${ticket.ticketID}</p>
+                    <p>Status: ${ticket.status} || Triaged: ${ticket.triage}</p>
+                    <p>Title: ${ticket.title}</p>
+                    <p>Description: ${ticket.desc}</p>
+                    <p>Type: ${ticket.type}</p>
+                    <p>Priority: ${ticket.priority}</p>
+                    <p>Creation date: ${ticketCreation} || Deadline: ${ticketDeadline}</p>
+                    <p>Customer ID: ${ticket.customerID} || Customer username: ${ticket.customerUsername}</p>
+                    <p>Customer email address: ${ticket.customerEmail}</p>
+                    <button class="self-assign">Self-assign ticket</button>
+                `;
+
+                const selfAssign = ticketBox.querySelector('.self-assign');
+                // Prevent assigned tickets from being reassigned or taken by assigned user
+                if (ticket.status === 'In progress' || userTickets.length > 0) {
+                    selfAssign.disabled = true;
+                    selfAssign.style.backgroundColor = '#3b505e';
+                }
+                expansionContainer.appendChild(ticketBox);
+            }
+        }
     });
 
     const viewToggle = document.getElementById('viewToggle');
