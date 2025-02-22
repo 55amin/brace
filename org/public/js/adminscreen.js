@@ -12,6 +12,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         const ticketsResult = await ticketsResponse.json();
         tickets = ticketsResult.ticketArr;
+
+        const userTicketsResponse = await fetch(`${baseUrl}/api/check-assign`, { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }); // Check if user already assigned to ticket
+        const userTicketsResult = await userTicketsResponse.json();
+        userTickets = userTicketsResult.userTickets;
     } catch (error) {
         showError('Failed to fetch tickets');
         console.error('Error fetching tickets:', error);
@@ -26,14 +35,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
 
-    const monthNames = [ // Create month and year heading
+    const monthNames = [ 
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
     const monthYear = document.getElementById('month-year');
     monthYear.innerText = `${monthNames[currentMonth]} ${currentYear}`;
 
-    daysOfWeek.forEach(day => {  // Create headings for days
+    daysOfWeek.forEach(day => {  
         const dayHeader = document.createElement('div');
         dayHeader.className = 'day day-header';
         dayHeader.innerText = day;
@@ -46,7 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         calendar.appendChild(emptySlot);
     }
 
-    for (let i = 1; i <= daysInMonth; i++) { // Create days in calendar
+    for (let i = 1; i <= daysInMonth; i++) { 
         const day = document.createElement('div');
         day.className = 'day';
         day.innerText = i;
@@ -70,6 +79,45 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             day.appendChild(ticketDot);
         }
+
+        day.addEventListener('click', () => {
+            const expansionContainer = document.getElementById('expansionContainer');
+            expansionContainer.innerHTML = '';
+            
+            ticketsForDay.forEach(ticket => { // Display expanded details for each ticket created on day
+                const ticketCreation = new Date(ticket.creationDate).toLocaleString();
+                const ticketDeadline = new Date(ticket.deadline).toLocaleString();
+                if (ticket.triage) {
+                    ticket.triage = 'Yes';
+                } else {
+                    ticket.triage = 'No';
+                }
+
+                const ticketBox = document.createElement('div');
+                ticketBox.className = 'ticket-box';
+                ticketBox.innerHTML = `
+                    <p>Ticket ID: ${ticket.ticketID}</p>
+                    <p>Status: ${ticket.status} || Triaged: ${ticket.triage}</p>
+                    <p>Title: ${ticket.title}</p>
+                    <p>Description: ${ticket.desc}</p>
+                    <p>Type: ${ticket.type}</p>
+                    <p>Priority: ${ticket.priority}</p>
+                    <p>Creation date: ${ticketCreation} || Deadline: ${ticketDeadline}</p>
+                    <p>Customer ID: ${ticket.customerID} || Customer username: ${ticket.customerUsername}</p>
+                    <p>Customer email address: ${ticket.customerEmail}</p>
+                    <button class="self-assign">Self-assign ticket</button>
+                `; 
+
+                const selfAssign = ticketBox.querySelector('.self-assign');
+                // Prevent assigned tickets from being reassigned or taken by assigned user
+                if (ticket.status === 'In progress' || userTickets.length > 0) {
+                    selfAssign.disabled = true;
+                    selfAssign.style.backgroundColor = '#3b505e';
+                }
+
+                expansionContainer.appendChild(ticketBox);
+            });
+        });
 
         calendar.appendChild(day);
     }

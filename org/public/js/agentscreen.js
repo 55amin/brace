@@ -45,14 +45,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
 
-    const monthNames = [ // Create month and year heading
+    const monthNames = [ 
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'
     ];
     const monthYear = document.getElementById('month-year');
     monthYear.innerText = `${monthNames[currentMonth]} ${currentYear}`;
 
-    daysOfWeek.forEach(day => {  // Create headings for days
+    daysOfWeek.forEach(day => {
         const dayHeader = document.createElement('div');
         dayHeader.className = 'day day-header';
         dayHeader.innerText = day;
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         calendar.appendChild(emptySlot);
     }
 
-    for (let i = 1; i <= daysInMonth; i++) { // Create days in calendar
+    for (let i = 1; i <= daysInMonth; i++) { 
         const day = document.createElement('div');
         day.className = 'day';
         day.innerText = i;

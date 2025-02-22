@@ -7,6 +7,7 @@ class Administrator {
       this.hashedPassword = hashedPassword;
       this.adminID = null;
       this.verified = false;
+      this.ticket = null;
     }
 
     setAdminID(adminID) {
@@ -23,6 +24,14 @@ class Administrator {
 
     setUnverified() {
       this.verified = false;
+    }
+
+    assignTicket(ticket) {
+      this.ticket = ticket;
+    }
+
+    completeTicket(ticket) {
+      this.ticket = null;
     }
 }
 

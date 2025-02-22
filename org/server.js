@@ -401,24 +401,22 @@ app.post('/api/check-assign', async (req, res) => {
     const assignedTickets = [];
 
     if (user && user.agentID) {
-        try {
-            tickets.forEach(ticket => {
-                if (ticket.assignedTo.includes(user.agentID)) {
-                    assignedTickets.push(ticket);
-                }
-            });
+        try { // Check if agent has assigned ticket
+            const agent = agents.find(agent => agent.agentID === user.agentID);
+            if (agent && agent.ticket) {
+                assignedTickets.push(agent.ticket);
+            }
             res.status(200).json({ userTickets: assignedTickets });
         } catch (error) {
             console.error('Error checking assigned tickets:', error);
             res.status(500).json({ error: 'Failed to check assigned tickets' });
         }
     } else if (user && user.adminID) {
-        try {
-            tickets.forEach(ticket => {
-                if (ticket.assignedTo.includes(user.adminID)) {
-                    assignedTickets.push(ticket);
-                }
-            });
+        try { // Check if admin has assigned ticket
+            const admin = admins.find(admin => admin.adminID === user.adminID);
+            if (admin && admin.ticket) {
+                assignedTickets.push(admin.ticket);
+            }
             res.status(200).json({ userTickets: assignedTickets });
         } catch (error) {
             console.error('Error checking assigned tickets:', error);
