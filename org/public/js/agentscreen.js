@@ -1,5 +1,8 @@
 const baseUrl = window.location.origin;
 import { showError } from '../helpers/showError.js';
+let tasks = [];
+let tickets = [];
+let userTickets = [];
 
 async function checkAssign() {
     const userTicketsResponse = await fetch(`${baseUrl}/api/check-assign`, { 
@@ -13,9 +16,6 @@ async function checkAssign() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-    let tasks = [];
-    let tickets = [];
-    let userTickets = [];
     try { // Fetch tasks and tickets from in-memory arrays
         const tasksResponse = await fetch(`${baseUrl}/api/get-tasks`, {
             method: 'POST',
