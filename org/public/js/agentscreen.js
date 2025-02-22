@@ -4,6 +4,7 @@ import { showError } from '../helpers/showError.js';
 document.addEventListener('DOMContentLoaded', async () => {
     let tasks = [];
     let tickets = [];
+    let userTickets = [];
     try { // Fetch tasks and tickets from in-memory arrays
         const tasksResponse = await fetch(`${baseUrl}/api/get-tasks`, {
             method: 'POST',

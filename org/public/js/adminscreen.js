@@ -3,6 +3,7 @@ import { showError } from '../helpers/showError.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     let tickets = [];
+    let userTickets = [];
     try { // Fetch tickets from in-memory array
         const ticketsResponse = await fetch(`${baseUrl}/api/get-tickets`, {
             method: 'POST',
@@ -83,7 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         day.addEventListener('click', () => {
             const expansionContainer = document.getElementById('expansionContainer');
             expansionContainer.innerHTML = '';
-            
+
             ticketsForDay.forEach(ticket => { // Display expanded details for each ticket created on day
                 const ticketCreation = new Date(ticket.creationDate).toLocaleString();
                 const ticketDeadline = new Date(ticket.deadline).toLocaleString();
