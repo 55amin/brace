@@ -1242,22 +1242,24 @@ app.listen(PORT, async () => {
                     }
                 }
 
-                if (!customers.find(customer => customer.customerID === row.customer_id)) { // Skip adding customer to in-memory array if customer already exists
+                if (!customers.find(customer => customer.customerID === row.customer_id)) { // Only add new customers to in-memory array
                     const customer = new Customer(row.username, row.email, row.registered_at);
                     customer.setCustomerID(row.customer_id);
                     customers.push(customer);
+                    console.log(`Loaded ${customers.length} customers into memory.`);
                 }
             }
 
             for (const row of ticketRows) {
                 if (row.status === 'Completed') {
-                    continue; // Skip adding ticket to in-memory array
+                    continue; // Skip adding completed ticket to in-memory array
                 }
 
-                if (!tickets.find(ticket => ticket.ticketID === row.ticket_id)) { // Skip adding ticket to in-memory array if ticket already exists
+                if (!tickets.find(ticket => ticket.ticketID === row.ticket_id)) { // Only add new tickets to in-memory array
                     const ticket = new Ticket(row.title, row.description, row.created_by, row.type, row.created_at);
                     ticket.setTicketID(row.ticket_id);
                     tickets.push(ticket);
+                    console.log(`Loaded ${tickets.length} tickets into memory.`);
 
                     if (row.triage === 1) { // Triage in-memory ticket if ticket in database triaged
                         ticket.triage();
@@ -1271,7 +1273,6 @@ app.listen(PORT, async () => {
                     }
                 }
             }
-            console.log(`Loaded ${customers.length} customers and ${tickets.length} tickets into memory.`);
         } catch (err) {
             console.error('Error loading customers and tickets from database:', err);
         }

@@ -1,6 +1,17 @@
 const baseUrl = window.location.origin;
 import { showError } from '../helpers/showError.js';
 
+async function checkAssign() {
+    const userTicketsResponse = await fetch(`${baseUrl}/api/check-assign`, { 
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    }); // Check if user already assigned to ticket
+    const userTicketsResult = await userTicketsResponse.json();
+    userTickets = userTicketsResult.userTickets;
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     let tasks = [];
     let tickets = [];
@@ -24,14 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const ticketsResult = await ticketsResponse.json();
         tickets = ticketsResult.ticketArr;
 
-        const userTicketsResponse = await fetch(`${baseUrl}/api/check-assign`, { 
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }); // Check if user already assigned to ticket
-        const userTicketsResult = await userTicketsResponse.json();
-        userTickets = userTicketsResult.userTickets;
+        await checkAssign();
     } catch (error) {
         showError('Failed to fetch tasks and/or tickets');
         console.error('Error fetching tasks and/or tickets:', error);
