@@ -180,8 +180,6 @@ app.listen(PORT, async () => {
 
     setInterval(async () => { // // Execute every minute to sync with database and organisation-facing website
         try { // Load customers and tickets from database into memory
-            customers = [];
-            tickets = [];
             const [customerRows] = await pool.promise().query('SELECT * FROM customers ORDER BY customer_id ASC');
             const [ticketRows] = await pool.promise().query('SELECT * FROM tickets ORDER BY ticket_id ASC');
             const weekAgo = new Date();
@@ -196,9 +194,11 @@ app.listen(PORT, async () => {
                     }
                 }
 
-                const customer = new Customer(row.username, row.email, row.registered_at);
-                customer.setCustomerID(row.customer_id);
-                customers.push(customer);
+                if (!customers.find(customer => customer.customerID === row.customer_id)) { // Skip adding customer to in-memory array if customer already exists
+                    const customer = new Customer(row.username, row.email, row.registered_at);
+                    customer.setCustomerID(row.customer_id);
+                    customers.push(customer);
+                }
             }
 
             for (const row of ticketRows) {
@@ -208,20 +208,22 @@ app.listen(PORT, async () => {
                     }
                     continue; // Skip adding ticket to in-memory array
                 }
+                
+                if (!tickets.find(ticket => ticket.ticketID === row.ticket_id)) { // Skip adding ticket to in-memory array if ticket already exists
+                    const ticket = new Ticket(row.title, row.description, row.created_by, row.type, row.created_at);
+                    ticket.setTicketID(row.ticket_id);
+                    tickets.push(ticket);
 
-                const ticket = new Ticket(row.title, row.description, row.created_by, row.type, row.created_at);
-                ticket.setTicketID(row.ticket_id);
-                tickets.push(ticket);
-
-                if (row.triage === 1) { // Triage in-memory ticket if ticket in database triaged
-                    ticket.triage();
-                }
-                if (row.priority > 1) { // Set correct priority for in-memory ticket based on priority of ticket in database 
-                    ticket.setPriority(row.priority);
-                }
-                const customer = customers.find(customer => customer.customerID === row.customer_id);
-                if (customer) {
-                    customer.addTicket(ticket);
+                    if (row.triage === 1) { // Triage in-memory ticket if ticket in database triaged
+                        ticket.triage();
+                    }
+                    if (row.priority > 1) { // Set correct priority for in-memory ticket based on priority of ticket in database 
+                        ticket.setPriority(row.priority);
+                    }
+                    const customer = customers.find(customer => customer.customerID === row.customer_id);
+                    if (customer) {
+                        customer.addTicket(ticket);
+                    }
                 }
             }
             console.log(`Loaded ${customers.length} customers and ${tickets.length} tickets into memory.`);
