@@ -178,61 +178,61 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
 
-    try { // Load customers and tickets from database into memory
-        const [customerRows] = await pool.promise().query('SELECT * FROM customers ORDER BY customer_id ASC');
-        const [ticketRows] = await pool.promise().query('SELECT * FROM tickets ORDER BY ticket_id ASC');
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
+    setInterval(async () => { // // Execute every minute to sync with database and organisation-facing website
+        try { // Load customers and tickets from database into memory
+            const [customerRows] = await pool.promise().query('SELECT * FROM customers ORDER BY customer_id ASC');
+            const [ticketRows] = await pool.promise().query('SELECT * FROM tickets ORDER BY ticket_id ASC');
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
 
-        for (const row of customerRows) {
-            if (new Date(row.registered_at) < weekAgo) {
-                const [ticketCount] = await pool.promise().query('SELECT COUNT(*) as count FROM tickets WHERE created_by = ?', [row.customer_id]);
-                if (ticketCount[0].count === 0) { // Delete customer from database
-                    await pool.promise().query('DELETE FROM customers WHERE customer_id = ?', [row.customer_id]);
-                    continue; // Skip adding customer to in-memory array
+            for (const row of customerRows) {
+                if (new Date(row.registered_at) < weekAgo) {
+                    const [ticketCount] = await pool.promise().query('SELECT COUNT(*) as count FROM tickets WHERE created_by = ?', [row.customer_id]);
+                    if (ticketCount[0].count === 0) { // Delete customer from database
+                        await pool.promise().query('DELETE FROM customers WHERE customer_id = ?', [row.customer_id]);
+                        continue; // Skip adding customer to in-memory array
+                    }
+                }
+
+                const customer = new Customer(row.username, row.email, row.registered_at);
+                customer.setCustomerID(row.customer_id);
+                customers.push(customer);
+            }
+
+            for (const row of ticketRows) {
+                if (row.status === 'Completed') {
+                    if (new Date(row.created_at) < weekAgo) { // Delete ticket from database
+                        await pool.promise().query('DELETE FROM tickets WHERE ticket_id = ?', [row.ticket_id]);
+                    }
+                    continue; // Skip adding ticket to in-memory array
+                }
+
+                const ticket = new Ticket(row.title, row.description, row.created_by, row.type, row.created_at);
+                ticket.setTicketID(row.ticket_id);
+                tickets.push(ticket);
+
+                if (row.triage === 1) { // Triage in-memory ticket if ticket in database triaged
+                    ticket.triage();
+                }
+                if (row.priority > 1) { // Set correct priority for in-memory ticket based on priority of ticket in database 
+                    ticket.setPriority(row.priority);
+                }
+                const customer = customers.find(customer => customer.customerID === row.customer_id);
+                if (customer) {
+                    customer.addTicket(ticket);
                 }
             }
-
-            const customer = new Customer(row.username, row.email, row.registered_at);
-            customer.setCustomerID(row.customer_id);
-            customers.push(customer);
+            console.log(`Loaded ${customers.length} customers and ${tickets.length} tickets into memory.`);
+        } catch (err) {
+            console.error('Error loading customers and tickets from database:', err);
         }
 
-        for (const row of ticketRows) {
-            if (row.status === 'Completed') {
-                if (new Date(row.created_at) < weekAgo) { // Delete ticket from database
-                    await pool.promise().query('DELETE FROM tickets WHERE ticket_id = ?', [row.ticket_id]);
-                }
-                continue; // Skip adding ticket to in-memory array
-            }
-
-            const ticket = new Ticket(row.title, row.description, row.created_by, row.type, row.created_at);
-            ticket.setTicketID(row.ticket_id);
-            tickets.push(ticket);
-
-            if (row.triage === 1) { // Triage in-memory ticket if ticket in database triaged
-                ticket.triage();
-            }
-            if (row.priority > 1) { // Set correct priority for in-memory ticket based on priority of ticket in database 
-                ticket.setPriority(row.priority);
-            }
-            const customer = customers.find(customer => customer.customerID === row.customer_id);
-            if (customer) {
-                customer.addTicket(ticket);
-            }
-        }
-        console.log(`Loaded ${customers.length} customers and ${tickets.length} tickets into memory.`);
-    } catch (err) {
-        console.error('Error loading customers and tickets from database:', err);
-    }
-
-    setInterval(async () => { // Check if ticket deadlines have passed every minute
         try {
             for (const ticket of tickets) {
                 const currentDate = new Date();
                 if ((currentDate > ticket.deadline) && (ticket.priority < 3)) { // Raise priority accordingly in memory and database
                     ticket.raisePriority();
-                    await pool.promise().query('UPDATE tickets SET priority = ? WHERE ticket_id = ?', [ticket.priority, ticket.ticketID]);
+                    await pool.promise().query('UPDATE tickets SET priority_level = ? WHERE ticket_id = ?', [ticket.priority, ticket.ticketID]);
                 }
             }
         } catch (err) {
