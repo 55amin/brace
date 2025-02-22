@@ -180,6 +180,8 @@ app.listen(PORT, async () => {
 
     setInterval(async () => { // // Execute every minute to sync with database and organisation-facing website
         try { // Load customers and tickets from database into memory
+            customers = [];
+            tickets = [];
             const [customerRows] = await pool.promise().query('SELECT * FROM customers ORDER BY customer_id ASC');
             const [ticketRows] = await pool.promise().query('SELECT * FROM tickets ORDER BY ticket_id ASC');
             const weekAgo = new Date();
