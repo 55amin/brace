@@ -1167,7 +1167,7 @@ app.post('/api/complete-task', async (req, res) => {
             task.setStatus('Completed');
             await pool.promise().query('UPDATE tasks SET status = ? WHERE task_id = ?', ['Completed', taskId]);
         }
-        const agent = agents.find(agent => agent.agentID === agentId);
+        const agent = agents.find(agent => agent.agentID === Number(agentId));
         if (task.assignedTo.includes(agentId)) { // Remove task from agent's tasks array
             agent.removeTask(task.taskID);
             await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentId]);
