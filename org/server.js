@@ -660,6 +660,10 @@ app.post('/api/create-task', async (req, res) => {
     const errors = [];
     const creationDate = new Date();
     const creator = req.session.user.adminID;
+    const completionStatus = {};
+    assignedTo.forEach(agentID => {
+        completionStatus[agentID] = false;
+    });
 
     if (!validatedTitle.isValid) errors.push(validatedTitle.error);
     if (!validatedDesc.isValid) errors.push(validatedDesc.error);
@@ -670,14 +674,15 @@ app.post('/api/create-task', async (req, res) => {
     }
 
     try {
-        const query = 'INSERT INTO tasks (title, description, deadline, assigned_to, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?)';
+        const query = 'INSERT INTO tasks (title, description, deadline, assigned_to, created_at, created_by, completion_status) VALUES (?, ?, ?, ?, ?, ?, ?)';
         const values = [
             validatedTitle.value,
             validatedDesc.value,
             validatedDeadline.value,
             JSON.stringify(assignedTo),
             creationDate,
-            creator
+            creator,
+            JSON.stringify(completionStatus)
         ];
         const [results] = await pool.promise().query(query, values);
 
@@ -1142,6 +1147,10 @@ app.post('/api/update-assign', async (req, res) => {
             });
 
             task.assignedTo = assignedTo; // Update the in-memory task's assigned agents
+            task.completionStatus = {}; 
+            assignedTo.forEach(agentID => {
+                task.completionStatus[agentID] = false;
+            });
             assignedTo.forEach(async (agentID) => { // Add task to newly assigned agents
                 const agent = agents.find(agent => agent.agentID === Number(agentID));
                 if (agent) {
@@ -1163,9 +1172,12 @@ app.post('/api/complete-task', async (req, res) => {
     const agentId = req.session.user.agentID;
     try {
         const task = tasks.find(task => task.taskID === taskId);
-        if (task) { // Update task status in memory and database
-            task.setStatus('Completed');
-            await pool.promise().query('UPDATE tasks SET status = ? WHERE task_id = ?', ['Completed', taskId]);
+        if (task) {
+            task.setComplete(agentId, true); // Update agent's completion status
+            await pool.promise().query('UPDATE tasks SET completion_status = ? WHERE task_id = ?', [JSON.stringify(task.completionStatus), taskId]);
+            if (task.status === 'Completed') {
+                await pool.promise().query('UPDATE tasks SET status = ? WHERE task_id = ?', ['Completed', taskId]);
+            }
         }
         const agent = agents.find(agent => agent.agentID === Number(agentId));
         if (task.assignedTo.includes(agentId)) { // Remove task from agent's tasks array
@@ -1256,12 +1268,13 @@ app.listen(PORT, async () => {
                 row.title, row.description, row.created_by, row.deadline, JSON.parse(row.assigned_to), row.created_at);
             task.setTaskID(row.task_id);
             task.setStatus(row.status);
+            task.completionStatus = JSON.parse(row.completion_status); 
             tasks.push(task);
 
             const assignedTo = JSON.parse(row.assigned_to);
             assignedTo.forEach(agentID => { // Add task to each assigned agent
                 const agent = agents.find(agent => agent.agentID === Number(agentID));
-                if (agent) {
+                if (agent && completionStatus[agentID] === false) {
                     agent.addTask(task.taskID);
                 }
             });

@@ -8,6 +8,10 @@ class Task {
       this.status = 'Assigned';
       this.creationDate = creationDate;
       this.taskID = null;
+      this.completionStatus = {};
+      assignedTo.forEach(agentID => {
+        this.completionStatus[agentID] = false; 
+      });
     }
 
     setTaskID(taskID) {
@@ -17,6 +21,13 @@ class Task {
     setStatus(status) {
       this.status = status;
     }
+
+    setComplete(agentID, status) {
+      this.completionStatus[agentID] = status;
+      if (Object.values(this.completionStatus).every(status => status === true)) {
+        this.status = 'Completed';
+      }
+  }
 }
 
 module.exports = Task;
