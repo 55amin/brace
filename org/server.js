@@ -1193,9 +1193,11 @@ app.post('/api/assign-ticket', async (req, res) => {
         }
 
         const agent = agents.find(agent => agent.agentID === Number(agentId));
-        if (agent) {
-            agent.addTicket(ticketId); // Add ticket to agent's tickets array
+        if (agent && !agent.ticket) {
+            agent.assignTicket(ticketId); // Add ticket to agent
             await pool.promise().query('UPDATE agents SET tickets = ? WHERE agent_id = ?', [JSON.stringify(agent.tickets), agentId]);
+        } else {
+            return res.status(400).json({ success: false, message: 'Agent already assigned to a ticket' });
         }
         res.status(200).json({ success: true, message: 'Ticket assigned successfully' });
     } catch (err) {

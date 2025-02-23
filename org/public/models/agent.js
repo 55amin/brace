@@ -71,7 +71,7 @@ class Agent {
         this.ticket = ticket;
     }
 
-    completeTicket(ticket) {
+    completeTicket() {
         this.ticket = null;
     }
 }

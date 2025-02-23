@@ -206,7 +206,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p>Customer ID: ${ticket.customerID} || Customer username: ${ticket.customerUsername}</p>
                     <p>Customer email address: ${ticket.customerEmail}</p>
                     <button id="self-assign-${ticket.ticketID}">Self-assign ticket</button>
-                `; 
+                `;
+                expansionContainer.appendChild(ticketBox);
 
                 const selfAssignBtn = document.getElementById(`self-assign-${ticket.ticketID}`);
                 // Prevent assigned tickets from being reassigned or taken by assigned user
@@ -217,7 +218,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 selfAssignBtn.addEventListener('click', async () => {
                     await selfAssign(ticket.ticketID);
                 });
-                expansionContainer.appendChild(ticketBox);
             });
         });
         calendar.appendChild(day);
@@ -312,6 +312,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p>Customer email address: ${ticket.customerEmail}</p>
                     <button class="self-assign">Self-assign ticket</button>
                 `;
+                expansionContainer.appendChild(ticketBox);
 
                 const selfAssignBtn = ticketBox.querySelector('.self-assign');
                 // Prevent assigned tickets from being reassigned or taken by assigned user
@@ -322,7 +323,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 selfAssignBtn.addEventListener('click', async () => {
                     await selfAssign(ticket.ticketID);
                 });
-                expansionContainer.appendChild(ticketBox);
             }
         }
     });
