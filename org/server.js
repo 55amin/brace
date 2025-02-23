@@ -494,7 +494,7 @@ app.post('/api/delete-task', async (req, res) => {
             await pool.promise().query('DELETE FROM tasks WHERE task_id = ?', [taskId]);
 
             task.assignedTo.forEach(async (agentID) => { // Remove task from each assigned agent's tasks array
-                const agent = agents.find(agent => agent.agentID === agentID);
+                const agent = agents.find(agent => agent.agentID === Number(agentID));
                 if (agent) {
                     agent.removeTask(task.taskID);
                     await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
@@ -693,7 +693,7 @@ app.post('/api/create-task', async (req, res) => {
         tasks.push(newTask);
 
         assignedTo.forEach(async (agentID) => { // Add task to each assigned agent
-            const agent = agents.find(agent => agent.agentID === agentID);
+            const agent = agents.find(agent => agent.agentID === Number(agentID));
             if (agent) {
                 agent.addTask(newTask.taskID);
                 await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
@@ -1133,18 +1133,17 @@ app.post('/api/update-assign', async (req, res) => {
         await pool.promise().query('UPDATE tasks SET assigned_to = ? WHERE task_id = ?', [JSON.stringify(assignedTo), taskId]);
         const task = tasks.find(task => task.taskID === taskId);
         if (task) {
-            task.assignedTo = assignedTo; // Update the in-memory task's assigned agents
-
             task.assignedTo.forEach(async (agentID) => { // Remove task from previously assigned agents
-                const agent = agents.find(agent => agent.agentID === agentID);
+                const agent = agents.find(agent => agent.agentID === Number(agentID));
                 if (agent) {
                     agent.removeTask(task.taskID);
                     await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
                 }
             });
 
+            task.assignedTo = assignedTo; // Update the in-memory task's assigned agents
             assignedTo.forEach(async (agentID) => { // Add task to newly assigned agents
-                const agent = agents.find(agent => agent.agentID === agentID);
+                const agent = agents.find(agent => agent.agentID === Number(agentID));
                 if (agent) {
                     agent.addTask(task.taskID);
                     await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
@@ -1230,7 +1229,7 @@ app.listen(PORT, async () => {
 
             const assignedTo = JSON.parse(row.assigned_to);
             assignedTo.forEach(agentID => { // Add task to each assigned agent
-                const agent = agents.find(agent => agent.agentID === agentID);
+                const agent = agents.find(agent => agent.agentID === Number(agentID));
                 if (agent) {
                     agent.addTask(task.taskID);
                 }
