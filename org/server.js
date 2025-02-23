@@ -1188,6 +1188,8 @@ app.post('/api/assign-ticket', async (req, res) => {
         if (ticket.status === 'Unassigned') { // Update ticket status in memory and database
             ticket.setStatus('Assigned');
             await pool.promise().query('UPDATE tickets SET status = ? WHERE ticket_id = ?', ['Assigned', ticketId]);
+            ticket.assignTo(agentId);
+            await pool.promise().query('UPDATE tickets SET assigned_to = ? WHERE ticket_id = ?', [agentId, ticketId]);
         } else {
             return res.status(400).json({ success: false, message: 'Ticket already assigned' });
         }
@@ -1309,6 +1311,15 @@ app.listen(PORT, async () => {
                     if (row.priority > 1) { // Set correct priority for in-memory ticket based on priority of ticket in database 
                         ticket.setPriority(row.priority);
                     }
+                    if (row && row.assigned_to) { // Assign ticket to agent in memory if ticket in database is assigned
+                        const agent = agents.find(agent => agent.agentID === row.assigned_to);
+                        if (agent) {
+                            agent.assignTicket(ticket.ticketID);
+                            ticket.assignTo(agent.agentID);
+                        }
+                        ticket.setStatus(ticket.status);
+                    }
+
                     const customer = customers.find(customer => customer.customerID === row.customer_id);
                     if (customer) {
                         customer.addTicket(ticket);
