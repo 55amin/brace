@@ -496,7 +496,7 @@ app.post('/api/delete-task', async (req, res) => {
             task.assignedTo.forEach(async (agentID) => { // Remove task from each assigned agent's tasks array
                 const agent = agents.find(agent => agent.agentID === agentID);
                 if (agent) {
-                    agent.removeTask(task);
+                    agent.removeTask(task.taskID);
                     await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
                 }
             });
@@ -507,7 +507,6 @@ app.post('/api/delete-task', async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to delete task' });
     }
 });
-
 
 // Create administrator account
 app.post('/api/create-admin', async (req, res) => {
@@ -696,7 +695,7 @@ app.post('/api/create-task', async (req, res) => {
         assignedTo.forEach(async (agentID) => { // Add task to each assigned agent
             const agent = agents.find(agent => agent.agentID === agentID);
             if (agent) {
-                agent.addTask(newTask);
+                agent.addTask(newTask.taskID);
                 await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
             }
         });
@@ -1139,7 +1138,7 @@ app.post('/api/update-assign', async (req, res) => {
             task.assignedTo.forEach(async (agentID) => { // Remove task from previously assigned agents
                 const agent = agents.find(agent => agent.agentID === agentID);
                 if (agent) {
-                    agent.removeTask(task);
+                    agent.removeTask(task.taskID);
                     await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
                 }
             });
@@ -1147,7 +1146,7 @@ app.post('/api/update-assign', async (req, res) => {
             assignedTo.forEach(async (agentID) => { // Add task to newly assigned agents
                 const agent = agents.find(agent => agent.agentID === agentID);
                 if (agent) {
-                    agent.addTask(task);
+                    agent.addTask(task.taskID);
                     await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
                 }
             });
@@ -1171,7 +1170,7 @@ app.post('/api/complete-task', async (req, res) => {
         }
         const agent = agents.find(agent => agent.agentID === agentId);
         if (task.assignedTo.includes(agentId)) { // Remove task from agent's tasks array
-            agent.removeTask(task);
+            agent.removeTask(task.taskID);
             await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentId]);
         }
         res.status(200).json({ success: true, message: 'Task completed successfully' });
@@ -1230,12 +1229,10 @@ app.listen(PORT, async () => {
             tasks.push(task);
 
             const assignedTo = JSON.parse(row.assigned_to);
-            console.log(assignedTo);
             assignedTo.forEach(agentID => { // Add task to each assigned agent
-                console.log(agentID);
                 const agent = agents.find(agent => agent.agentID === agentID);
                 if (agent) {
-                    agent.addTask(task);
+                    agent.addTask(task.taskID);
                 }
             });
         });
