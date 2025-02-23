@@ -697,12 +697,8 @@ app.post('/api/create-task', async (req, res) => {
             const agent = agents.find(agent => agent.agentID === agentID);
             if (agent) {
                 agent.addTask(newTask);
-                const [agentRow] = await pool.promise().query('SELECT tasks FROM agents WHERE agent_id = ?', [agentID]);
-                const agentTasks = JSON.parse(agentRow[0].tasks || '[]'); // Ensure any existing tasks aren't overwritten
-                agentTasks.push(newTask.taskID);
-                await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agentTasks), agentID]);
+                await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
             }
-            
         });
         res.status(200).json({ success: true, task: newTask });
     } catch (err) {
@@ -1144,10 +1140,7 @@ app.post('/api/update-assign', async (req, res) => {
                 const agent = agents.find(agent => agent.agentID === agentID);
                 if (agent) {
                     agent.removeTask(task);
-                    const [agentRow] = await pool.promise().query('SELECT tasks FROM agents WHERE agent_id = ?', [agentID]);
-                    const agentTasks = JSON.parse(agentRow[0].tasks || '[]');
-                    const updatedTasks = agentTasks.filter(id => id !== taskId);
-                    await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(updatedTasks), agentID]);
+                    await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
                 }
             });
 
@@ -1155,10 +1148,7 @@ app.post('/api/update-assign', async (req, res) => {
                 const agent = agents.find(agent => agent.agentID === agentID);
                 if (agent) {
                     agent.addTask(task);
-                    const [agentRow] = await pool.promise().query('SELECT tasks FROM agents WHERE agent_id = ?', [agentID]);
-                    const agentTasks = JSON.parse(agentRow[0].tasks || '[]');
-                    agentTasks.push(task.taskID);
-                    await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agentTasks), agentID]);
+                    await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
                 }
             });
         }
@@ -1240,7 +1230,9 @@ app.listen(PORT, async () => {
             tasks.push(task);
 
             const assignedTo = JSON.parse(row.assigned_to);
+            console.log(assignedTo);
             assignedTo.forEach(agentID => { // Add task to each assigned agent
+                console.log(agentID);
                 const agent = agents.find(agent => agent.agentID === agentID);
                 if (agent) {
                     agent.addTask(task);

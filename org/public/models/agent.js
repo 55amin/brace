@@ -57,7 +57,7 @@ class Agent {
     }
 
     addTask(task) {
-        this.tasks.push(task)
+        this.tasks.push(task);
     }
 
     removeTask(task) {
