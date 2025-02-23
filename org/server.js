@@ -1179,6 +1179,32 @@ app.post('/api/complete-task', async (req, res) => {
     }
 });
 
+// Self-assign ticket
+app.post('/api/assign-ticket', async (req, res) => {
+    const { ticketId } = req.body;
+    const agentId = req.session.user.agentID;
+    try {
+        const ticket = tickets.find(ticket => ticket.ticketID === ticketId);
+        if (ticket.status === 'Unassigned') { // Update ticket status in memory and database
+            ticket.setStatus('Assigned');
+            await pool.promise().query('UPDATE tickets SET status = ? WHERE ticket_id = ?', ['Assigned', ticketId]);
+        } else {
+            return res.status(400).json({ success: false, message: 'Ticket already assigned' });
+        }
+
+        const agent = agents.find(agent => agent.agentID === Number(agentId));
+        if (agent) {
+            agent.addTicket(ticketId); // Add ticket to agent's tickets array
+            await pool.promise().query('UPDATE agents SET tickets = ? WHERE agent_id = ?', [JSON.stringify(agent.tickets), agentId]);
+        }
+        res.status(200).json({ success: true, message: 'Ticket assigned successfully' });
+    } catch (err) {
+        console.error('Error assigning ticket:', err);
+        res.status(500).json({ success: false, message: 'Failed to assign ticket' });
+    }
+
+});
+
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {

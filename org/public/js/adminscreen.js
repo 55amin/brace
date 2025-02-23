@@ -3,16 +3,38 @@ import { showError } from '../helpers/showError.js';
 let tickets = [];
 let userTickets = [];
 
-async function checkAssign() {
+async function checkAssign() { // Check if user already assigned to ticket
     const userTicketsResponse = await fetch(`${baseUrl}/api/check-assign`, { 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         }
-    }); // Check if user already assigned to ticket
+    }); 
     const userTicketsResult = await userTicketsResponse.json();
     userTickets = userTicketsResult.userTickets;
 }
+
+async function selfAssign(ticketID) {
+    try { // Self-assign ticket to user
+        const selfAssignResponse = await fetch(`${baseUrl}/api/self-assign`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ticketID })
+        });
+        const selfAssignResult = await selfAssignResponse.json();
+        if (selfAssignResult.success) { // Reload page and check user assignments to disable self-assign button
+            await checkAssign();
+            window.location.reload();
+        } else {
+            showError(selfAssignResult.message);
+        }
+    } catch (error) {
+        showError('Failed to self-assign ticket');
+        console.error('Error self-assigning ticket:', error);
+    }
+}  
 
 document.addEventListener('DOMContentLoaded', async () => {
     try { // Fetch tickets from in-memory array
@@ -116,15 +138,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p>Creation date: ${ticketCreation} || Deadline: ${ticketDeadline}</p>
                     <p>Customer ID: ${ticket.customerID} || Customer username: ${ticket.customerUsername}</p>
                     <p>Customer email address: ${ticket.customerEmail}</p>
-                    <button class="self-assign">Self-assign ticket</button>
+                    <button id="self-assign-${ticket.ticketID}">Self-assign ticket</button>
                 `; 
 
-                const selfAssign = ticketBox.querySelector('.self-assign');
+                const selfAssignBtn = document.getElementById(`self-assign-${ticket.ticketID}`);
                 // Prevent assigned tickets from being reassigned or taken by assigned user
-                if (ticket.status === 'In progress' || userTickets.length > 0) {
-                    selfAssign.disabled = true;
-                    selfAssign.style.backgroundColor = '#3b505e';
+                if (ticket.status === 'Assigned' || ticket.status === 'In progress' || userTickets.length > 0) {
+                    selfAssignBtn.disabled = true;
+                    selfAssignBtn.style.backgroundColor = '#3b505e';
                 }
+                selfAssignBtn.addEventListener('click', async () => {
+                    await selfAssign(ticket.ticketID);
+                });
                 expansionContainer.appendChild(ticketBox);
             });
         });
@@ -184,12 +209,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <button class="self-assign">Self-assign ticket</button>
             `;
 
-            const selfAssign = ticketBox.querySelector('.self-assign');
+            const selfAssignBtn = ticketBox.querySelector('.self-assign');
             // Prevent assigned tickets from being reassigned or taken by assigned user
-            if (ticket.status === 'In progress' || userTickets.length > 0) {
-                selfAssign.disabled = true;
-                selfAssign.style.backgroundColor = '#3b505e';
+            if (ticket.status === 'Assigned' || ticket.status === 'In progress' || userTickets.length > 0) {
+                selfAssignBtn.disabled = true;
+                selfAssignBtn.style.backgroundColor = '#3b505e';
             }
+            selfAssignBtn.addEventListener('click', async () => {
+                await selfAssign(ticket.ticketID);
+            });
             expansionContainer.appendChild(ticketBox);
         }
     });
