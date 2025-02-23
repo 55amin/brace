@@ -38,12 +38,12 @@ async function completeTask(taskID) {
 
 async function selfAssign(ticketID) {
     try { // Self-assign ticket to user
-        const selfAssignResponse = await fetch(`${baseUrl}/api/self-assign`, {
+        const selfAssignResponse = await fetch(`${baseUrl}/api/assign-ticket`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ ticketID })
+            body: JSON.stringify({ ticketId: ticketID })
         });
         const selfAssignResult = await selfAssignResponse.json();
         if (selfAssignResult.success) { // Reload page and check user assignments to disable self-assign button

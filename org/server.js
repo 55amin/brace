@@ -1251,6 +1251,7 @@ app.listen(PORT, async () => {
             const task = new Task(
                 row.title, row.description, row.created_by, row.deadline, JSON.parse(row.assigned_to), row.created_at);
             task.setTaskID(row.task_id);
+            task.setStatus(row.status);
             tasks.push(task);
 
             const assignedTo = JSON.parse(row.assigned_to);
