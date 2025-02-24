@@ -41,8 +41,8 @@ class Ticket {
         }
     }
 
-    setTriage() {
-        this.triage = true;
+    triage() {
+        this.triaged = true;
         this.raisePriority();
     }
 }
