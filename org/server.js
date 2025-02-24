@@ -1274,7 +1274,7 @@ app.listen(PORT, async () => {
             const assignedTo = JSON.parse(row.assigned_to);
             assignedTo.forEach(agentID => { // Add task to each assigned agent
                 const agent = agents.find(agent => agent.agentID === Number(agentID));
-                if (agent && completionStatus[agentID] === false) {
+                if (agent && task.completionStatus[agentID] === false) {
                     agent.addTask(task.taskID);
                 }
             });
