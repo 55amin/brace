@@ -9,7 +9,7 @@ class Ticket {
         this.assignedTo = null;
         this.status = 'Unassigned';
         this.priority = 1;
-        this.triage = false;
+        this.triaged = false;
         this.creationDate = creationDate;
         this.completionDate = null;
         this.ticketID = null;
@@ -41,7 +41,7 @@ class Ticket {
         }
     }
 
-    triage() {
+    setTriage() {
         this.triage = true;
         this.raisePriority();
     }

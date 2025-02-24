@@ -216,7 +216,7 @@ app.listen(PORT, async () => {
                     tickets.push(ticket);
                     console.log(`Loaded ${tickets.length} tickets into memory.`);
 
-                    if (row.triage === 1) { // Triage in-memory ticket if ticket in database triaged
+                    if (row.triaged === 1) { // Triage in-memory ticket if ticket in database triaged
                         ticket.triage();
                     }
                     if (row.priority > 1) { // Set correct priority for in-memory ticket based on priority of ticket in database 
@@ -240,7 +240,7 @@ app.listen(PORT, async () => {
             for (const ticket of tickets) { //FIX THIS
                 const currentDate = new Date();
                 if ((currentDate > ticket.deadline) && (ticket.priority < 3)) { // Raise priority accordingly in memory and database
-                    if (!ticket.triage && ticket.priority === 2) {
+                    if (!ticket.triaged && ticket.priority === 2) {
                         continue;
                     }
                     ticket.raisePriority();
