@@ -237,9 +237,12 @@ app.listen(PORT, async () => {
         }
 
         try {
-            for (const ticket of tickets) {
+            for (const ticket of tickets) { //FIX THIS
                 const currentDate = new Date();
                 if ((currentDate > ticket.deadline) && (ticket.priority < 3)) { // Raise priority accordingly in memory and database
+                    if (!ticket.triage && ticket.priority === 2) {
+                        continue;
+                    }
                     ticket.raisePriority();
                     await pool.promise().query('UPDATE tickets SET priority_level = ? WHERE ticket_id = ?', [ticket.priority, ticket.ticketID]);
                 }
