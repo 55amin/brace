@@ -1318,11 +1318,11 @@ app.listen(PORT, async () => {
                     tickets.push(ticket);
                     console.log(`Loaded ${tickets.length} tickets into memory.`);
 
-                    if (row.triaged === 1) { // Triage in-memory ticket if ticket in database triaged
+                    if (row.triage === 1) { // Triage in-memory ticket if ticket in database triaged
                         ticket.triage();
                     }
-                    if (row.priority > 1) { // Set correct priority for in-memory ticket based on priority of ticket in database 
-                        ticket.setPriority(row.priority);
+                    if (row.priority_level > 1) { // Set correct priority for in-memory ticket based on priority of ticket in database 
+                        ticket.setPriority(row.priority_level);
                     }
                     if (row && row.assigned_to) { // Assign ticket to agent in memory if ticket in database is assigned
                         const agent = agents.find(agent => agent.agentID === row.assigned_to);
