@@ -15,6 +15,17 @@ async function checkAssign() { // Check if user already assigned to ticket
     userTickets = userTicketsResult.userTickets;
 }
 
+async function getTasks() { // Fetch tasks from in-memory array
+    const tasksResponse = await fetch(`${baseUrl}/api/get-user-tasks`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    });
+    const tasksResult = await tasksResponse.json();
+    tasks = tasksResult.userTasks;
+}
+
 async function completeTask(taskID) {
     try { // Set task as complete
         const response = await fetch(`${baseUrl}/api/complete-task`, {
@@ -60,15 +71,6 @@ async function selfAssign(ticketID) {
 
 document.addEventListener('DOMContentLoaded', async () => {
     try { // Fetch tasks and tickets from in-memory arrays
-        const tasksResponse = await fetch(`${baseUrl}/api/get-user-tasks`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        const tasksResult = await tasksResponse.json();
-        tasks = tasksResult.userTasks;
-
         const ticketsResponse = await fetch(`${baseUrl}/api/get-tickets`, {
             method: 'POST',
             headers: {
@@ -78,6 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const ticketsResult = await ticketsResponse.json();
         tickets = ticketsResult.ticketArr;
 
+        await getTasks();
         await checkAssign();
     } catch (error) {
         showError('Failed to fetch tasks and/or tickets');
@@ -181,6 +184,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const completeTaskBtn = document.getElementById(`complete-${task.taskID}`);
                 completeTaskBtn.addEventListener('click', async () => {
                     await completeTask(task.taskID);
+                    await getTasks();
                 });
             });
 
@@ -280,6 +284,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const completeTaskBtn = taskBox.querySelector('.complete-task');
                 completeTaskBtn.addEventListener('click', async () => {
                     await completeTask(task.taskID);
+                    await getTasks();
                 });
             }
         } else if (type === 'Ticket') {

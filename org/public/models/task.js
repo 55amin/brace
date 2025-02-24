@@ -22,8 +22,8 @@ class Task {
       this.status = status;
     }
 
-    setComplete(agentID, status) {
-      this.completionStatus[agentID] = status;
+    setComplete(agentID) {
+      this.completionStatus[agentID] = true;
       if (Object.values(this.completionStatus).every(status => status === true)) {
         this.status = 'Completed';
       }
