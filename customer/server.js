@@ -237,14 +237,25 @@ app.listen(PORT, async () => {
         }
 
         try {
-            for (const ticket of tickets) { //FIX THIS
+            for (const ticket of tickets) { 
                 const currentDate = new Date();
-                if ((currentDate > ticket.deadline) && (ticket.priority < 3)) { // Raise priority accordingly in memory and database
-                    if (!ticket.triaged && ticket.priority === 2) {
-                        continue;
-                    }
-                    ticket.raisePriority();
-                    await pool.promise().query('UPDATE tickets SET priority_level = ? WHERE ticket_id = ?', [ticket.priority, ticket.ticketID]);
+                const pastDeadline = currentDate > ticket.deadline;
+                let newPriority;
+        
+                if (ticket.triaged && pastDeadline) {
+                    newPriority = 3;
+                } else if (ticket.triaged || pastDeadline) {
+                    newPriority = 2;
+                } else {
+                    newPriority = 1;
+                }
+        
+                if (newPriority !== ticket.priority) {
+                    ticket.setPriority(newPriority);
+                    await pool.promise().query(
+                        'UPDATE tickets SET priority_level = ? WHERE ticket_id = ?',
+                        [newPriority, ticket.ticketID]
+                    );
                 }
             }
         } catch (err) {

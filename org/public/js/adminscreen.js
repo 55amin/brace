@@ -118,19 +118,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             expansionContainer.innerHTML = '';
 
             ticketsForDay.forEach(ticket => { // Display expanded details for each ticket created on day
-                if (ticket.triage) {
-                    ticket.triage = 'Yes';
-                } else {
-                    ticket.triage = 'No';
-                }
-
+                const triaged = ticket.triage ? 'Yes' : 'No';
                 const ticketCreation = new Date(ticket.creationDate).toLocaleString();
                 const ticketDeadline = new Date(ticket.deadline).toLocaleString();
                 const ticketBox = document.createElement('div');
                 ticketBox.className = 'ticket-box';
                 ticketBox.innerHTML = `
                     <p>Ticket ID: ${ticket.ticketID}</p>
-                    <p>Status: ${ticket.status} || Triaged: ${ticket.triage}</p>
+                    <p>Status: ${ticket.status} || Triaged: ${triaged}</p>
                     <p>Title: ${ticket.title}</p>
                     <p>Description: ${ticket.desc}</p>
                     <p>Type: ${ticket.type}</p>
@@ -186,19 +181,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const ticket = tickets.find(ticket => ticket.ticketID === Number(id));
         if (ticket) {
+            const triaged = ticket.triage ? 'Yes' : 'No';
             const ticketCreation = new Date(ticket.creationDate).toLocaleString();
             const ticketDeadline = new Date(ticket.deadline).toLocaleString();
-            if (ticket.triage) {
-                ticket.triage = 'Yes';
-            } else {
-                ticket.triage = 'No';
-            }
 
             const ticketBox = document.createElement('div');
             ticketBox.className = 'ticket-box';
             ticketBox.innerHTML = `
                 <p>Ticket ID: ${ticket.ticketID}</p>
-                <p>Status: ${ticket.status} || Triaged: ${ticket.triage}</p>
+                <p>Status: ${ticket.status} || Triaged: ${triaged}</p>
                 <p>Title: ${ticket.title}</p>
                 <p>Description: ${ticket.desc}</p>
                 <p>Type: ${ticket.type}</p>
