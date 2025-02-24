@@ -1209,7 +1209,7 @@ app.post('/api/assign-ticket', async (req, res) => {
         const agent = agents.find(agent => agent.agentID === Number(agentId));
         if (agent && !agent.ticket) {
             agent.assignTicket(ticketId); // Add ticket to agent
-            await pool.promise().query('UPDATE agents SET tickets = ? WHERE agent_id = ?', [JSON.stringify(agent.tickets), agentId]);
+            await pool.promise().query('UPDATE agents SET ticket = ? WHERE agent_id = ?', [JSON.stringify(agent.ticket), agentId]);
         } else {
             return res.status(400).json({ success: false, message: 'Agent already assigned to a ticket' });
         }
@@ -1218,7 +1218,6 @@ app.post('/api/assign-ticket', async (req, res) => {
         console.error('Error assigning ticket:', err);
         res.status(500).json({ success: false, message: 'Failed to assign ticket' });
     }
-
 });
 
 // Start server
