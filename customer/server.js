@@ -216,7 +216,7 @@ app.listen(PORT, async () => {
                     tickets.push(ticket);
                     console.log(`Loaded ${tickets.length} tickets into memory.`);
 
-                    if (row.triage === 1) { // Triage in-memory ticket if ticket in database triaged
+                    if (row.triage) { // Triage in-memory ticket if ticket in database triaged
                         ticket.triage();
                     }
                     if (row.priority_level > 1) { // Set correct priority for in-memory ticket based on priority of ticket in database 

@@ -227,7 +227,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (task.status === 'Completed') { // Skip completed tasks
             return;
         }
-
         const option = document.createElement('option');
         option.value = `Task ${task.taskID}`;
         option.innerText = `Task ${task.taskID}: ${task.title}`;
@@ -252,7 +251,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             option.style.color = 'black';
         } else if (ticket.priority === 3) {
             option.style.backgroundColor = 'red';
-            option.style.color = 'black';
+            option.style.color = 'black';   
         }
         dropdownMenu.appendChild(option);
     });
