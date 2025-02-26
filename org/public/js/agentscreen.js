@@ -243,13 +243,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const option = document.createElement('option');
         option.value = `Ticket ${ticket.ticketID}`;
         option.innerText = `Ticket ${ticket.ticketID}: ${ticket.title}`;
-        if (ticket.priority === 1) {
+        if (ticket.priority == 1) {
             option.style.backgroundColor = 'yellow';
             option.style.color = 'black';
-        } else if (ticket.priority === 2) {
+        } else if (ticket.priority == 2) {
             option.style.backgroundColor = 'orange';
             option.style.color = 'black';
-        } else if (ticket.priority === 3) {
+        } else if (ticket.priority == 3) {
             option.style.backgroundColor = 'red';
             option.style.color = 'black';   
         }
