@@ -396,7 +396,7 @@ app.post('/api/get-tickets', async (req, res) => {
         tickets.forEach(ticket => { 
             if (user && user.agentID) { // If requestor is an agent, check access level
                 const agent = agents.find(agent => agent.agentID === user.agentID);
-                if ((agent && agent.accessLevel === 1) && ticket.triaged === true) {
+                if ((agent && Number(agent.accessLevel) == 1) && ticket.triaged === true) {
                     return; // Level 1 agents cannot view triaged tickets
                 }
             }
