@@ -1298,8 +1298,8 @@ app.listen(PORT, async () => {
                 let available = false;
                 
                 if (workingHours && !agent.ticket) { // Check if agent is available based on working hours and assignment
-                    const [startH, startM] = hours.start.split(':').map(Number);
-                    const [endH, endM] = hours.end.split(':').map(Number);
+                    const [startH, startM] = workingHours.start.split(':').map(Number);
+                    const [endH, endM] = workingHours.end.split(':').map(Number);
                     const start = (startH * 60) + startM;
                     const end = (endH * 60) + endM;
                     available = currentMinutes >= start && currentMinutes < end;
