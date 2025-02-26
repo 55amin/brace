@@ -1212,6 +1212,7 @@ app.post('/api/assign-ticket', async (req, res) => {
         const agent = agents.find(agent => agent.agentID === Number(agentId));
         if (agent && !agent.ticket) {
             agent.assignTicket(ticketId); // Add ticket to agent
+            agent.setAvailability('Unavailable'); // Set agent to unavailable
             await pool.promise().query('UPDATE agents SET ticket = ? WHERE agent_id = ?', [JSON.stringify(agent.ticket), agentId]);
         } else {
             return res.status(400).json({ success: false, message: 'Agent already assigned to a ticket' });
@@ -1287,6 +1288,23 @@ app.listen(PORT, async () => {
     }
 
     setInterval(async () => { // Execute every minute to sync with database and customer-facing website
+        try { // Set availability for agents
+            const currentTime = new Date();
+            agents.forEach(agent => {
+                const currentMinutes = (currentTime.getHours() * 60) + currentTime.getMinutes();
+                const currentDay = currentTime.getDay();
+                const workingHours = agent.workingHours[currentDay];
+    
+                if (workingHours && (currentMinutes >= workingHours.start) && (currentMinutes < workingHours.end) && !agent.ticket) {
+                    agent.setAvailability('Available');
+                } else {
+                    agent.setAvailability('Unavailable');
+                }
+            });
+        } catch (err) {
+            console.error('Error setting agent availability:', err);
+        }
+
         try { // Load customers and tickets from database into memory
             const [customerRows] = await pool.promise().query('SELECT * FROM customers ORDER BY customer_id ASC');
             const [ticketRows] = await pool.promise().query('SELECT * FROM tickets ORDER BY ticket_id ASC');

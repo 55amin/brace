@@ -8,8 +8,7 @@ class Agent {
         this.specialties = [];
         this.agentID = null;
         this.verified = false;
-        this.availability = 'Offline';
-        this.workload = 0;
+        this.availability = 'Unavailable';
         this.tasks = [];
         this.ticket = null;
     }
@@ -44,16 +43,6 @@ class Agent {
 
     setAvailability(status) {
         this.availability = status;
-    }
-
-    setWorkload(type) {
-        if (type === 'add') { // Increment workload
-            this.workload++;
-        } else if (type === 'sub') { // Decrement workload
-            if (this.workload > 0) { // Prevent negative workload
-                this.workload--;
-            }
-        }
     }
 
     addTask(task) {
