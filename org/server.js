@@ -1355,7 +1355,7 @@ app.listen(PORT, async () => {
                             agent.assignTicket(ticket.ticketID);
                             ticket.assignTo(agent.agentID);
                         }
-                        ticket.setStatus(ticket.status);
+                        ticket.setStatus(row.status);
                     }
 
                     const customer = customers.find(customer => customer.customerID === row.customer_id);
