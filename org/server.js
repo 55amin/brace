@@ -1288,21 +1288,26 @@ app.listen(PORT, async () => {
     }
 
     setInterval(async () => { // Execute every minute to sync with database and customer-facing website
-        try { // Set availability for agents
+        try { // Set availability for each agent based on working hours
             const currentTime = new Date();
+            const currentDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][currentTime.getDay()];
+            const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+        
             agents.forEach(agent => {
-                const currentMinutes = (currentTime.getHours() * 60) + currentTime.getMinutes();
-                const currentDay = currentTime.getDay();
                 const workingHours = agent.workingHours[currentDay];
-    
-                if (workingHours && (currentMinutes >= workingHours.start) && (currentMinutes < workingHours.end) && !agent.ticket) {
-                    agent.setAvailability('Available');
-                } else {
-                    agent.setAvailability('Unavailable');
+                let available = false;
+                
+                if (workingHours && !agent.ticket) { // Check if agent is available based on working hours and assignment
+                    const [startH, startM] = hours.start.split(':').map(Number);
+                    const [endH, endM] = hours.end.split(':').map(Number);
+                    const start = (startH * 60) + startM;
+                    const end = (endH * 60) + endM;
+                    available = currentMinutes >= start && currentMinutes < end;
                 }
+                agent.setAvailability(available ? 'Available' : 'Unavailable');
             });
         } catch (err) {
-            console.error('Error setting agent availability:', err);
+            console.error('Error setting availability:', err);
         }
 
         try { // Load customers and tickets from database into memory
