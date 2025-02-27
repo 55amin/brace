@@ -1228,6 +1228,7 @@ app.post('/api/assign-ticket', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
+    let firstLoad = null;
     
     try { // Load administrators from database into memory
         const [rows] = await pool.promise().query('SELECT * FROM administrators ORDER BY admin_id ASC');
@@ -1362,6 +1363,38 @@ app.listen(PORT, async () => {
                     if (customer) {
                         customer.addTicket(ticket);
                     }
+                }
+            }
+
+            if (!firstLoad) {
+                firstLoad = new Date();
+            } else { // Automatically assign new tickets to available agents
+                const availableAgents = agents.filter(agent => agent.availability === 'Available');
+                const unassignedTickets = tickets.filter(ticket => ticket.status === 'Unassigned' && (new Date(ticket.creationDate) > firstLoad));
+
+                if (unassignedTickets.length > 0) {
+                    unassignedTickets.forEach(async ticket => {
+                        if (ticket.type !== 'Miscellaneous') { // Find agent with matching specialty for ticket
+                            const matchingAgents = availableAgents.filter(agent => agent.specialties.some(specialty => specialty.includes(ticket.type)));
+                            if (matchingAgents.length > 0) { // Randomly select matching agent to assign ticket to
+                                const agent = matchingAgents[Math.floor(Math.random() * matchingAgents.length)]; 
+                                ticket.setStatus('Assigned');
+                                ticket.assignTo(agent.agentID);
+                                agent.assignTicket(ticket.ticketID);
+
+                                await pool.promise().query('UPDATE tickets SET status = ?, assigned_to = ? WHERE ticket_id = ?', ['Assigned', agent.agentID, ticket.ticketID]);
+                                await pool.promise().query('UPDATE agents SET ticket = ? WHERE agent_id = ?', [JSON.stringify(ticket.ticketID), agent.agentID]);
+                            }
+                        } else { // Randomly select agent to assign ticket to if ticket type is miscellaneous
+                            const agent = availableAgents[Math.floor(Math.random() * availableAgents.length)];
+                            ticket.setStatus('Assigned');
+                            ticket.assignTo(agent.agentID);
+                            agent.assignTicket(ticket.ticketID);
+
+                            await pool.promise().query('UPDATE tickets SET status = ?, assigned_to = ? WHERE ticket_id = ?', ['Assigned', agent.agentID, ticket.ticketID]);
+                            await pool.promise().query('UPDATE agents SET ticket = ? WHERE agent_id = ?', [JSON.stringify(ticket.ticketID), agent.agentID]);
+                        }
+                    });
                 }
             }
         } catch (err) {

@@ -58,6 +58,7 @@ class Agent {
 
     assignTicket(ticket) {
         this.ticket = ticket;
+        this.setAvailability('Unavailable');
     }
 
     completeTicket() {
