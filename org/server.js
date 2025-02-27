@@ -1396,6 +1396,8 @@ app.listen(PORT, async () => {
                         }
                     });
                 }
+
+                firstLoad = new Date(); // Prevent multiple attempts to assign tickets
             }
         } catch (err) {
             console.error('Error loading customers and tickets from database:', err);
