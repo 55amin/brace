@@ -1168,6 +1168,40 @@ app.post('/api/update-assign', async (req, res) => {
     }
 });
 
+// Update break duration
+app.post('/api/update-duration', async (req, res) => {
+    const { duration } = req.body;
+    try {
+        const [rows] = await pool.promise().query('SELECT * FROM config WHERE setting_name = break_duration');
+        if (rows.length > 0) {
+            await pool.promise().query('UPDATE config SET setting_value = ? WHERE setting_name = break_duration', [duration]);
+        } else {
+            await pool.promise().query('INSERT INTO config (setting_name, setting_value) VALUES (?, ?)', ['break_duration', duration]);
+        }
+        res.status(200).json({ success: true, message: 'Break duration updated successfully' });
+    } catch (error) {
+        console.error('Error updating break duration:', error);
+        res.status(500).json({ success: false, message: 'Failed to update break duration' });
+    }
+});
+
+// Update break frequency
+app.post('/api/update-frequency', async (req, res) => {
+    const { frequency } = req.body;
+    try {
+        const [rows] = await pool.promise().query('SELECT * FROM config WHERE setting_name = break_frequency');
+        if (rows.length > 0) {
+            await pool.promise().query('UPDATE config SET setting_value = ? WHERE setting_name = break_frequency', [frequency]);
+        } else {
+            await pool.promise().query('INSERT INTO config (setting_name, setting_value) VALUES (?, ?)', ['break_frequency', frequency]);
+        }
+        res.status(200).json({ success: true, message: 'Break frequency updated successfully' });
+    } catch (error) {
+        console.error('Error updating break frequency:', error);
+        res.status(500).json({ success: false, message: 'Failed to update break frequency' });
+    }
+});
+
 // Complete task
 app.post('/api/complete-task', async (req, res) => {
     const { taskId } = req.body;
