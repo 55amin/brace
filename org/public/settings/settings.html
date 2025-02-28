@@ -30,7 +30,7 @@
         <button type="button" onclick="location.href='managetask.html'">Manage tasks</button>
         <form id="durationForm" name="break-duration" method="post" class="form">
             <label for="break-duration">Set break duration:</label>
-            <select id="break-duration" name="break-duration">
+            <select id="break-duration" name="break-duration" required="">
                 <option value="15">15 minutes</option>
                 <option value="30">30 minutes</option>
                 <option value="60" selected>1 hour</option>
@@ -39,7 +39,7 @@
         </form>
         <form id="frequencyForm" name="break-frequency" method="post" class="form">
             <label for="break-frequency">Set break frequency:</label>
-            <select id="break-frequency" name="break-frequency">
+            <select id="break-frequency" name="break-frequency" required="">
                 <option value="1">1 break</option>
                 <option value="2">2 breaks</option>
                 <option value="3">3 breaks</option>
@@ -47,5 +47,6 @@
             <input type="submit" class="submit-button" id="submit-frequency" value="Update break frequency"/>
         </form>
     </div>
+    <script type="module" src="../js/settings.js"></script>
 </body>
 </html>
