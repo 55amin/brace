@@ -1303,7 +1303,12 @@ app.listen(PORT, async () => {
                     const [endH, endM] = workingHours.end.split(':').map(Number);
                     const start = (startH * 60) + startM;
                     const end = (endH * 60) + endM;
-                    available = currentMinutes >= start && currentMinutes < end;
+        
+                    if (end < start) { // Check if working hours span across two days
+                        available = (currentMinutes >= start) || (currentMinutes < end);
+                    } else {
+                        available = (currentMinutes >= start) && (currentMinutes < end);
+                    }
                 }
                 agent.setAvailability(available ? 'Available' : 'Unavailable');
             });
