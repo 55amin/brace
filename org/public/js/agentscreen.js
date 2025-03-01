@@ -352,17 +352,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 startBreak.style.display = 'none';
                 const breakTimer = document.createElement('p');
                 breakTimer.id = 'break-timer';
-                breakTimer.fontstyle = 'italic';
+                breakTimer.style = 'font-style: italic;';
                 showError(`Break started for ${result.breakDuration} minutes`, 'neutral');
                 document.querySelector('.toggle-container').appendChild(breakTimer);
 
                 const breakEnd = Date.now() + (result.breakDuration * 60 * 1000);
-                const interval = setInterval(() => {
+                const breakInterval = setInterval(() => {
                     const remainingTime = Math.ceil((breakEnd - Date.now()) / 1000);
                     if (remainingTime > 0) {
                         breakTimer.innerText = `Break ends in ${Math.floor(remainingTime / 60)}:${remainingTime % 60}`;
                     } else {
-                        clearInterval(interval);
+                        clearInterval(breakInterval);
                         startBreak.style.display = 'block';
                         startBreak.disabled = false;
                     }
