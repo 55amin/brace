@@ -1416,9 +1416,10 @@ app.listen(PORT, async () => {
                     }
 
                     if (available) { // Check if the agent is currently on a break
+                        const [durationRows] = await pool.promise().query('SELECT setting_value FROM config WHERE setting_name = "break_duration"');
+                        const breakDuration = Number(durationRows[0].setting_value);
                         const [breakRows] = await pool.promise().query('SELECT * FROM breaks WHERE agent_id = ? AND break_date = ?', [agent.agentID, currentDate]);
                         const ongoingBreak = breakRows.find(breakRow => {
-                            const breakDuration = Number(breakRow.break_duration);
                             const breakEndTime = new Date(breakRow.break_start).getTime() + (breakDuration * 60 * 1000);
                             return currentTime.getTime() < breakEndTime;
                         });
