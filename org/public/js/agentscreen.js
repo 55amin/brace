@@ -355,9 +355,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 showError(`Break started for ${result.breakDuration} minutes`, 'neutral');
                 document.querySelector('.toggle-container').appendChild(breakTimer);
 
-                const breakEndTime = Date.now() + (result.breakDuration * 60 * 1000);
+                const breakEnd = Date.now() + (result.breakDuration * 60 * 1000);
                 const interval = setInterval(() => {
-                    const remainingTime = Math.ceil((breakEndTime - Date.now()) / 1000);
+                    const remainingTime = Math.ceil((breakEnd - Date.now()) / 1000);
                     if (remainingTime > 0) {
                         breakTimer.innerText = `Break ends in ${Math.floor(remainingTime / 60)}:${remainingTime % 60}`;
                     } else {
