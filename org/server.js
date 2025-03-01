@@ -1172,9 +1172,9 @@ app.post('/api/update-assign', async (req, res) => {
 app.post('/api/update-duration', async (req, res) => {
     const { duration } = req.body;
     try {
-        const [rows] = await pool.promise().query('SELECT * FROM config WHERE setting_name = break_duration');
+        const [rows] = await pool.promise().query('SELECT * FROM config WHERE setting_name = "break_duration"');
         if (rows.length > 0) {
-            await pool.promise().query('UPDATE config SET setting_value = ? WHERE setting_name = break_duration', [duration]);
+            await pool.promise().query('UPDATE config SET setting_value = ? WHERE setting_name = "break_duration"', [duration]);
         } else {
             await pool.promise().query('INSERT INTO config (setting_name, setting_value) VALUES (?, ?)', ['break_duration', duration]);
         }
@@ -1189,9 +1189,9 @@ app.post('/api/update-duration', async (req, res) => {
 app.post('/api/update-frequency', async (req, res) => {
     const { frequency } = req.body;
     try {
-        const [rows] = await pool.promise().query('SELECT * FROM config WHERE setting_name = break_frequency');
+        const [rows] = await pool.promise().query('SELECT * FROM config WHERE setting_name = "break_frequency"');
         if (rows.length > 0) {
-            await pool.promise().query('UPDATE config SET setting_value = ? WHERE setting_name = break_frequency', [frequency]);
+            await pool.promise().query('UPDATE config SET setting_value = ? WHERE setting_name = "break_frequency"', [frequency]);
         } else {
             await pool.promise().query('INSERT INTO config (setting_name, setting_value) VALUES (?, ?)', ['break_frequency', frequency]);
         }
@@ -1255,6 +1255,66 @@ app.post('/api/assign-ticket', async (req, res) => {
     } catch (err) {
         console.error('Error assigning ticket:', err);
         res.status(500).json({ success: false, message: 'Failed to assign ticket' });
+    }
+});
+
+// Start break
+app.post('/api/start-break', async (req, res) => {
+    const agentId = req.session.user.agentID;
+    const currentTime = new Date();
+    const currentDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][currentTime.getDay()];
+    const currentMinutes = (currentTime.getHours() * 60) + currentTime.getMinutes();
+
+    try { // Check break configuration and if agent has already taken breaks
+        const agent = agents.find(agent => agent.agentID === agentId);
+        if (!agent) {
+            return res.status(400).json({ success: false, message: 'Agent not found' });
+        }
+        const workingHours = agent.workingHours[currentDayOfWeek];
+        if (!workingHours) {
+            return res.status(400).json({ success: false, message: 'Agent is not within working hours, cannot start break' });
+        }
+
+        const [startH, startM] = workingHours.start.split(':').map(Number);
+        const [endH, endM] = workingHours.end.split(':').map(Number);
+        const start = (startH * 60) + startM;
+        const end = (endH * 60) + endM;
+
+        let isWorking = false; // Check if agent is within working hours
+        if (end < start) { // Check if working hours span across two days
+            isWorking = (currentMinutes >= start) || (currentMinutes < end);
+        } else {
+            isWorking = (currentMinutes >= start) && (currentMinutes < end);
+        }
+        if (!isWorking) {
+            return res.status(400).json({ success: false, message: 'Agent is not within working hours, cannot start break' });
+        }
+
+        // Delete previous working day break entries
+        await pool.promise().query('DELETE FROM breaks WHERE agent_id = ? AND break_date < ?', [agentId, currentDay]);
+        const [durationRows] = await pool.promise().query('SELECT setting_value FROM config WHERE setting_name = "break_duration"');
+        const [frequencyRows] = await pool.promise().query('SELECT setting_value FROM config WHERE setting_name = "break_frequency"');
+        const breakDuration = Number(durationRows[0].setting_value);
+        const breakFrequency = Number(frequencyRows[0].setting_value);
+
+    
+        const [breakRows] = await pool.promise().query('SELECT * FROM breaks WHERE agent_id = ? AND break_date = ?', [agentId, currentDay]);
+        if (breakRows.length >= breakFrequency) {
+            return res.status(400).json({ success: false, message: 'User has already taken all breaks for current day' });
+        }
+
+        if (breakRows.length > 0) { 
+            await pool.promise().query('UPDATE breaks SET break_number = ? WHERE agent_id = ? AND break_date = ?', [breakRows[0].break_number + 1, agentId, currentDay]);
+            agent.setAvailability('Unavailable');
+        } else if (breakRows.length === 0) { 
+            agent.setAvailability('Unavailable');
+            await pool.promise().query('INSERT INTO breaks (agent_id, break_date, break_number) VALUES (?, ?, ?)', [agentId, currentDay, 1]);
+        }
+
+        res.status(200).json({ success: true, message: `Break started for ${breakDuration} minutes`, breakDuration });
+    } catch (error) {
+        console.error('Error starting break:', error);
+        res.status(500).json({ success: false, message: 'Failed to start break' });
     }
 });
 
@@ -1326,7 +1386,7 @@ app.listen(PORT, async () => {
         try { // Set availability for each agent based on working hours
             const currentTime = new Date();
             const currentDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][currentTime.getDay()];
-            const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
+            const currentMinutes = (currentTime.getHours() * 60) + currentTime.getMinutes();
         
             agents.forEach(agent => {
                 const workingHours = agent.workingHours[currentDay];

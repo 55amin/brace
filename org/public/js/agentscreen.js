@@ -335,4 +335,50 @@ document.addEventListener('DOMContentLoaded', async () => {
             dropdownContainer.style.display = 'none';
         }
     });
+
+    const startBreak = document.getElementById('breakButton');
+    startBreak.addEventListener('click', async () => { // Record break and start timer
+        try {
+            startBreak.disabled = true;
+            const response = await fetch(`${baseUrl}/api/start-break`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            const result = await response.json();
+
+            if (result.success) { // Display break end time
+                startBreak.style.display = 'none';
+                const breakTimer = document.createElement('p');
+                breakTimer.id = 'break-timer';
+                showError(`Break started for ${result.breakDuration} minutes`, 'neutral');
+                document.querySelector('.toggle-container').appendChild(breakTimer);
+
+                const breakEndTime = Date.now() + (result.breakDuration * 60 * 1000);
+                const interval = setInterval(() => {
+                    const remainingTime = Math.ceil((breakEndTime - Date.now()) / 1000);
+                    if (remainingTime > 0) {
+                        breakTimer.innerText = `Break ends in ${Math.floor(remainingTime / 60)}:${remainingTime % 60}`;
+                    } else {
+                        clearInterval(interval);
+                        startBreak.style.display = 'block';
+                        startBreak.disabled = false;
+                    }
+                }, 1000);
+            } else if (result.message === 'Failed to start break') {
+                startBreak.disabled = false;
+                showError(result.message);
+            } else {
+                startBreak.disabled = true;
+                startBreak.backgroundColor = '#3b505e';
+                toggleContainer.appendChild(breakTimer);
+                showError(result.message);
+            }
+        } catch (error) {
+            startBreak.disabled = false;
+            showError('Failed to start break');
+            console.error('Error starting break:', error);
+        }
+    });
 });
