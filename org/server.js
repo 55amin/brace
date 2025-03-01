@@ -1270,7 +1270,7 @@ app.post('/api/start-break', async (req, res) => {
         if (!agent) {
             return res.status(400).json({ success: false, message: 'Agent not found' });
         }
-        const workingHours = agent.workingHours[currentDayOfWeek];
+        const workingHours = agent.workingHours[currentDay];
         if (!workingHours) {
             return res.status(400).json({ success: false, message: 'Agent is not within working hours, cannot start break' });
         }
