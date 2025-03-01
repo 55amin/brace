@@ -373,7 +373,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 startBreak.disabled = true;
                 startBreak.backgroundColor = '#3b505e';
-                toggleContainer.appendChild(breakTimer);
                 showError(result.message);
             }
         } catch (error) {

@@ -1291,14 +1291,14 @@ app.post('/api/start-break', async (req, res) => {
         }
 
         // Delete previous working day break entries
-        await pool.promise().query('DELETE FROM breaks WHERE agent_id = ? AND break_date < ?', [agentId, currentDay]);
+        await pool.promise().query('DELETE FROM breaks WHERE agent_id = ? AND break_date < ?', [agentId, currentTime.getDate()]);
         const [durationRows] = await pool.promise().query('SELECT setting_value FROM config WHERE setting_name = "break_duration"');
         const [frequencyRows] = await pool.promise().query('SELECT setting_value FROM config WHERE setting_name = "break_frequency"');
         const breakDuration = Number(durationRows[0].setting_value);
         const breakFrequency = Number(frequencyRows[0].setting_value);
 
         // Check if the agent has taken all breaks for the day or if there is an ongoing break
-        const [breakRows] = await pool.promise().query('SELECT * FROM breaks WHERE agent_id = ? AND break_date = ?', [agentId, currentDay]);
+        const [breakRows] = await pool.promise().query('SELECT * FROM breaks WHERE agent_id = ? AND break_date = ?', [agentId, currentTime.getDate()]);
         if (breakRows.length >= breakFrequency) {
             return res.status(400).json({ success: false, message: 'User has already taken all breaks for current day' });
         }
@@ -1313,11 +1313,11 @@ app.post('/api/start-break', async (req, res) => {
         
 
         if (breakRows.length > 0) { 
-            await pool.promise().query('UPDATE breaks SET break_number = ? WHERE agent_id = ? AND break_date = ?', [breakRows[0].break_number + 1, agentId, currentDay]);
+            await pool.promise().query('UPDATE breaks SET break_number = ?, break_start = ? WHERE agent_id = ? AND break_date = ?', [breakRows[0].break_number + 1, currentTime, agentId, currentDay.getDate()]);
             agent.setAvailability('Unavailable');
         } else if (breakRows.length === 0) { 
             agent.setAvailability('Unavailable');
-            await pool.promise().query('INSERT INTO breaks (agent_id, break_date, break_number) VALUES (?, ?, ?)', [agentId, currentDay, 1]);
+            await pool.promise().query('INSERT INTO breaks (agent_id, break_start, break_date, break_number) VALUES (?, ?, ?, ?)', [agentId, currentTime, currentTime.getDate(), 1]);
         }
 
         res.status(200).json({ success: true, message: `Break started for ${breakDuration} minutes`, breakDuration });
