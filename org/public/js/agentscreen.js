@@ -352,6 +352,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 startBreak.style.display = 'none';
                 const breakTimer = document.createElement('p');
                 breakTimer.id = 'break-timer';
+                breakTimer.fontstyle = 'italic';
                 showError(`Break started for ${result.breakDuration} minutes`, 'neutral');
                 document.querySelector('.toggle-container').appendChild(breakTimer);
 
