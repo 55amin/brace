@@ -1264,6 +1264,8 @@ app.post('/api/start-break', async (req, res) => {
     const currentTime = new Date();
     const currentDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][currentTime.getDay()];
     const currentMinutes = (currentTime.getHours() * 60) + currentTime.getMinutes();
+    const currentDate = currentTime.toISOString().split('T')[0];
+    
 
     try { // Check break configuration
         const agent = agents.find(agent => agent.agentID === agentId);
@@ -1291,14 +1293,14 @@ app.post('/api/start-break', async (req, res) => {
         }
 
         // Delete previous working day break entries
-        await pool.promise().query('DELETE FROM breaks WHERE agent_id = ? AND break_date < ?', [agentId, currentTime.getDate()]);
+        await pool.promise().query('DELETE FROM breaks WHERE agent_id = ? AND break_date < ?', [agentId, currentDate]);
         const [durationRows] = await pool.promise().query('SELECT setting_value FROM config WHERE setting_name = "break_duration"');
         const [frequencyRows] = await pool.promise().query('SELECT setting_value FROM config WHERE setting_name = "break_frequency"');
         const breakDuration = Number(durationRows[0].setting_value);
         const breakFrequency = Number(frequencyRows[0].setting_value);
 
         // Check if the agent has taken all breaks for the day or if there is an ongoing break
-        const [breakRows] = await pool.promise().query('SELECT * FROM breaks WHERE agent_id = ? AND break_date = ?', [agentId, currentTime.getDate()]);
+        const [breakRows] = await pool.promise().query('SELECT * FROM breaks WHERE agent_id = ? AND break_date = ?', [agentId, currentDate]);
         if (breakRows.length >= breakFrequency) {
             return res.status(400).json({ success: false, message: 'User has already taken all breaks for current day' });
         }
@@ -1311,15 +1313,13 @@ app.post('/api/start-break', async (req, res) => {
             return res.status(200).json({ success: false, message: `Break already in progress for ${breakDuration} minutes, from ${breakStart}` });
         }
         
-
         if (breakRows.length > 0) { 
-            await pool.promise().query('UPDATE breaks SET break_number = ?, break_start = ? WHERE agent_id = ? AND break_date = ?', [breakRows[0].break_number + 1, currentTime, agentId, currentDay.getDate()]);
+            await pool.promise().query('UPDATE breaks SET break_number = ?, break_start = ? WHERE agent_id = ? AND break_date = ?', [breakRows[0].break_number + 1, currentTime, agentId, currentDate]);
             agent.setAvailability('Unavailable');
         } else if (breakRows.length === 0) { 
             agent.setAvailability('Unavailable');
-            await pool.promise().query('INSERT INTO breaks (agent_id, break_start, break_date, break_number) VALUES (?, ?, ?, ?)', [agentId, currentTime, currentTime.getDate(), 1]);
+            await pool.promise().query('INSERT INTO breaks (agent_id, break_start, break_date, break_number) VALUES (?, ?, ?, ?)', [agentId, currentTime, currentDate, 1]);
         }
-
         res.status(200).json({ success: true, message: `Break started for ${breakDuration} minutes`, breakDuration });
     } catch (error) {
         console.error('Error starting break:', error);
@@ -1396,8 +1396,10 @@ app.listen(PORT, async () => {
             const currentTime = new Date();
             const currentDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][currentTime.getDay()];
             const currentMinutes = (currentTime.getHours() * 60) + currentTime.getMinutes();
+            const currentDate = currentTime.toISOString().split('T')[0];
+
         
-            agents.forEach(agent => {
+            agents.forEach(async agent => {
                 const workingHours = agent.workingHours[currentDay];
                 let available = false;
                 
@@ -1411,6 +1413,18 @@ app.listen(PORT, async () => {
                         available = (currentMinutes >= start) || (currentMinutes < end);
                     } else {
                         available = (currentMinutes >= start) && (currentMinutes < end);
+                    }
+
+                    if (available) { // Check if the agent is currently on a break
+                        const [breakRows] = await pool.promise().query('SELECT * FROM breaks WHERE agent_id = ? AND break_date = ?', [agent.agentID, currentDate]);
+                        const ongoingBreak = breakRows.find(breakRow => {
+                            const breakDuration = Number(breakRow.break_duration);
+                            const breakEndTime = new Date(breakRow.break_start).getTime() + (breakDuration * 60 * 1000);
+                            return currentTime.getTime() < breakEndTime;
+                        });
+                        if (ongoingBreak) { // Set agents on break to unavailable
+                            available = false; 
+                        }
                     }
                 }
                 agent.setAvailability(available ? 'Available' : 'Unavailable');
