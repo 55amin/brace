@@ -9,8 +9,9 @@ const {
     validateTitle,
     validateDesc,
     validateDeadline
-} = require('./utils/validation');
+} = require('../utils/validation');
 const bcrypt = require('bcrypt');
+const pool = require('../db');
 
 // Update forename
 router.post('/api/update-forename', async (req, res) => {

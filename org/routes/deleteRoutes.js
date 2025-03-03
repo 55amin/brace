@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const pool = require('../db');
 
 // Delete user from database and memory
 router.post('/api/delete-user', async (req, res) => {

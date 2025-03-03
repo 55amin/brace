@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const pool = require('../db');
 
 // Return all users
 router.post('/api/get-users', async (req, res) => {

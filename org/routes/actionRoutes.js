@@ -3,9 +3,10 @@ const router = express.Router();
 const {
     validateEmail,
     validatePassword
-} = require('./utils/validation');
+} = require('../utils/validation');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const pool = require('../db');
 
 // Notify admins of multiple failed login attempts
 router.post('/api/notify-admin', async (req, res) => {

@@ -9,11 +9,12 @@ const {
     validateTitle,
     validateDesc,
     validateDeadline
-} = require('./utils/validation');
+} = require('../utils/validation');
 const Administrator = require('../public/models/administrator');
 const Agent = require('../public/models/agent');
 const Task = require('../public/models/task');
 const bcrypt = require('bcrypt');
+const pool = require('../db');
 
 // Create administrator account
 router.post('/api/create-admin', async (req, res) => {
