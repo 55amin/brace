@@ -11,7 +11,7 @@ const {
     validateDeadline
 } = require('../utils/validation');
 const bcrypt = require('bcrypt');
-const pool = require('../db');
+const pool = require('../utils/db');
 const { admins, agents, tasks } = require('../server');
 
 // Update forename

@@ -14,7 +14,7 @@ const Administrator = require('../public/models/administrator');
 const Agent = require('../public/models/agent');
 const Task = require('../public/models/task');
 const bcrypt = require('bcrypt');
-const pool = require('../db');
+const pool = require('../utils/db');
 const { admins, agents, tasks } = require('../server');
 
 // Create administrator account

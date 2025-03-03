@@ -8,8 +8,7 @@ const Agent = require('./public/models/agent');
 const Task = require('./public/models/task');
 const Customer = require('./public/models/customer');
 const Ticket = require('./public/models/ticket');
-const nodemailer = require('nodemailer');
-const pool = require('./db');
+const pool = require('./utils/db');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -40,14 +39,6 @@ app.use((req, res, next) => {
         req.session.touch(); // Refresh session upon user interaction
     }
     next();
-});
-
-const transporter = nodemailer.createTransport({ // Configure email service
-    service: 'Gmail',
-    auth: {
-        user: process.env.EMAIL_ADDRESS, 
-        pass: process.env.EMAIL_PASSWORD 
-    }
 });
 
 const admins = [];

@@ -6,15 +6,16 @@ const {
 } = require('../utils/validation');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const pool = require('../db');
+const pool = require('../utils/db');
 const { admins, agents, tasks, tickets } = require('../server');
+const mail = require('../utils/mail');
 
 // Notify admins of multiple failed login attempts
 router.post('/notify-admin', async (req, res) => {
     const { email } = req.body;
     try {
         for (const admin of admins) { // Send email to each admin
-            await transporter.sendMail({
+            await mail.sendMail({
                 from: `Brace for Techmedic <${process.env.EMAIL_ADDRESS}>`,
                 to: admin.email,
                 subject: 'Brace: Multiple failed login attempts',
@@ -55,7 +56,7 @@ router.post('/email-code', async (req, res) => {
             message = `To reset your password, enter this verification code: ${code}\n\nThis code will expire in 10 minutes.\n\nBrace for Techmedic`;
         }
 
-        await transporter.sendMail({ // Send verification email
+        await mail.sendMail({ // Send verification email
             from: `Brace for Techmedic <${process.env.EMAIL_ADDRESS}>`,
             to: email,
             subject,
