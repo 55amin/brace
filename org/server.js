@@ -56,6 +56,14 @@ const tasks = [];
 const customers = [];
 const tickets = [];
 
+module.exports = {
+    admins,
+    agents,
+    tasks,
+    customers,
+    tickets
+};
+
 // Check if admin is authenticated
 function isAuthenticatedAdmin(req, res, next) { // Check if session exists and user is logged in as an admin
     if (req.session && req.session.user && req.session.user.adminID) { 

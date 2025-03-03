@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const { admins, agents, tasks, customers, tickets } = require('../server');
 
 // Return all users
 router.post('/get-users', async (req, res) => {

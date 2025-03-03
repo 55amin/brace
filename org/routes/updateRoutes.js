@@ -12,6 +12,7 @@ const {
 } = require('../utils/validation');
 const bcrypt = require('bcrypt');
 const pool = require('../db');
+const { admins, agents, tasks } = require('../server');
 
 // Update forename
 router.post('/update-forename', async (req, res) => {

@@ -7,6 +7,7 @@ const {
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const pool = require('../db');
+const { admins, agents, tasks, tickets } = require('../server');
 
 // Notify admins of multiple failed login attempts
 router.post('/notify-admin', async (req, res) => {

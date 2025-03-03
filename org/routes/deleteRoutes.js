@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../db');
+const { admins, agents, tasks } = require('../server');
 
 // Delete user from database and memory
 router.post('/delete-user', async (req, res) => {
