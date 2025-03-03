@@ -25,7 +25,7 @@ router.post('/update-forename', async (req, res) => {
     }
 
     try { // Update forename in database
-        await pool.promise().query('UPDATE administrators SET forename = ? WHERE admin_id = ?', [forename, userId]);
+        await pool.query('UPDATE administrators SET forename = ? WHERE admin_id = ?', [forename, userId]);
         const admin = admins.find(admin => admin.adminID === userId);
         if (admin) {
             admin.forename = forename; // Update the in-memory admin's forename
@@ -49,7 +49,7 @@ router.post('/update-surname', async (req, res) => {
     }
 
     try { // Update surname in database
-        await pool.promise().query('UPDATE administrators SET surname = ? WHERE admin_id = ?', [surname, userId]);
+        await pool.query('UPDATE administrators SET surname = ? WHERE admin_id = ?', [surname, userId]);
         const admin = admins.find(admin => admin.adminID === userId);
         if (admin) {
             admin.surname = surname; // Update the in-memory admin's surname
@@ -85,7 +85,7 @@ router.post('/update-email', async (req, res) => {
         table = 'agents';
     }
 
-    const [rowsEmail] = await pool.promise().query(
+    const [rowsEmail] = await pool.query(
         'SELECT COUNT(*) as count FROM ?? WHERE email = ?',
         [table, validatedEmail.value] // Check if email address exists in database
     );
@@ -96,13 +96,13 @@ router.post('/update-email', async (req, res) => {
 
     try { // Update email address in database
         if (role === 'admin') {
-            await pool.promise().query('UPDATE administrators SET email = ? WHERE admin_id = ?', [email, userId]);
+            await pool.query('UPDATE administrators SET email = ? WHERE admin_id = ?', [email, userId]);
             const admin = admins.find(admin => admin.adminID === userId);
             if (admin) {
                 admin.email = email; // Update the in-memory admin's email address
             }
         } else if (role === 'agent') {
-            await pool.promise().query('UPDATE agents SET email = ? WHERE agent_id = ?', [email, userId]);
+            await pool.query('UPDATE agents SET email = ? WHERE agent_id = ?', [email, userId]);
             const agent = agents.find(agent => agent.agentID === userId);
             if (agent) {
                 agent.email = email; // Update the in-memory agent's email address
@@ -126,7 +126,7 @@ router.post('/update-phone', async (req, res) => {
         return res.status(400).json({ success: false, errors });
     }
 
-    const [rowsPhone] = await pool.promise().query(
+    const [rowsPhone] = await pool.query(
         'SELECT COUNT(*) as count FROM administrators WHERE phone = ?',
         [validatedPhone.value] // Check if phone number exists in database
     );
@@ -136,7 +136,7 @@ router.post('/update-phone', async (req, res) => {
     }
 
     try { // Update phone number in database
-        await pool.promise().query('UPDATE administrators SET phone = ? WHERE admin_id = ?', [phone, userId]);
+        await pool.query('UPDATE administrators SET phone = ? WHERE admin_id = ?', [phone, userId]);
         const admin = admins.find(admin => admin.adminID === userId);
         if (admin) {
             admin.phone = phone; // Update the in-memory admin's phone number
@@ -159,7 +159,7 @@ router.post('/update-username', async (req, res) => {
         return res.status(400).json({ success: false, errors });
     }
 
-    const [rowsUsername] = await pool.promise().query(
+    const [rowsUsername] = await pool.query(
         'SELECT COUNT(*) as count FROM agents WHERE username = ?',
         [validatedUsername.value] // Check if username exists in database
     );
@@ -169,7 +169,7 @@ router.post('/update-username', async (req, res) => {
     }
 
     try { // Update username in database
-        await pool.promise().query('UPDATE agents SET username = ? WHERE agent_id = ?', [username, userId]);
+        await pool.query('UPDATE agents SET username = ? WHERE agent_id = ?', [username, userId]);
         const agent = agents.find(agent => agent.agentID === userId);
         if (agent) {
             agent.username = username; // Update the in-memory agent's username
@@ -185,7 +185,7 @@ router.post('/update-username', async (req, res) => {
 router.post('/update-access', async (req, res) => {
     const { accessLevel, userId } = req.body;
     try { // Update access level in database
-        await pool.promise().query('UPDATE agents SET access_level = ? WHERE agent_id = ?', [accessLevel, userId]);
+        await pool.query('UPDATE agents SET access_level = ? WHERE agent_id = ?', [accessLevel, userId]);
         const agent = agents.find(agent => agent.agentID === userId);
         if (agent) {
             agent.setAccessLevel(accessLevel); // Update the in-memory agent's access level
@@ -202,7 +202,7 @@ router.post('/update-hours', async (req, res) => {
     const { workingHours, userId } = req.body;
 
     try { // Update working hours in database
-        await pool.promise().query('UPDATE agents SET working_hours = ? WHERE agent_id = ?', [JSON.stringify(workingHours), userId]);
+        await pool.query('UPDATE agents SET working_hours = ? WHERE agent_id = ?', [JSON.stringify(workingHours), userId]);
         const agent = agents.find(agent => agent.agentID === userId);
         if (agent) {
             agent.setWorkingHours(workingHours); // Update the in-memory agent's working hours
@@ -219,7 +219,7 @@ router.post('/update-specialties', async (req, res) => {
     const { specialties, userId } = req.body;
 
     try { // Update specialties in database
-        await pool.promise().query('UPDATE agents SET specialty = ? WHERE agent_id = ?', [JSON.stringify(specialties), userId]);
+        await pool.query('UPDATE agents SET specialty = ? WHERE agent_id = ?', [JSON.stringify(specialties), userId]);
         const agent = agents.find(agent => agent.agentID === userId);
         if (agent) {
             agent.setSpecialties(specialties); // Update the in-memory agent's specialties
@@ -244,7 +244,7 @@ router.post('/update-password', async (req, res) => {
 
     try { // Update password in database
         const hashedPassword = await bcrypt.hash(validatedPassword.value, 10);
-        await pool.promise().query('UPDATE agents SET hashed_password = ? WHERE agent_id = ?', [hashedPassword, userId]);
+        await pool.query('UPDATE agents SET hashed_password = ? WHERE agent_id = ?', [hashedPassword, userId]);
         const agent = agents.find(agent => agent.agentID === userId);
         if (agent) {
             agent.setPassword(hashedPassword); // Update the in-memory agent's password
@@ -268,7 +268,7 @@ router.post('/update-title', async (req, res) => {
     }
 
     try { // Update title in database
-        await pool.promise().query('UPDATE tasks SET title = ? WHERE task_id = ?', [validatedTitle.value, taskId]);
+        await pool.query('UPDATE tasks SET title = ? WHERE task_id = ?', [validatedTitle.value, taskId]);
         const task = tasks.find(task => task.taskID === taskId);
         if (task) {
             task.title = validatedTitle.value; // Update the in-memory task's title
@@ -292,7 +292,7 @@ router.post('/update-desc', async (req, res) => {
     }
 
     try { // Update description in the database
-        await pool.promise().query('UPDATE tasks SET description = ? WHERE task_id = ?', [validatedDesc.value, taskId]);
+        await pool.query('UPDATE tasks SET description = ? WHERE task_id = ?', [validatedDesc.value, taskId]);
         const task = tasks.find(task => task.taskID === taskId);
         if (task) {
             task.desc = validatedDesc.value; // Update the in-memory task's description
@@ -316,7 +316,7 @@ router.post('/update-deadline', async (req, res) => {
     }
 
     try { // Update deadline in database
-        await pool.promise().query('UPDATE tasks SET deadline = ? WHERE task_id = ?', [validatedDeadline.value, taskId]);
+        await pool.query('UPDATE tasks SET deadline = ? WHERE task_id = ?', [validatedDeadline.value, taskId]);
         const task = tasks.find(task => task.taskID === taskId);
         if (task) {
             task.deadline = validatedDeadline.value; // Update the in-memory task's deadline
@@ -343,14 +343,14 @@ router.post('/update-assign', async (req, res) => {
             completionStatus[agentID] = false;
         });
 
-        await pool.promise().query('UPDATE tasks SET assigned_to = ?, completion_status = ? WHERE task_id = ?', [JSON.stringify(assignedTo), JSON.stringify(completionStatus), taskId]);
+        await pool.query('UPDATE tasks SET assigned_to = ?, completion_status = ? WHERE task_id = ?', [JSON.stringify(assignedTo), JSON.stringify(completionStatus), taskId]);
         const task = tasks.find(task => task.taskID === taskId);
         if (task) {
             task.assignedTo.forEach(async (agentID) => { // Remove task from previously assigned agents
                 const agent = agents.find(agent => agent.agentID === Number(agentID));
                 if (agent) {
                     agent.removeTask(task.taskID);
-                    await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
+                    await pool.query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
                 }
             });
 
@@ -360,7 +360,7 @@ router.post('/update-assign', async (req, res) => {
                 const agent = agents.find(agent => agent.agentID === Number(agentID));
                 if (agent) {
                     agent.addTask(task.taskID);
-                    await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
+                    await pool.query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
                 }
             });
         }
@@ -375,11 +375,11 @@ router.post('/update-assign', async (req, res) => {
 router.post('/update-duration', async (req, res) => {
     const { duration } = req.body;
     try {
-        const [rows] = await pool.promise().query('SELECT * FROM config WHERE setting_name = "break_duration"');
+        const [rows] = await pool.query('SELECT * FROM config WHERE setting_name = "break_duration"');
         if (rows.length > 0) {
-            await pool.promise().query('UPDATE config SET setting_value = ? WHERE setting_name = "break_duration"', [duration]);
+            await pool.query('UPDATE config SET setting_value = ? WHERE setting_name = "break_duration"', [duration]);
         } else {
-            await pool.promise().query('INSERT INTO config (setting_name, setting_value) VALUES (?, ?)', ['break_duration', duration]);
+            await pool.query('INSERT INTO config (setting_name, setting_value) VALUES (?, ?)', ['break_duration', duration]);
         }
         res.status(200).json({ success: true, message: 'Break duration updated successfully' });
     } catch (error) {
@@ -392,11 +392,11 @@ router.post('/update-duration', async (req, res) => {
 router.post('/update-frequency', async (req, res) => {
     const { frequency } = req.body;
     try {
-        const [rows] = await pool.promise().query('SELECT * FROM config WHERE setting_name = "break_frequency"');
+        const [rows] = await pool.query('SELECT * FROM config WHERE setting_name = "break_frequency"');
         if (rows.length > 0) {
-            await pool.promise().query('UPDATE config SET setting_value = ? WHERE setting_name = "break_frequency"', [frequency]);
+            await pool.query('UPDATE config SET setting_value = ? WHERE setting_name = "break_frequency"', [frequency]);
         } else {
-            await pool.promise().query('INSERT INTO config (setting_name, setting_value) VALUES (?, ?)', ['break_frequency', frequency]);
+            await pool.query('INSERT INTO config (setting_name, setting_value) VALUES (?, ?)', ['break_frequency', frequency]);
         }
         res.status(200).json({ success: true, message: 'Break frequency updated successfully' });
     } catch (error) {

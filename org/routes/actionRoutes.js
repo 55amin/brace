@@ -35,11 +35,11 @@ router.post('/email-code', async (req, res) => {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     try {
-        await pool.promise().query( // Delete any existing codes if a user tries to resend email
+        await pool.query( // Delete any existing codes if a user tries to resend email
             'DELETE FROM verifications WHERE email = ?',
             [email]);
 
-        await pool.promise().query( // Insert email address and verification code into database
+        await pool.query( // Insert email address and verification code into database
             'INSERT INTO verifications (email, code, type, created_at, expires_at) VALUES (?, ?, ?, ?, ?)', 
             [email, code, type, createdAt, expiresAt]);
 
@@ -73,7 +73,7 @@ router.post('/verify-code', async (req, res) => {
     currentTime = new Date();
 
     try {
-        const [rows] = await pool.promise().query( // Find the matching row
+        const [rows] = await pool.query( // Find the matching row
             'SELECT * FROM verifications WHERE email = ? AND code = ? AND expires_at > ?',
             [email, code, currentTime]);
 
@@ -82,13 +82,13 @@ router.post('/verify-code', async (req, res) => {
                 const admin = admins.find(admin => admin.email === email);
                 if (admin) {
                     admin.setVerified();
-                    await pool.promise().query('UPDATE administrators SET verified = 1 WHERE email = ?', [email]); 
+                    await pool.query('UPDATE administrators SET verified = 1 WHERE email = ?', [email]); 
                 }
             } else if (user === 'agent') { 
                 const agent = agents.find(agent => agent.email === email);
                 if (agent) {
                     agent.setVerified();
-                    await pool.promise().query('UPDATE agents SET verified = 1 WHERE email = ?', [email]); 
+                    await pool.query('UPDATE agents SET verified = 1 WHERE email = ?', [email]); 
                 }
             }
             res.status(200).json({ success: true, message: 'Verification successful' });
@@ -108,13 +108,13 @@ router.post('/unverify-user', async (req, res) => {
             const admin = admins.find(admin => admin.adminID === userId);
             if (admin) {
                 admin.setUnverified();
-                await pool.promise().query('UPDATE administrators SET verified = 0 WHERE admin_id = ?', [userId]);
+                await pool.query('UPDATE administrators SET verified = 0 WHERE admin_id = ?', [userId]);
             }
         } else if (role === 'agent') {  
             const agent = agents.find(agent => agent.agentID === userId);
             if (agent) {
                 agent.setUnverified();
-                await pool.promise().query('UPDATE agents SET verified = 0 WHERE agent_id = ?', [userId]);
+                await pool.query('UPDATE agents SET verified = 0 WHERE agent_id = ?', [userId]);
             }
         }
         res.status(200).json({ success: true, message: 'User unverified successfully' });
@@ -138,7 +138,7 @@ router.post('/login', async (req, res) => {
 
     try {
         if (role === 'admin') {
-            const [rowsEmail] = await pool.promise().query(
+            const [rowsEmail] = await pool.query(
                 'SELECT COUNT(*) as count FROM administrators WHERE email = ?',
                 [validatedEmail.value] // Check if email address exists in database
             );
@@ -162,7 +162,7 @@ router.post('/login', async (req, res) => {
                 }
             }
         } else if (role === 'agent') {
-            const [rowsEmail] = await pool.promise().query(
+            const [rowsEmail] = await pool.query(
                 'SELECT COUNT(*) as count FROM agents WHERE email = ?',
                 [validatedEmail.value] // Check if email address exists in database
             );
@@ -209,7 +209,7 @@ router.post('/reset-password', async (req, res) => {
 
     if (type === 'login') {
         currentTime = new Date();
-        const [rows] = await pool.promise().query( // Find the matching row
+        const [rows] = await pool.query( // Find the matching row
             'SELECT * FROM verifications WHERE email = ? AND type = ? AND expires_at > ?',
             [email, 'password', currentTime]);
 
@@ -221,7 +221,7 @@ router.post('/reset-password', async (req, res) => {
 
     try { // Update password in database
         const hashedPassword = await bcrypt.hash(validatedPassword.value, 10);
-            await pool.promise().query(
+            await pool.query(
                 'UPDATE administrators SET hashed_password = ? WHERE email = ?',
                 [hashedPassword, validatedEmail.value] 
             );
@@ -245,16 +245,16 @@ router.post('/complete-task', async (req, res) => {
         const task = tasks.find(task => task.taskID === taskId);
         if (task) {
             task.setComplete(agentId); // Update agent's completion status
-            await pool.promise().query('UPDATE tasks SET completion_status = ? WHERE task_id = ?', [JSON.stringify(task.completionStatus), taskId]);
+            await pool.query('UPDATE tasks SET completion_status = ? WHERE task_id = ?', [JSON.stringify(task.completionStatus), taskId]);
             if (task.status === 'Completed') {
-                await pool.promise().query('UPDATE tasks SET status = ? WHERE task_id = ?', ['Completed', taskId]);
+                await pool.query('UPDATE tasks SET status = ? WHERE task_id = ?', ['Completed', taskId]);
             }
         }
         const agent = agents.find(agent => agent.agentID === Number(agentId));
         const assignedToArray = JSON.parse(task.assignedTo);
         if (assignedToArray.includes(agentId)) { // Remove task from agent's tasks array
             agent.removeTask(task.taskID);
-            await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentId]);
+            await pool.query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentId]);
         }
         res.status(200).json({ success: true, message: 'Task completed successfully' });
     } catch (err) {
@@ -271,9 +271,9 @@ router.post('/assign-ticket', async (req, res) => {
         const ticket = tickets.find(ticket => ticket.ticketID === ticketId);
         if (ticket.status === 'Unassigned') { // Update ticket status in memory and database
             ticket.setStatus('Assigned');
-            await pool.promise().query('UPDATE tickets SET status = ? WHERE ticket_id = ?', ['Assigned', ticketId]);
+            await pool.query('UPDATE tickets SET status = ? WHERE ticket_id = ?', ['Assigned', ticketId]);
             ticket.assignTo(agentId);
-            await pool.promise().query('UPDATE tickets SET assigned_to = ? WHERE ticket_id = ?', [agentId, ticketId]);
+            await pool.query('UPDATE tickets SET assigned_to = ? WHERE ticket_id = ?', [agentId, ticketId]);
         } else {
             return res.status(400).json({ success: false, message: 'Ticket already assigned' });
         }
@@ -282,7 +282,7 @@ router.post('/assign-ticket', async (req, res) => {
         if (agent && !agent.ticket) {
             agent.assignTicket(ticketId); // Add ticket to agent
             agent.setAvailability('Unavailable'); // Set agent to unavailable
-            await pool.promise().query('UPDATE agents SET ticket = ? WHERE agent_id = ?', [JSON.stringify(agent.ticket), agentId]);
+            await pool.query('UPDATE agents SET ticket = ? WHERE agent_id = ?', [JSON.stringify(agent.ticket), agentId]);
         } else {
             return res.status(400).json({ success: false, message: 'Agent already assigned to a ticket' });
         }
@@ -328,14 +328,14 @@ router.post('/start-break', async (req, res) => {
         }
 
         // Delete previous working day break entries
-        await pool.promise().query('DELETE FROM breaks WHERE agent_id = ? AND break_date < ?', [agentId, currentDate]);
-        const [durationRows] = await pool.promise().query('SELECT setting_value FROM config WHERE setting_name = "break_duration"');
-        const [frequencyRows] = await pool.promise().query('SELECT setting_value FROM config WHERE setting_name = "break_frequency"');
+        await pool.query('DELETE FROM breaks WHERE agent_id = ? AND break_date < ?', [agentId, currentDate]);
+        const [durationRows] = await pool.query('SELECT setting_value FROM config WHERE setting_name = "break_duration"');
+        const [frequencyRows] = await pool.query('SELECT setting_value FROM config WHERE setting_name = "break_frequency"');
         const breakDuration = Number(durationRows[0].setting_value);
         const breakFrequency = Number(frequencyRows[0].setting_value);
 
         // Check if the agent has taken all breaks for the day or if there is an ongoing break
-        const [breakRows] = await pool.promise().query('SELECT * FROM breaks WHERE agent_id = ? AND break_date = ?', [agentId, currentDate]);
+        const [breakRows] = await pool.query('SELECT * FROM breaks WHERE agent_id = ? AND break_date = ?', [agentId, currentDate]);
         if (breakRows.length >= breakFrequency) {
             return res.status(400).json({ success: false, message: 'User has already taken all breaks for current day' });
         }
@@ -349,11 +349,11 @@ router.post('/start-break', async (req, res) => {
         }
         
         if (breakRows.length > 0) { 
-            await pool.promise().query('UPDATE breaks SET break_number = ?, break_start = ? WHERE agent_id = ? AND break_date = ?', [breakRows[0].break_number + 1, currentTime, agentId, currentDate]);
+            await pool.query('UPDATE breaks SET break_number = ?, break_start = ? WHERE agent_id = ? AND break_date = ?', [breakRows[0].break_number + 1, currentTime, agentId, currentDate]);
             agent.setAvailability('Unavailable');
         } else if (breakRows.length === 0) { 
             agent.setAvailability('Unavailable');
-            await pool.promise().query('INSERT INTO breaks (agent_id, break_start, break_date, break_number) VALUES (?, ?, ?, ?)', [agentId, currentTime, currentDate, 1]);
+            await pool.query('INSERT INTO breaks (agent_id, break_start, break_date, break_number) VALUES (?, ?, ?, ?)', [agentId, currentTime, currentDate, 1]);
         }
         res.status(200).json({ success: true, message: `Break started for ${breakDuration} minutes`, breakDuration });
     } catch (error) {

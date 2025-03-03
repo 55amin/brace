@@ -40,7 +40,7 @@ router.post('/create-admin', async (req, res) => {
     }
 
     try {
-        const [rowsEmail] = await pool.promise().query(
+        const [rowsEmail] = await pool.query(
             'SELECT COUNT(*) as count FROM administrators WHERE email = ?',
             [validatedEmail.value] // Check if email address exists in database
         );
@@ -49,7 +49,7 @@ router.post('/create-admin', async (req, res) => {
             return res.status(400).json({ success: false, errors });
         }
 
-        const [rowsPhone] = await pool.promise().query(
+        const [rowsPhone] = await pool.query(
             'SELECT COUNT(*) as count FROM administrators WHERE phone = ?',
             [validatedPhone.value] // Check if phone number exists in database
         );
@@ -68,7 +68,7 @@ router.post('/create-admin', async (req, res) => {
             validatedPhone.value,
             hashedPassword
         ];
-        const [results] = await pool.promise().query(query, values);
+        const [results] = await pool.query(query, values);
 
         // Create new admin instance and add adminID from database
         const newAdmin = new Administrator(
@@ -107,7 +107,7 @@ router.post('/create-agent', async (req, res) => {
     }
 
     try {
-        const [rowsUsername] = await pool.promise().query(
+        const [rowsUsername] = await pool.query(
             'SELECT COUNT(*) as count FROM agents WHERE username = ?',
             [validatedUsername.value] // Check if username exists in database
         );
@@ -116,7 +116,7 @@ router.post('/create-agent', async (req, res) => {
             return res.status(400).json({ success: false, errors });
         }
 
-        const [rowsEmail] = await pool.promise().query(
+        const [rowsEmail] = await pool.query(
             'SELECT COUNT(*) as count FROM agents WHERE email = ?',
             [validatedEmail.value] // Check if email address exists in database
         );
@@ -136,7 +136,7 @@ router.post('/create-agent', async (req, res) => {
             hashedPassword,
             JSON.stringify(specialties), // Store specialties as a JSON string
         ];
-        const [results] = await pool.promise().query(query, values);
+        const [results] = await pool.query(query, values);
         
         // Create new agent instance and add agentID from database
         const newAgent = new Agent(
@@ -192,7 +192,7 @@ router.post('/create-task', async (req, res) => {
             creator,
             JSON.stringify(completionStatus)
         ];
-        const [results] = await pool.promise().query(query, values);
+        const [results] = await pool.query(query, values);
 
         const newTask = new Task( // Create new task instance and add taskID from database
             validatedTitle.value,
@@ -209,7 +209,7 @@ router.post('/create-task', async (req, res) => {
             const agent = agents.find(agent => agent.agentID === Number(agentID));
             if (agent) {
                 agent.addTask(newTask.taskID);
-                await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
+                await pool.query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
             }
         });
         res.status(200).json({ success: true, task: newTask });

@@ -13,13 +13,13 @@ router.post('/delete-user', async (req, res) => {
                     return res.status(400).json({ error: 'Cannot delete currently logged in user' });
                 }
                 admins.splice(admins.indexOf(admin), 1);
-                await pool.promise().query('DELETE FROM administrators WHERE admin_id = ?', [userId]);
+                await pool.query('DELETE FROM administrators WHERE admin_id = ?', [userId]);
             }
         } else if (role === 'agent') {
             const agent = agents.find(agent => agent.agentID === userId);
             if (agent) {
                 agent.splice(agents.indexOf(agent), 1);
-                await pool.promise().query('DELETE FROM agents WHERE agent_id = ?', [userId]);
+                await pool.query('DELETE FROM agents WHERE agent_id = ?', [userId]);
             }
         }
         res.status(200).json({ success: true, message: 'User deleted successfully' });
@@ -36,13 +36,13 @@ router.post('/delete-task', async (req, res) => {
         const task = tasks.find(task => task.taskID === taskId);
         if (task) {
             tasks.splice(tasks.indexOf(task), 1);
-            await pool.promise().query('DELETE FROM tasks WHERE task_id = ?', [taskId]);
+            await pool.query('DELETE FROM tasks WHERE task_id = ?', [taskId]);
 
             task.assignedTo.forEach(async (agentID) => { // Remove task from each assigned agent's tasks array
                 const agent = agents.find(agent => agent.agentID === Number(agentID));
                 if (agent) {
                     agent.removeTask(task.taskID);
-                    await pool.promise().query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
+                    await pool.query('UPDATE agents SET tasks = ? WHERE agent_id = ?', [JSON.stringify(agent.tasks), agentID]);
                 }
             });
         }

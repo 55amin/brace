@@ -9,7 +9,6 @@ const Task = require('./public/models/task');
 const Customer = require('./public/models/customer');
 const Ticket = require('./public/models/ticket');
 const nodemailer = require('nodemailer');
-const mysql = require('mysql2');
 const pool = require('./db');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -129,7 +128,7 @@ app.listen(PORT, async () => {
     let firstLoad = null;
     
     try { // Load administrators from database into memory
-        const [rows] = await pool.promise().query('SELECT * FROM administrators ORDER BY admin_id ASC');
+        const [rows] = await pool.query('SELECT * FROM administrators ORDER BY admin_id ASC');
         rows.forEach(row => {
             const admin = new Administrator(
                 row.forename, row.surname, row.email, row.phone, row.hashed_password);
@@ -145,7 +144,7 @@ app.listen(PORT, async () => {
     }
 
     try { // Load agents from database into memory
-        const [rows] = await pool.promise().query('SELECT * FROM agents ORDER BY agent_id ASC');
+        const [rows] = await pool.query('SELECT * FROM agents ORDER BY agent_id ASC');
         rows.forEach(row => {
             const agent = new Agent(
                 row.username, row.email, row.access_level, JSON.parse(row.working_hours), row.hashed_password);
@@ -164,7 +163,7 @@ app.listen(PORT, async () => {
     }
 
     try { // Load tasks from database into memory
-        const [rows] = await pool.promise().query('SELECT * FROM tasks ORDER BY task_id ASC');
+        const [rows] = await pool.query('SELECT * FROM tasks ORDER BY task_id ASC');
         rows.forEach(row => {
             const task = new Task(
                 row.title, row.description, row.created_by, row.deadline, JSON.parse(row.assigned_to), row.created_at);
@@ -209,9 +208,9 @@ app.listen(PORT, async () => {
                         available = (currentMinutes >= start) && (currentMinutes < end);
                     }
                     if (available) { // Check if the agent is currently on a break
-                        const [durationRows] = await pool.promise().query('SELECT setting_value FROM config WHERE setting_name = "break_duration"');
+                        const [durationRows] = await pool.query('SELECT setting_value FROM config WHERE setting_name = "break_duration"');
                         const breakDuration = Number(durationRows[0].setting_value);
-                        const [breakRows] = await pool.promise().query('SELECT * FROM breaks WHERE agent_id = ? AND break_date = ?', [agent.agentID, currentDate]);
+                        const [breakRows] = await pool.query('SELECT * FROM breaks WHERE agent_id = ? AND break_date = ?', [agent.agentID, currentDate]);
                         const ongoingBreak = breakRows.find(breakRow => {
                             const breakEndTime = new Date(breakRow.break_start).getTime() + (breakDuration * 60 * 1000);
                             return currentTime.getTime() < breakEndTime;
@@ -228,14 +227,14 @@ app.listen(PORT, async () => {
         }
 
         try { // Load customers and tickets from database into memory
-            const [customerRows] = await pool.promise().query('SELECT * FROM customers ORDER BY customer_id ASC');
-            const [ticketRows] = await pool.promise().query('SELECT * FROM tickets ORDER BY ticket_id ASC');
+            const [customerRows] = await pool.query('SELECT * FROM customers ORDER BY customer_id ASC');
+            const [ticketRows] = await pool.query('SELECT * FROM tickets ORDER BY ticket_id ASC');
             const weekAgo = new Date();
             weekAgo.setDate(weekAgo.getDate() - 7);
 
             for (const row of customerRows) {
                 if (new Date(row.registered_at) < weekAgo) {
-                    const [ticketCount] = await pool.promise().query('SELECT COUNT(*) as count FROM tickets WHERE created_by = ?', [row.customer_id]);
+                    const [ticketCount] = await pool.query('SELECT COUNT(*) as count FROM tickets WHERE created_by = ?', [row.customer_id]);
                     if (ticketCount[0].count === 0) {
                         continue; // Skip adding customer to in-memory array
                     }
@@ -297,8 +296,8 @@ app.listen(PORT, async () => {
                                 ticket.setStatus('Assigned');
                                 ticket.assignTo(agent.agentID);
                                 agent.assignTicket(ticket.ticketID);
-                                await pool.promise().query('UPDATE tickets SET status = ?, assigned_to = ? WHERE ticket_id = ?', ['Assigned', agent.agentID, ticket.ticketID]);
-                                await pool.promise().query('UPDATE agents SET ticket = ? WHERE agent_id = ?', [JSON.stringify(ticket.ticketID), agent.agentID]);
+                                await pool.query('UPDATE tickets SET status = ?, assigned_to = ? WHERE ticket_id = ?', ['Assigned', agent.agentID, ticket.ticketID]);
+                                await pool.query('UPDATE agents SET ticket = ? WHERE agent_id = ?', [JSON.stringify(ticket.ticketID), agent.agentID]);
                             }
                         } else { // Randomly select agent to assign ticket to if ticket type is miscellaneous
                             const agent = availableAgents[Math.floor(Math.random() * availableAgents.length)];
@@ -306,8 +305,8 @@ app.listen(PORT, async () => {
                             ticket.assignTo(agent.agentID);
                             agent.assignTicket(ticket.ticketID);
 
-                            await pool.promise().query('UPDATE tickets SET status = ?, assigned_to = ? WHERE ticket_id = ?', ['Assigned', agent.agentID, ticket.ticketID]);
-                            await pool.promise().query('UPDATE agents SET ticket = ? WHERE agent_id = ?', [JSON.stringify(ticket.ticketID), agent.agentID]);
+                            await pool.query('UPDATE tickets SET status = ?, assigned_to = ? WHERE ticket_id = ?', ['Assigned', agent.agentID, ticket.ticketID]);
+                            await pool.query('UPDATE agents SET ticket = ? WHERE agent_id = ?', [JSON.stringify(ticket.ticketID), agent.agentID]);
                         }
                     });
                 }

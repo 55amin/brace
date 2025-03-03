@@ -140,7 +140,7 @@ router.post('/get-tickets', async (req, res) => {
 // Check if an administrator exists in database
 router.get('/check-admin', async (req, res) => {
     try {
-        const [rows] = await pool.promise().query('SELECT COUNT(*) as count FROM administrators');
+        const [rows] = await pool.query('SELECT COUNT(*) as count FROM administrators');
         const adminExists = rows[0].count > 0;
         
         if (adminExists) {
@@ -157,7 +157,7 @@ router.get('/check-admin', async (req, res) => {
 // Check if an agent exists in database
 router.get('/check-agent', async (req, res) => {
     try {
-        const [rows] = await pool.promise().query('SELECT COUNT(*) as count FROM agents');
+        const [rows] = await pool.query('SELECT COUNT(*) as count FROM agents');
         const agentExists = rows[0].count > 0;
 
         if (agentExists) {
