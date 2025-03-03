@@ -9,7 +9,7 @@ const crypto = require('crypto');
 const pool = require('../db');
 
 // Notify admins of multiple failed login attempts
-router.post('/api/notify-admin', async (req, res) => {
+router.post('/notify-admin', async (req, res) => {
     const { email } = req.body;
     try {
         for (const admin of admins) { // Send email to each admin
@@ -28,7 +28,7 @@ router.post('/api/notify-admin', async (req, res) => {
 });
 
 // Send verification email and verify code
-router.post('/api/email-code', async (req, res) => {
+router.post('/email-code', async (req, res) => {
     const { email, type } = req.body;
     const code = crypto.randomBytes(3).toString('hex').toUpperCase(); // Generate 6 character alphanumeric code
     const createdAt = new Date();
@@ -68,7 +68,7 @@ router.post('/api/email-code', async (req, res) => {
     }
 });
 
-router.post('/api/verify-code', async (req, res) => {
+router.post('/verify-code', async (req, res) => {
     const { email, code, user } = req.body;
     currentTime = new Date();
 
@@ -101,7 +101,7 @@ router.post('/api/verify-code', async (req, res) => {
     }
 });
 
-router.post('/api/unverify-user', async (req, res) => {
+router.post('/unverify-user', async (req, res) => {
     const { role, userId } = req.body; // Get user type and ID
     try { // Unverify user in memory and database
         if (role === 'admin') {
@@ -125,7 +125,7 @@ router.post('/api/unverify-user', async (req, res) => {
 });
 
 // Authenticate users
-router.post('/api/login', async (req, res) => {
+router.post('/login', async (req, res) => {
     const { email, password, role } = req.body;
     const validatedEmail = validateEmail(email);
     const validatedPassword = validatePassword(password);
@@ -196,7 +196,7 @@ router.post('/api/login', async (req, res) => {
 });  
 
 // Reset password
-router.post('/api/reset-password', async (req, res) => {
+router.post('/reset-password', async (req, res) => {
     const { email, password, type } = req.body;
     const validatedEmail = validateEmail(email);
     const validatedPassword = validatePassword(password);
@@ -238,7 +238,7 @@ router.post('/api/reset-password', async (req, res) => {
 });
 
 // Complete task
-router.post('/api/complete-task', async (req, res) => {
+router.post('/complete-task', async (req, res) => {
     const { taskId } = req.body;
     const agentId = req.session.user.agentID;
     try {
@@ -264,7 +264,7 @@ router.post('/api/complete-task', async (req, res) => {
 });
 
 // Self-assign ticket
-router.post('/api/assign-ticket', async (req, res) => {
+router.post('/assign-ticket', async (req, res) => {
     const { ticketId } = req.body;
     const agentId = req.session.user.agentID;
     try {
@@ -294,7 +294,7 @@ router.post('/api/assign-ticket', async (req, res) => {
 });
 
 // Start break
-router.post('/api/start-break', async (req, res) => {
+router.post('/start-break', async (req, res) => {
     const agentId = req.session.user.agentID;
     const currentTime = new Date();
     const currentDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][currentTime.getDay()];

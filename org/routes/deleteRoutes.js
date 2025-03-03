@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require('../db');
 
 // Delete user from database and memory
-router.post('/api/delete-user', async (req, res) => {
+router.post('/delete-user', async (req, res) => {
     const { role, userId } = req.body;
     try {
         if (role === 'admin') {
@@ -30,7 +30,7 @@ router.post('/api/delete-user', async (req, res) => {
 });
 
 // Delete task from database and memory
-router.post('/api/delete-task', async (req, res) => {
+router.post('/delete-task', async (req, res) => {
     const { taskId } = req.body;
     try {
         const task = tasks.find(task => task.taskID === taskId);

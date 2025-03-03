@@ -14,7 +14,7 @@ const bcrypt = require('bcrypt');
 const pool = require('../db');
 
 // Update forename
-router.post('/api/update-forename', async (req, res) => {
+router.post('/update-forename', async (req, res) => {
     const { forename, userId = req.session.user.adminID } = req.body;
     const validatedForename = validateName(forename);
     const errors = [];
@@ -38,7 +38,7 @@ router.post('/api/update-forename', async (req, res) => {
 });
 
 // Update surname
-router.post('/api/update-surname', async (req, res) => {
+router.post('/update-surname', async (req, res) => {
     const { surname, userId = req.session.user.adminID } = req.body;
     const validatedSurname = validateName(surname);
     const errors = [];
@@ -62,7 +62,7 @@ router.post('/api/update-surname', async (req, res) => {
 });
 
 // Update email address
-router.post('/api/update-email', async (req, res) => {
+router.post('/update-email', async (req, res) => {
     const { email, role, userId = 0} = req.body;
     const validatedEmail = validateEmail(email);
     const errors = [];
@@ -116,7 +116,7 @@ router.post('/api/update-email', async (req, res) => {
 });
 
 // Update phone number
-router.post('/api/update-phone', async (req, res) => {
+router.post('/update-phone', async (req, res) => {
     const { phone, userId = req.session.user.adminID } = req.body;
     const validatedPhone = validatePhone(phone);
     const errors = [];
@@ -149,7 +149,7 @@ router.post('/api/update-phone', async (req, res) => {
 });
 
 // Update username
-router.post('/api/update-username', async (req, res) => {
+router.post('/update-username', async (req, res) => {
     const { username, userId } = req.body;
     const validatedUsername = validateUsername(username);
     const errors = [];
@@ -182,7 +182,7 @@ router.post('/api/update-username', async (req, res) => {
 });
 
 // Update access level
-router.post('/api/update-access', async (req, res) => {
+router.post('/update-access', async (req, res) => {
     const { accessLevel, userId } = req.body;
     try { // Update access level in database
         await pool.promise().query('UPDATE agents SET access_level = ? WHERE agent_id = ?', [accessLevel, userId]);
@@ -198,7 +198,7 @@ router.post('/api/update-access', async (req, res) => {
 });
 
 // Update working hours
-router.post('/api/update-hours', async (req, res) => {
+router.post('/update-hours', async (req, res) => {
     const { workingHours, userId } = req.body;
 
     try { // Update working hours in database
@@ -215,7 +215,7 @@ router.post('/api/update-hours', async (req, res) => {
 });
 
 // Update specialties
-router.post('/api/update-specialties', async (req, res) => {
+router.post('/update-specialties', async (req, res) => {
     const { specialties, userId } = req.body;
 
     try { // Update specialties in database
@@ -232,7 +232,7 @@ router.post('/api/update-specialties', async (req, res) => {
 });
 
 // Update password
-router.post('/api/update-password', async (req, res) => {
+router.post('/update-password', async (req, res) => {
     const { password, userId } = req.body;
     const validatedPassword = validatePassword(password);
     const errors = [];
@@ -257,7 +257,7 @@ router.post('/api/update-password', async (req, res) => {
 });
 
 // Update a task's title
-router.post('/api/update-title', async (req, res) => {
+router.post('/update-title', async (req, res) => {
     const { title, taskId } = req.body;
     const validatedTitle = validateTitle(title);
     const errors = [];
@@ -281,7 +281,7 @@ router.post('/api/update-title', async (req, res) => {
 });
 
 // Update a task's description
-router.post('/api/update-desc', async (req, res) => {
+router.post('/update-desc', async (req, res) => {
     const { desc, taskId } = req.body;
     const validatedDesc = validateDesc(desc);
     const errors = [];
@@ -305,7 +305,7 @@ router.post('/api/update-desc', async (req, res) => {
 });
 
 // Update a task's deadline
-router.post('/api/update-deadline', async (req, res) => {
+router.post('/update-deadline', async (req, res) => {
     const { deadline, taskId } = req.body;
     const validatedDeadline = validateDeadline(deadline);
     const errors = [];
@@ -329,7 +329,7 @@ router.post('/api/update-deadline', async (req, res) => {
 });
 
 // Update a task's assignments
-router.post('/api/update-assign', async (req, res) => {
+router.post('/update-assign', async (req, res) => {
     const { assignedTo, taskId } = req.body;
     const errors = [];
     if (!assignedTo) errors.push('Task must be assigned to at least one agent');
@@ -372,7 +372,7 @@ router.post('/api/update-assign', async (req, res) => {
 });
 
 // Update break duration
-router.post('/api/update-duration', async (req, res) => {
+router.post('/update-duration', async (req, res) => {
     const { duration } = req.body;
     try {
         const [rows] = await pool.promise().query('SELECT * FROM config WHERE setting_name = "break_duration"');
@@ -389,7 +389,7 @@ router.post('/api/update-duration', async (req, res) => {
 });
 
 // Update break frequency
-router.post('/api/update-frequency', async (req, res) => {
+router.post('/update-frequency', async (req, res) => {
     const { frequency } = req.body;
     try {
         const [rows] = await pool.promise().query('SELECT * FROM config WHERE setting_name = "break_frequency"');

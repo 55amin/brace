@@ -3,7 +3,7 @@ const router = express.Router();
 const pool = require('../db');
 
 // Return all users
-router.post('/api/get-users', async (req, res) => {
+router.post('/get-users', async (req, res) => {
     const { role } = req.body; 
     const users = [];
     try { // Return all users depending on role
@@ -37,7 +37,7 @@ router.post('/api/get-users', async (req, res) => {
 });
 
 // Return all tasks
-router.post('/api/get-tasks', async (req, res) => {
+router.post('/get-tasks', async (req, res) => {
     const taskArr = [];
     try {
         tasks.forEach(task => {
@@ -70,7 +70,7 @@ router.post('/api/get-tasks', async (req, res) => {
 });
 
 // Return a user's tasks
-router.post('/api/get-user-tasks', async (req, res) => {
+router.post('/get-user-tasks', async (req, res) => {
     const userTasks = [];
     const agentID = req.session.user.agentID;
     try {
@@ -100,7 +100,7 @@ router.post('/api/get-user-tasks', async (req, res) => {
 });
 
 // Return all tickets and relevant information about the associated customers
-router.post('/api/get-tickets', async (req, res) => {
+router.post('/get-tickets', async (req, res) => {
     const ticketArr = [];
     const user = req.session.user;
 
@@ -138,7 +138,7 @@ router.post('/api/get-tickets', async (req, res) => {
 });
 
 // Check if an administrator exists in database
-router.get('/api/check-admin', async (req, res) => {
+router.get('/check-admin', async (req, res) => {
     try {
         const [rows] = await pool.promise().query('SELECT COUNT(*) as count FROM administrators');
         const adminExists = rows[0].count > 0;
@@ -155,7 +155,7 @@ router.get('/api/check-admin', async (req, res) => {
 });
 
 // Check if an agent exists in database
-router.get('/api/check-agent', async (req, res) => {
+router.get('/check-agent', async (req, res) => {
     try {
         const [rows] = await pool.promise().query('SELECT COUNT(*) as count FROM agents');
         const agentExists = rows[0].count > 0;
@@ -172,7 +172,7 @@ router.get('/api/check-agent', async (req, res) => {
 });
 
 // Check if a user is assigned to a ticket
-router.post('/api/check-assign', async (req, res) => {
+router.post('/check-assign', async (req, res) => {
     const user = req.session.user;
     const assignedTickets = [];
 

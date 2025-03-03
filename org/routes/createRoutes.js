@@ -17,7 +17,7 @@ const bcrypt = require('bcrypt');
 const pool = require('../db');
 
 // Create administrator account
-router.post('/api/create-admin', async (req, res) => {
+router.post('/create-admin', async (req, res) => {
     const { forename, surname, email, phone, password } = req.body;
     const validatedForename = validateName(forename);
     const validatedSurname = validateName(surname);
@@ -91,7 +91,7 @@ router.post('/api/create-admin', async (req, res) => {
 });
 
 // Create agent account
-router.post('/api/create-agent', async (req, res) => {
+router.post('/create-agent', async (req, res) => {
     const { username, email, accessLevel, workingHours, password, specialties } = req.body;
     const validatedUsername = validateUsername(username);
     const validatedEmail = validateEmail(email);
@@ -160,7 +160,7 @@ router.post('/api/create-agent', async (req, res) => {
 });
 
 // Create task
-router.post('/api/create-task', async (req, res) => {
+router.post('/create-task', async (req, res) => {
     const { title, desc, deadline, assignedTo } = req.body;
     const validatedTitle = validateTitle(title);
     const validatedDesc = validateDesc(desc);
