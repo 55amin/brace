@@ -52,3 +52,5 @@ router.post('/api/delete-task', async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to delete task' });
     }
 });
+
+module.exports = router;

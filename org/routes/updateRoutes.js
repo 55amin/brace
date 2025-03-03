@@ -404,3 +404,5 @@ router.post('/api/update-frequency', async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to update break frequency' });
     }
 });
+
+module.exports = router;

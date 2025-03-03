@@ -218,3 +218,5 @@ router.post('/api/create-task', async (req, res) => {
         res.status(500).json({ success: false, errors: ['Failed to create task'] });
     }
 });
+
+module.exports = router;

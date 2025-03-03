@@ -361,3 +361,5 @@ router.post('/api/start-break', async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to start break' });
     }
 });
+
+module.exports = router;

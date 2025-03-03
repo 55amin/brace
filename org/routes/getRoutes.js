@@ -202,3 +202,5 @@ router.post('/api/check-assign', async (req, res) => {
         res.status(400).json({ error: 'User unauthenticated or unauthorised' });
     }
 });
+
+module.exports = router;
