@@ -65,26 +65,20 @@ const transporter = nodemailer.createTransport({ // Configure email service
 const customers = [];
 const tickets = [];
 
-io.on('connection', (socket) => { // Handle new customer connection
-    console.log('New customer connected');
+// Create chat room
+app.post('/api/create-chat', (req, res) => {
+    const customerID = req.session.user.customerID;
+    const ticketID = req.session.user.ticketID;
+    if (!customerID || !ticketID) {
+        return res.status(400).json({ success: false, message: 'Customer or ticket ID not found in session' });
+    }
 
-    socket.on('joinRoom', (data) => {
-        const { ticketID } = data;
-        const customerID = socket.handshake.session.user.customerID;
-        if (customerID) {
-            socket.join(ticketID);
-            console.log(`Customer ${customerID} joined room ${ticketID}`);
-        } else {
-            socket.disconnect();
-        }
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Client disconnected');
-    });
+    // Add the customer to the chat room using Socket.IO
+    io.to(ticketID).emit('joinRoom', { ticketID });
+    res.status(200).json({ success: true, message: 'Joined chat room successfully', ticketID });
 });
 
-// API to send a message
+// Send message
 app.post('/api/send-message', async (req, res) => {
     const { message } = req.body;
     const customerID = req.session.user.customerID;

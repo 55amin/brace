@@ -11,15 +11,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(),
+                }
             });
             const result = await response.json();
     
             if (result.success) { // Display all messages, based on sender
                 chatMessages.innerHTML = '';
                 result.messages.forEach(message => {
-                    const sender = message.agent_id ? agent : 'customer';
+                    const sender = message.agent_id ? 'agent' : 'customer';
                     const messageElement = document.createElement('div');
                     messageElement.className = `message ${sender}`;
                     messageElement.innerHTML = `
@@ -57,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ sender: 'customer', message }),
+                body: JSON.stringify({ message }),
             });
             const result = await response.json();
 
