@@ -15,22 +15,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             const result = await response.json();
     
-            if (result.success) { // Display all messages, based on sender
+            if (result.success) { // Display all messages
                 chatMessages.innerHTML = '';
-                result.messages.forEach(message => {
+                result.messages.forEach(message => { // Check who sent message
                     const sender = message.agent_id ? 'agent' : 'customer';
-                    const messageElement = document.createElement('div');
-                    messageElement.className = `message ${sender}`;
-                    messageElement.innerHTML = `
+                    const messageRow = document.createElement('div');
+                    messageRow.className = `message ${sender}`;
+                    messageRow.innerHTML = `
                         <div class="message-header">
                             <span class="message-sender ${sender}">${sender}</span>
                             <span class="message-time ${sender}">${new Date(message.created_at).toLocaleTimeString()}</span>
                         </div>
                         <p>${message.content}</p>
                     `;
-                    chatMessagesContainer.appendChild(messageElement);
+                    chatMessages.appendChild(messageRow);
                 });
-                chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             } else {
                 alert(result.message);
             }
