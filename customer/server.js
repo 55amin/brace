@@ -13,10 +13,15 @@ const {
 } = require('./utils/validation');
 const nodemailer = require('nodemailer');
 const mysql = require('mysql2');
+const http = require('http');
+const socketIo = require('socket.io');
+const crypto = require('crypto');
 const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -58,6 +63,44 @@ const transporter = nodemailer.createTransport({ // Configure email service
 
 const customers = [];
 const tickets = [];
+
+io.on('connection', (socket) => { // Handle new customer connection
+    console.log('New customer connected');
+
+    socket.on('joinRoom', (data) => {
+        const { customerID, ticketID } = data;
+        if (socket.handshake.session.user && socket.handshake.session.user.customerID === customerID) {
+            socket.join(ticketID);
+            console.log(`Customer ${customerID} joined room ${ticketID}`);
+        } else {
+            socket.disconnect();
+        }
+    });
+
+    socket.on('sendMessage', async (data) => {
+        const { customerID, ticketID, message } = data;
+        if (socket.handshake.session.user && socket.handshake.session.user.customerID === customerID) {
+            // Encrypt and store messages in database
+            const encryptedMessage = crypto.createCipher('aes-256-cbc', process.env.ENCRYPTION_KEY).update(message, 'utf8', 'hex');
+            try {
+                await pool.promise().query(
+                    'INSERT INTO messages (ticket_id, customer_id, message) VALUES (?, ?, ?)',
+                    [ticketID, customerID, encryptedMessage]
+                );
+                io.to(ticketID).emit('receiveMessage', { customerID, message: encryptedMessage });
+            } catch (error) {
+                console.error('Error storing message:', error);
+            }
+        } else {
+            socket.disconnect();
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Client disconnected');
+    });
+});
+
 
 app.get('/', (req, res) => {
     res.redirect('/index.html'); 
