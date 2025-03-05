@@ -19,12 +19,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (result.success) { // Display all messages, based on sender
                 chatMessages.innerHTML = '';
                 result.messages.forEach(message => {
+                    const sender = message.agent_id ? agent : 'customer';
                     const messageElement = document.createElement('div');
-                    messageElement.className = `message ${message.sender}`;
+                    messageElement.className = `message ${sender}`;
                     messageElement.innerHTML = `
                         <div class="message-header">
-                            <span class="message-sender ${message.sender}">${message.sender}</span>
-                            <span class="message-time ${message.sender}">${new Date(message.timestamp).toLocaleTimeString()}</span>
+                            <span class="message-sender ${sender}">${sender}</span>
+                            <span class="message-time ${sender}">${new Date(message.created_at).toLocaleTimeString()}</span>
                         </div>
                         <p>${message.content}</p>
                     `;

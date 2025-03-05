@@ -52,9 +52,21 @@ function validateDesc(desc) {
     return { isValid: true, value: desc };
 }
 
+function validateMessage(message) {
+    const regex = /^[\s\S]{1,1000}$/; 
+    if (!regex.test(message)) {
+        return {
+            isValid: false,
+            error: "Invalid message. Message must be 1-1000 characters long."
+        };
+    }
+    return { isValid: true, value: message };
+}
+
 module.exports = {
     validateUsername,
     validateEmail,
     validateTitle,
     validateDesc,
+    validateMessage
 };

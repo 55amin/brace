@@ -9,7 +9,8 @@ const {
     validateUsername,
     validateEmail,
     validateTitle,
-    validateDesc
+    validateDesc,
+    validateMessage
 } = require('./utils/validation');
 const nodemailer = require('nodemailer');
 const mysql = require('mysql2');
@@ -68,29 +69,11 @@ io.on('connection', (socket) => { // Handle new customer connection
     console.log('New customer connected');
 
     socket.on('joinRoom', (data) => {
-        const { customerID, ticketID } = data;
-        if (socket.handshake.session.user && socket.handshake.session.user.customerID === customerID) {
+        const { ticketID } = data;
+        const customerID = socket.handshake.session.user.customerID;
+        if (customerID) {
             socket.join(ticketID);
             console.log(`Customer ${customerID} joined room ${ticketID}`);
-        } else {
-            socket.disconnect();
-        }
-    });
-
-    socket.on('sendMessage', async (data) => {
-        const { customerID, ticketID, message } = data;
-        if (socket.handshake.session.user && socket.handshake.session.user.customerID === customerID) {
-            // Encrypt and store messages in database
-            const encryptedMessage = crypto.createCipher('aes-256-cbc', process.env.ENCRYPTION_KEY).update(message, 'utf8', 'hex');
-            try {
-                await pool.promise().query(
-                    'INSERT INTO messages (ticket_id, customer_id, message) VALUES (?, ?, ?)',
-                    [ticketID, customerID, encryptedMessage]
-                );
-                io.to(ticketID).emit('receiveMessage', { customerID, message: encryptedMessage });
-            } catch (error) {
-                console.error('Error storing message:', error);
-            }
         } else {
             socket.disconnect();
         }
@@ -101,6 +84,43 @@ io.on('connection', (socket) => { // Handle new customer connection
     });
 });
 
+// API to send a message
+app.post('/api/send-message', async (req, res) => {
+    const { message } = req.body;
+    const customerID = req.session.user.customerID;
+    const ticketID = req.session.user.ticketID;
+    const validatedMessage = validateMessage(message);
+    if (!validatedMessage.isValid) {
+        return res.status(400).json({ success: false, message: validatedMessage.error });
+    }
+
+    try {
+        const encryptedMessage = crypto.createCipher('aes-256-cbc', process.env.ENCRYPTION_KEY).update(validatedMessage, 'utf8', 'hex');
+        await pool.promise().query(
+            'INSERT INTO messages (ticket_id, customer_id, message, created_at) VALUES (?, ?, ?, ?)',
+            [ticketID, customerID, encryptedMessage, new Date()]
+        );
+        // Emit the message to the room using Socket.IO
+        io.to(ticketID).emit('receiveMessage', { customerID, message: encryptedMessage });
+        res.status(200).json({ success: true, message: 'Message sent successfully' });
+    } catch (error) {
+        console.error('Error sending message:', error);
+        res.status(500).json({ success: false, message: 'Failed to send message' });
+    }
+});
+
+// Return all messages
+app.post('/api/get-messages', async (req, res) => {
+    const ticketID = req.session.user.ticketID;
+
+    try {
+        const [rows] = await pool.promise().query('SELECT * FROM messages WHERE ticket_id = ?', [ticketID]);
+        res.status(200).json({ success: true, messages: rows });
+    } catch (error) {
+        console.error('Error fetching messages:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch messages' });
+    }
+});
 
 app.get('/', (req, res) => {
     res.redirect('/index.html'); 
@@ -140,7 +160,7 @@ app.post('/api/customer-reg', async (req, res) => {
                 req.session.user = { email: validatedEmail.value, customerID: existingCustomer.customer_id };
                 return res.status(200).json({ success: true, message: 'Customer already registered but does not have a ticket' });
             } else if (existingCustomer.ticket_id) { // Customers with open ticket cannot open another ticket
-                req.session.user = { email: validatedEmail.value, customerID: existingCustomer.customer_id };
+                req.session.user = { email: validatedEmail.value, customerID: existingCustomer.customer_id, ticketID: existingCustomer.ticket_id };
                 return res.status(400).json({ success: false, error: 'Customer already has ticket open' });
             }
         }
@@ -206,6 +226,7 @@ app.post('/api/create-ticket', async (req, res) => {
         if (customer) { // Add ticket to associated customer
             customer.addTicket(newTicket);
             await pool.promise().query('UPDATE customers SET ticket_id = ? WHERE customer_id = ?', [newTicket.ticketID, customer.customerID]);
+            req.session.user.ticketID = newTicket.ticketID;
         }
 
         res.status(200).json({ success: true, message: 'Ticket created successfully', ticketId: results.insertId });
@@ -214,7 +235,6 @@ app.post('/api/create-ticket', async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to create ticket' });
     }
 });
-
 
 // Start server
 const PORT = process.env.PORT || 3000;
