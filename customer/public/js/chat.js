@@ -41,6 +41,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.addEventListener('load', async () => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
+        try {
+            const response = await fetch(`${baseUrl}/api/create-chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                console.log(result.message);
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            console.error('Error creating chatroom:', error);
+            alert('Failed to create chatroom');
+        }
         await fetchMessages();
     });
     
@@ -61,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
 
             if (result.success) {
-                message.value = '';
+                document.getElementById('newMessage').value = '';
                 await fetchMessages();
             } else {
                 alert(result.message);
