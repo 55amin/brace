@@ -110,6 +110,17 @@ function validateDeadline(deadline) {
     return { isValid: true, value: deadline };
 }
 
+function validateMessage(message) {
+    const regex = /^[\s\S]{1,1000}$/; 
+    if (!regex.test(message)) {
+        return {
+            isValid: false,
+            error: "Invalid message. Message must be 1-1000 characters long."
+        };
+    }
+    return { isValid: true, value: message };
+}
+
 module.exports = {
     validateName,
     validateUsername,
@@ -118,5 +129,6 @@ module.exports = {
     validatePassword,
     validateTitle,
     validateDesc,
-    validateDeadline
+    validateDeadline,
+    validateMessage
 };
