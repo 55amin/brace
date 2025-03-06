@@ -1,16 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../utils/db');
-const http = require('http');
-const socketIo = require('socket.io');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
 dotenv.config();
-const server = http.createServer(router);
-const io = socketIo(server);
 const key = crypto.scryptSync(process.env.ENCRYPTION_KEY, 'salt', 32);
 const iv = Buffer.alloc(16, 0); 
-const validateMessage = require('../utils/validation');
+const { validateMessage } = require('../utils/validation');
 const { admins, agents } = require('../server');
 
 // Create chat room
@@ -37,7 +33,7 @@ router.post('/create-chat', (req, res) => {
     }
 
     // Add the agent to the chat room
-    io.to(ticketID).emit('joinRoom', { ticketID });
+    req.app.get('io').to(ticketID).emit('joinRoom', { ticketID });
     res.status(200).json({ success: true, message: `Joined chat room ${ticketID} successfully`, ticketID });
 });
 
@@ -61,7 +57,7 @@ router.post('/send-message', async (req, res) => { // Needs patch
         );
         
         // Emit the message to the room
-        io.to(ticketID).emit('receiveMessage', { agentID, message: encryptedMessage });
+        req.app.get('io').to(ticketID).emit('receiveMessage', { agentID, message: encryptedMessage });
         res.status(200).json({ success: true, message: 'Message sent successfully' });
     } catch (error) {
         console.error('Error sending message:', error);

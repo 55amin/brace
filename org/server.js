@@ -1,4 +1,6 @@
 const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
 const path = require('path');
 const cors = require('cors');
 const session = require('express-session');
@@ -13,9 +15,12 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.set('io', io);
 
 const sessionStore = new MySQLStore({ // Configure MySQL session store
     clearExpired: true,
