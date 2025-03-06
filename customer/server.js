@@ -77,7 +77,7 @@ app.post('/api/create-chat', (req, res) => {
 
     // Add the customer to the chat room
     io.to(ticketID).emit('joinRoom', { ticketID });
-    res.status(200).json({ success: true, message: 'Joined chat room successfully', ticketID });
+    res.status(200).json({ success: true, message: `Joined chat room ${ticketID} successfully`, ticketID });
 });
 
 // Send message
