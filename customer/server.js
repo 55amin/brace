@@ -92,7 +92,7 @@ app.post('/api/send-message', async (req, res) => {
 
     try {
         const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-        let encryptedMessage = cipher.update(validatedMessage, 'utf8', 'hex');
+        let encryptedMessage = cipher.update(validatedMessage.value, 'utf8', 'hex');
         encryptedMessage += cipher.final('hex');
         await pool.promise().query(
             'INSERT INTO messages (ticket_id, customer_id, message, created_at) VALUES (?, ?, ?, ?)',
