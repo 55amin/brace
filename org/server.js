@@ -113,6 +113,7 @@ const createRoutes = require('./routes/createRoutes');
 const updateRoutes = require('./routes/updateRoutes');
 const deleteRoutes = require('./routes/deleteRoutes');
 const actionRoutes = require('./routes/actionRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 app.use('/api', getRoutes);
 app.use('/api', createRoutes);
