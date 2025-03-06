@@ -2,8 +2,7 @@ const baseUrl = window.location.origin;
 
 document.addEventListener('DOMContentLoaded', async () => {
     const chatMessages = document.getElementById('chat-messages');
-    const chatInput = document.getElementById('messageInput');
-    const sendButton = document.getElementById('send');
+    const chatInput = document.getElementById('chatInput');
 
     async function fetchMessages() {
         try {
@@ -46,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     
     // Send a message
-    sendButton.addEventListener('click', async () => {
+    chatInput.addEventListener('submit', async () => {
         const message = chatInput.value.trim();
         if (!message) return;
 
