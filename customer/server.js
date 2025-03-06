@@ -118,9 +118,9 @@ app.post('/api/get-messages', async (req, res) => {
             const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
             let decryptedMessage = decipher.update(row.message, 'hex', 'utf8');
             decryptedMessage += decipher.final('utf8');
-            return { ...row, message: decryptedMessage };
+            row.message = decryptedMessage;
         });
-        res.status(200).json({ success: true, messages: decryptedMessages });
+        res.status(200).json({ success: true, messages: rows });
     } catch (error) {
         console.error('Error fetching messages:', error);
         res.status(500).json({ success: false, message: 'Failed to fetch messages' });
