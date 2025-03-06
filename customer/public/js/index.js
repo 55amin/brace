@@ -28,8 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = 'ticketcreation.html';
             } else if (result.error === 'Customer already has ticket open') {
                 window.location.href = 'chat.html';
-            } else {
-                showError(result.error)
             }
         } catch (err) {
             showError('Failed to register customer');
