@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (result.success) { // Display all messages
                 chatMessages.innerHTML = '';
                 result.messages.forEach(message => { // Check who sent message
-                    const sender = message.agent_id ? 'agent' : 'customer';
+                    const sender = message.agent_id ? 'Agent' : 'Customer';
                     const messageRow = document.createElement('div');
                     messageRow.className = `message ${sender}`;
                     messageRow.innerHTML = `
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <span class="message-sender ${sender}">${sender}</span>
                             <span class="message-time ${sender}">${new Date(message.created_at).toLocaleTimeString()}</span>
                         </div>
-                        <p>${message.content}</p>
+                        <p>${message.message}</p>
                     `;
                     chatMessages.appendChild(messageRow);
                 });
