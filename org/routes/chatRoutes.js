@@ -51,7 +51,7 @@ router.post('/send-message', async (req, res) => { // Needs patch
         const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
         let encryptedMessage = cipher.update(validatedMessage.value, 'utf8', 'hex');
         encryptedMessage += cipher.final('hex');
-        await pool.promise().query(
+        await pool.query(
             'INSERT INTO messages (ticket_id, agent_id, message, created_at) VALUES (?, ?, ?, ?)',
             [ticketID, agentID, encryptedMessage, new Date()]
         );
@@ -83,7 +83,7 @@ router.post('/get-messages', async (req, res) => {
     }
 
     try {
-        const [rows] = await pool.promise().query('SELECT * FROM messages WHERE ticket_id = ?', [ticketID]);
+        const [rows] = await pool.query('SELECT * FROM messages WHERE ticket_id = ?', [ticketID]);
         rows.foreach(row => {
             const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
             let decryptedMessage = decipher.update(row.message, 'hex', 'utf8');

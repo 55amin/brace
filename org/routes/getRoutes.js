@@ -74,6 +74,11 @@ router.post('/get-tasks', async (req, res) => {
 router.post('/get-user-tasks', async (req, res) => {
     const userTasks = [];
     const agentID = req.session.user.agentID;
+
+    if (!agentID) {
+        return res.status(400).json({ error: 'User unauthenticated or unauthorised' });
+    }
+
     try {
         const agent = agents.find(agent => agent.agentID === agentID);
         if (agent) {
