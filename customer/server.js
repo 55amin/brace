@@ -154,7 +154,7 @@ app.post('/api/customer-reg', async (req, res) => {
                 req.session.user = { email: validatedEmail.value, customerID: existingCustomer.customer_id };
                 return res.status(200).json({ success: true, message: 'Customer already registered but does not have a ticket' });
             } else if (existingCustomer.ticket_id) { // Customers with open ticket cannot open another ticket
-                req.session.user = { email: validatedEmail.value, customerID: existingCustomer.customer_id, ticketID: existingCustomer.ticket_id };
+                req.session.user = { email: validatedEmail.value, customerID: existingCustomer.customer_id, ticketID: existingCustomer.ticket.ticket_id };
                 return res.status(400).json({ success: false, error: 'Customer already has ticket open' });
             }
         }
