@@ -19,11 +19,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 result.messages.forEach(message => { // Check who sent message
                     const sender = message.agent_id ? 'Agent' : 'Customer';
                     const messageRow = document.createElement('div');
-                    messageRow.className = `message ${sender}`;
+                    messageRow.className = `message ${sender.toLowerCase()}`;
                     messageRow.innerHTML = `
                         <div class="message-header">
-                            <span class="message-sender ${sender}">${sender}</span>
-                            <span class="message-time ${sender}">${new Date(message.created_at).toLocaleTimeString()}</span>
+                            <span class="message-sender ${sender.toLowerCase()}">${sender}</span>
+                            <span class="message-time ${sender.toLowerCase()}">${new Date(message.created_at).toLocaleTimeString()}</span>
                         </div>
                         <p>${message.message}</p>
                     `;
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
 
             if (result.success) {
-                chatInput.value = '';
+                message.value = '';
                 await fetchMessages();
             } else {
                 alert(result.message);
