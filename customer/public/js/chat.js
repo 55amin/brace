@@ -45,7 +45,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     
     // Send a message
-    chatInput.addEventListener('submit', async () => {
+    chatInput.addEventListener('submit', async (event) => {
+        event.preventDefault();
         const message = chatInput.value.trim();
         if (!message) return;
 
