@@ -6,11 +6,11 @@ const socketIo = require('socket.io');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
 dotenv.config();
-
 const server = http.createServer(app);
 const io = socketIo(server);
 const key = crypto.scryptSync(process.env.ENCRYPTION_KEY, 'salt', 32);
 const iv = Buffer.alloc(16, 0); 
+const validateMessage = require('../utils/validation');
 
 // Create chat room
 router.post('/api/create-chat', (req, res) => { // Needs patch
