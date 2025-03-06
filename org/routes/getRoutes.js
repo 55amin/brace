@@ -138,6 +138,20 @@ router.post('/get-tickets', async (req, res) => {
     }
 });
 
+// Return a user's role
+router.get('/get-role', (req, res) => {
+    const user = req.session.user;
+    if (user) {
+        if (user.adminID) {
+            res.status(200).json({ admin: true });
+        } else if (user.agentID) {
+            res.status(200).json({ agent: true });
+        }
+    } else {
+        res.status(400).json({ error: 'User unauthenticated or unauthorised' });
+    }
+});
+
 // Check if an administrator exists in database
 router.get('/check-admin', async (req, res) => {
     try {

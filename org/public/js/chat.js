@@ -1,6 +1,25 @@
 const baseUrl = window.location.origin;
 
 document.addEventListener('DOMContentLoaded', async () => {
+    const backButton = document.getElementById('backChat');
+    try {
+        const response = await fetch(`${baseUrl}/api/get-role`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        const result = await response.json();
+
+        if (result.admin) {
+            backButton.href = '../admin/adminscreen.html';
+        } else if (result.agent) {
+            backButton.href = '../agent/agentscreen.html';
+        }
+    } catch (error) {
+        return;
+    }
+
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
 

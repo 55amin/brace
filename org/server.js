@@ -120,6 +120,7 @@ app.use('/api', createRoutes);
 app.use('/api', updateRoutes);
 app.use('/api', deleteRoutes);
 app.use('/api', actionRoutes);
+app.use('/api', chatRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3000;

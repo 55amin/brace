@@ -114,7 +114,7 @@ app.post('/api/get-messages', async (req, res) => {
 
     try {
         const [rows] = await pool.promise().query('SELECT * FROM messages WHERE ticket_id = ?', [ticketID]);
-        const decryptedMessages = rows.map(row => {
+        rows.foreach(row => {
             const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
             let decryptedMessage = decipher.update(row.message, 'hex', 'utf8');
             decryptedMessage += decipher.final('utf8');

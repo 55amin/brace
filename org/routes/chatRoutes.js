@@ -11,24 +11,40 @@ const io = socketIo(server);
 const key = crypto.scryptSync(process.env.ENCRYPTION_KEY, 'salt', 32);
 const iv = Buffer.alloc(16, 0); 
 const validateMessage = require('../utils/validation');
+const { admins, agents } = require('../server');
 
 // Create chat room
-router.post('/api/create-chat', (req, res) => { // Needs patch
-    const agentID = req.session.user.agentID;
-    const ticketID = req.session.user.ticketID;
-    if (!agentID || !ticketID) {
-        return res.status(400).json({ success: false, message: 'Agent or ticket ID not found in session' });
+router.post('/create-chat', (req, res) => { 
+    let ticketID;
+    if (req.session.user.agentID) {
+        const agent = agents.find(agent => agent.agentID === req.session.user.agentID);
+        if (!agent) {
+            return res.status(400).json({ success: false, message: 'Agent not found' });
+        }
+        ticketID = agent.ticket;
+    } else if (req.session.user.adminID) {
+        const admin = admins.find(admin => admin.adminID === req.session.user.adminID);
+        if (!admin) {
+            return res.status(400).json({ success: false, message: 'Admin not found' });
+        }
+        ticketID = admin.ticket;
+    } else {
+        return res.status(400).json({ success: false, message: 'User unauthenticated or unauthorised' });
     }
 
-    // Add the customer to the chat room
+    if (!ticketID) {
+        return res.status(400).json({ success: false, message: 'Ticket not found' });
+    }
+
+    // Add the agent to the chat room
     io.to(ticketID).emit('joinRoom', { ticketID });
     res.status(200).json({ success: true, message: `Joined chat room ${ticketID} successfully`, ticketID });
 });
 
 // Send message
-router.post('/api/send-message', async (req, res) => { // Needs patch
+router.post('/send-message', async (req, res) => { // Needs patch
     const { message } = req.body;
-    const agentID = req.session.user.agentID;
+    const agentID = req.session.user.agentID || req.session.user.adminID;
     const ticketID = req.session.user.ticketID; 
     const validatedMessage = validateMessage(message);
     if (!validatedMessage.isValid) {
@@ -54,12 +70,25 @@ router.post('/api/send-message', async (req, res) => { // Needs patch
 });
 
 // Return all messages
-router.post('/api/get-messages', async (req, res) => { // Needs patch
-    const ticketID = req.session.user.ticketID;
+router.post('/get-messages', async (req, res) => { 
+    let ticketID;
+    if (req.session.user.agentID) {
+        const agent = agents.find(agent => agent.agentID === req.session.user.agentID);
+        if (!agent) {
+            return res.status(400).json({ success: false, message: 'Agent not found' });
+        }
+        ticketID = agent.ticket;
+    } else if (req.session.user.adminID) {
+        const admin = admins.find(admin => admin.adminID === req.session.user.adminID);
+        if (!admin) {
+            return res.status(400).json({ success: false, message: 'Admin not found' });
+        }
+        ticketID = admin.ticket;
+    }
 
     try {
         const [rows] = await pool.promise().query('SELECT * FROM messages WHERE ticket_id = ?', [ticketID]);
-        const decryptedMessages = rows.map(row => {
+        rows.foreach(row => {
             const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
             let decryptedMessage = decipher.update(row.message, 'hex', 'utf8');
             decryptedMessage += decipher.final('utf8');
