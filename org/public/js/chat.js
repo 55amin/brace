@@ -1,4 +1,5 @@
 const baseUrl = window.location.origin;
+const socket = io(baseUrl);
 
 document.addEventListener('DOMContentLoaded', async () => {
     const backButton = document.getElementById('backChat');
@@ -58,31 +59,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    window.addEventListener('load', async () => {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-        try {
-            const response = await fetch(`${baseUrl}/api/create-chat`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-            const result = await response.json();
-            
-            if (result.success) {
-                console.log(result.message);
-            } else {
-                alert(result.message);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    try { // Add agent to chatroom
+        const response = await fetch(`${baseUrl}/api/create-chat`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
             }
-        } catch (error) {
-            console.error('Error creating chatroom:', error);
-            alert('Failed to create chatroom');
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            console.log(result.message);
+        } else {
+            alert(result.message);
         }
+    } catch (error) {
+        console.error('Error creating chatroom:', error);
+        alert('Failed to create chatroom');
+    }
+    await fetchMessages();
+
+    socket.on('receiveMessage', async () => { // Listen for new messages
         await fetchMessages();
     });
-    
-    // Send a message
-    chatInput.addEventListener('submit', async (event) => {
+
+    chatInput.addEventListener('submit', async (event) => { // Send a message
         event.preventDefault();
         const message = document.getElementById('newMessage').value.trim();
         if (!message) return;

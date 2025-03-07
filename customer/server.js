@@ -69,28 +69,33 @@ const tickets = [];
 
 // Create chat room
 app.post('/api/create-chat', (req, res) => {
-    const customerID = req.session.user.customerID;
-    const ticketID = req.session.user.ticketID;
-    if (!customerID || !ticketID) {
-        return res.status(400).json({ success: false, message: 'Customer or ticket ID not found in session' });
-    }
+    try {
+        const customerID = req.session.user.customerID;
+        const ticketID = req.session.user.ticketID;
+        if (!customerID || !ticketID) {
+            return res.status(400).json({ success: false, message: 'Customer or ticket ID not found in session' });
+        }
 
-    // Add the customer to the chat room
-    io.to(ticketID).emit('joinRoom', { ticketID });
-    res.status(200).json({ success: true, message: `Joined chat room ${ticketID} successfully`, ticketID });
+        // Add the customer to the chat room
+        io.to(ticketID).emit('joinRoom', { ticketID });
+        res.status(200).json({ success: true, message: `Joined chat room ${ticketID} successfully`, ticketID });
+    } catch (error) {
+        console.error('Error creating chat room:', error);
+        res.status(500).json({ success: false, message: 'Failed to create chat room' });
+    }
 });
 
 // Send message
 app.post('/api/send-message', async (req, res) => {
     const { message } = req.body;
-    const customerID = req.session.user.customerID;
-    const ticketID = req.session.user.ticketID;
     const validatedMessage = validateMessage(message);
     if (!validatedMessage.isValid) {
         return res.status(400).json({ success: false, message: validatedMessage.error });
     }
 
     try {
+        const customerID = req.session.user.customerID;
+        const ticketID = req.session.user.ticketID;
         const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
         let encryptedMessage = cipher.update(validatedMessage.value, 'utf8', 'hex');
         encryptedMessage += cipher.final('hex');
@@ -110,9 +115,8 @@ app.post('/api/send-message', async (req, res) => {
 
 // Return all messages
 app.post('/api/get-messages', async (req, res) => {
-    const ticketID = req.session.user.ticketID;
-
     try {
+        const ticketID = req.session.user.ticketID;
         const [rows] = await pool.promise().query('SELECT * FROM messages WHERE ticket_id = ?', [ticketID]);
         rows.forEach(row => {
             const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
