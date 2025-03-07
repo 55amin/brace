@@ -40,11 +40,29 @@ router.post('/create-chat', (req, res) => {
 // Send message
 router.post('/send-message', async (req, res) => { // Needs patch
     const { message } = req.body;
-    const agentID = req.session.user.agentID || req.session.user.adminID;
-    const ticketID = req.session.user.ticketID; 
     const validatedMessage = validateMessage(message);
     if (!validatedMessage.isValid) {
         return res.status(400).json({ success: false, message: validatedMessage.error });
+    }
+
+    let ticketID;
+    let agentID;
+    if (req.session.user.agentID) {
+        const agent = agents.find(agent => agent.agentID === req.session.user.agentID);
+        if (!agent) {
+            return res.status(400).json({ success: false, message: 'Agent not found' });
+        }
+        ticketID = agent.ticket;
+        agentID = agent.agentID;
+    } else if (req.session.user.adminID) {
+        const admin = admins.find(admin => admin.adminID === req.session.user.adminID);
+        if (!admin) {
+            return res.status(400).json({ success: false, message: 'Admin not found' });
+        }
+        ticketID = admin.ticket;
+        agentID = admin.adminID;
+    } else {
+        return res.status(400).json({ success: false, message: 'User unauthenticated or unauthorised' });
     }
 
     try {
