@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     messageRow.innerHTML = `
                         <div class="message-header">
                             <span class="message-sender ${sender.toLowerCase()}">${sender}</span>
-                            <span class="message-time ${sender.toLowerCase()}">${new Date(message.created_at).toLocaleTimeString()}</span>
+                            <span class="message-time ${sender.toLowerCase()}">${new Date(message.created_at).toLocaleString()}</span>
                         </div>
                         <p>${message.message}</p>
                     `;
