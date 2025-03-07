@@ -22,7 +22,16 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = socketIo(server, {
+    cors: {
+        origin: ["https://brace-portal.onrender.com"],
+        methods: ["GET", "POST"],
+        credentials: true
+    },
+    path: "/socket.io/",
+    transports: ['websocket', 'polling']
+});
+
 const key = crypto.scryptSync(process.env.ENCRYPTION_KEY, 'salt', 32);
 const iv = Buffer.alloc(16, 0); 
 app.use(cors());
@@ -247,7 +256,7 @@ app.post('/api/create-ticket', async (req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, async () => {
+server.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
 
     setInterval(async () => { // // Execute every minute to sync with database and organisation-facing website
