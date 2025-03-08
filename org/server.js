@@ -4,6 +4,7 @@ const socketIo = require('socket.io');
 const path = require('path');
 const cors = require('cors');
 const session = require('express-session');
+const redis = require('redis');
 const MySQLStore = require('express-mysql-session')(session);
 const Administrator = require('./public/models/administrator');
 const Agent = require('./public/models/agent');
