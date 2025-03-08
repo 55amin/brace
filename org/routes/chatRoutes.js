@@ -74,12 +74,13 @@ router.post('/send-message', async (req, res) => { // Needs patch
             'INSERT INTO messages (ticket_id, agent_id, message, created_at) VALUES (?, ?, ?, ?)',
             [ticketID, agentID, encryptedMessage, new Date()]
         );
+        const decryptedMessage = JSON.stringify({ ticketID, agentID, message: validatedMessage.value });
 
         // Publish the message to Redis
-        await client.publish('agentMessages', JSON.stringify({ ticketID, agentID, message: encryptedMessage }));
+        await client.publish('agentMessages', JSON.stringify({ ticketID, agentID, message: encryptedMessage, created_at: new Date() }));
         
         // Emit the message to the room
-        req.app.get('io').to(ticketID).emit('receiveMessage', { agentID, message: encryptedMessage });
+        req.app.get('io').to(ticketID).emit('receiveMessage', { agentID, message: decryptedMessage });
         res.status(200).json({ success: true, message: 'Message sent successfully' });
     } catch (error) {
         console.error('Error sending message:', error);
@@ -90,7 +91,7 @@ router.post('/send-message', async (req, res) => { // Needs patch
 // Subscribe to customerMessages channel to receive messages from agents
 subscriber.subscribe('customerMessages');
 subscriber.on('message', (channel, message) => {
-    const { ticketID, customerID, message: encryptedMessage } = JSON.parse(message);
+    const { ticketID, customerID, message: encryptedMessage, created_at } = JSON.parse(message);
 
     // Decrypt the message
     const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
@@ -98,7 +99,7 @@ subscriber.on('message', (channel, message) => {
     decryptedMessage += decipher.final('utf8');
 
     // Broadcast the message to the customer's chat room using Socket.IO
-    io.to(ticketID).emit('receiveMessage', { customerID, message: decryptedMessage });
+    io.to(ticketID).emit('receiveMessage', { customerID, message: decryptedMessage, created_at });
 });
 
 module.exports = router;

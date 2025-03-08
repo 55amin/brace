@@ -339,7 +339,7 @@ server.listen(PORT, async () => {
 io.on('connection', (socket) => {
     socket.on('fetchMessages', async (ticketID) => { // Listen for fetchMessages event
         try {
-            const [rows] = await pool.promise().query('SELECT * FROM messages WHERE ticket_id = ?', [ticketID]);
+            const [rows] = await pool.query('SELECT * FROM messages WHERE ticket_id = ?', [ticketID]);
             rows.forEach(row => {
                 const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
                 let decryptedMessage = decipher.update(row.message, 'hex', 'utf8');
