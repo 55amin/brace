@@ -17,6 +17,10 @@ function displayMessage(message) { // Display message with sender and time
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    let ticketID;
+    
     try { // Add customer to chatroom
         const response = await fetch(`${baseUrl}/api/create-chat`, {
             method: 'POST',
@@ -37,9 +41,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert('Failed to create chatroom');
     }
 
-    const chatMessages = document.getElementById('chatMessages');
-    const chatInput = document.getElementById('chatInput');
-    let ticketID;
     socket.emit('fetchMessages', ticketID); // Send fetchMessages event to server
 
     socket.on('receiveMessages', (messages) => { // Load all messages when joining chat
