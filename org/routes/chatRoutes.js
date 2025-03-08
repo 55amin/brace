@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const redis = require('redis');
 const pool = require('../utils/db');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
