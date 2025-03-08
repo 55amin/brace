@@ -154,8 +154,9 @@ server.listen(PORT, async () => {
             const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
             let decryptedMessage = decipher.update(encryptedMessage, 'hex', 'utf8');
             decryptedMessage += decipher.final('utf8');
-            finalMessage = JSON.stringify({ ticketID, customerID, message: decryptedMessage, created_at });
-            io.to(ticketID).emit('receiveMessage', { finalMessage }); // Send message to chat room
+
+            const finalMessage = JSON.stringify({ ticketID, customerID, message: decryptedMessage, created_at });
+            io.to(ticketID).emit('receiveMessage', finalMessage); // Send message to chat room
         });
 
         console.log('Successfully connected to Redis and subscribed to customerMessages channel');
