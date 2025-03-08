@@ -12,7 +12,6 @@ const {
     validateDesc,
     validateMessage
 } = require('./utils/validation');
-const nodemailer = require('nodemailer');
 const mysql = require('mysql2');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -34,7 +33,7 @@ const io = socketIo(server, {
 });
 
 
-const redisClient = redis.createClient({ // Configure Redis client
+const client = redis.createClient({ // Configure Redis client
     username: 'default',
     password: process.env.REDIS_PASSWORD,
     socket: {
@@ -42,6 +41,7 @@ const redisClient = redis.createClient({ // Configure Redis client
         port: process.env.REDIS_PORT
     }
 });
+const subscriber = client.duplicate(); // Configure duplicate Redis client for subscribing to channels
 
 const key = crypto.scryptSync(process.env.ENCRYPTION_KEY, 'salt', 32);
 const iv = Buffer.alloc(16, 0); 
@@ -75,14 +75,6 @@ app.use(session({ // Configure user session
         maxAge: 1000 * 60 * 60 * 24
     }
 }));
-
-const transporter = nodemailer.createTransport({ // Configure email service
-    service: 'Gmail',
-    auth: {
-        user: process.env.EMAIL_ADDRESS,
-        pass: process.env.EMAIL_PASSWORD
-    } 
-});
 
 const customers = [];
 const tickets = [];
@@ -125,7 +117,7 @@ app.post('/api/send-message', async (req, res) => {
         );
         
         // Publish the message to Redis
-        await redisClient.publish('customerMessages', JSON.stringify({ ticketID, customerID, message: encryptedMessage }));
+        await client.publish('customerMessages', JSON.stringify({ ticketID, customerID, message: encryptedMessage }));
 
         // Emit the message to the room
         io.to(ticketID).emit('receiveMessage', { customerID, message: encryptedMessage });
@@ -137,8 +129,8 @@ app.post('/api/send-message', async (req, res) => {
 });
 
 // Subscribe to agentMessages channel to receive messages from agents
-redisClient.subscribe('agentMessages');
-redisClient.on('message', (channel, message) => {
+subscriber.subscribe('agentMessages');
+subscriber.on('message', (channel, message) => {
     const { ticketID, agentID, message: encryptedMessage } = JSON.parse(message);
 
     // Decrypt the message
@@ -268,7 +260,8 @@ app.post('/api/create-ticket', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
-    await redisClient.connect(); // Connect to Redis
+    await client.connect(); // Connect to Redis server
+    await subscriber.connect(); 
 
     setInterval(async () => { // // Execute every minute to sync with database and organisation-facing website
         try { // Load customers and tickets from database into memory

@@ -7,7 +7,7 @@ dotenv.config();
 const key = crypto.scryptSync(process.env.ENCRYPTION_KEY, 'salt', 32);
 const iv = Buffer.alloc(16, 0); 
 const { validateMessage } = require('../utils/validation');
-const { admins, agents } = require('../server');
+const { admins, agents, client, subscriber } = require('../server');
 
 // Create chat room
 router.post('/create-chat', (req, res) => { 
@@ -73,6 +73,9 @@ router.post('/send-message', async (req, res) => { // Needs patch
             'INSERT INTO messages (ticket_id, agent_id, message, created_at) VALUES (?, ?, ?, ?)',
             [ticketID, agentID, encryptedMessage, new Date()]
         );
+
+        // Publish the message to Redis
+        await client.publish('agentMessages', JSON.stringify({ ticketID, agentID, message: encryptedMessage }));
         
         // Emit the message to the room
         req.app.get('io').to(ticketID).emit('receiveMessage', { agentID, message: encryptedMessage });
@@ -83,36 +86,18 @@ router.post('/send-message', async (req, res) => { // Needs patch
     }
 });
 
-// Return all messages
-router.post('/get-messages', async (req, res) => { 
-    let ticketID;
-    if (req.session.user.agentID) {
-        const agent = agents.find(agent => agent.agentID === req.session.user.agentID);
-        if (!agent) {
-            return res.status(400).json({ success: false, message: 'Agent not found' });
-        }
-        ticketID = agent.ticket;
-    } else if (req.session.user.adminID) {
-        const admin = admins.find(admin => admin.adminID === req.session.user.adminID);
-        if (!admin) {
-            return res.status(400).json({ success: false, message: 'Admin not found' });
-        }
-        ticketID = admin.ticket;
-    }
+// Subscribe to customerMessages channel to receive messages from agents
+subscriber.subscribe('customerMessages');
+subscriber.on('message', (channel, message) => {
+    const { ticketID, customerID, message: encryptedMessage } = JSON.parse(message);
 
-    try {
-        const [rows] = await pool.query('SELECT * FROM messages WHERE ticket_id = ?', [ticketID]);
-        rows.forEach(row => {
-            const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-            let decryptedMessage = decipher.update(row.message, 'hex', 'utf8');
-            decryptedMessage += decipher.final('utf8');
-            row.message = decryptedMessage;
-        });
-        res.status(200).json({ success: true, messages: rows });
-    } catch (error) {
-        console.error('Error fetching messages:', error);
-        res.status(500).json({ success: false, message: 'Failed to fetch messages' });
-    }
+    // Decrypt the message
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    let decryptedMessage = decipher.update(encryptedMessage, 'hex', 'utf8');
+    decryptedMessage += decipher.final('utf8');
+
+    // Broadcast the message to the customer's chat room using Socket.IO
+    io.to(ticketID).emit('receiveMessage', { customerID, message: decryptedMessage });
 });
 
 module.exports = router;

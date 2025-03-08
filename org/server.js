@@ -26,6 +26,20 @@ const io = socketIo(server, {
     transports: ['websocket', 'polling']
 });
 
+const client = redis.createClient({ // Configure Redis client
+    username: 'default',
+    password: process.env.REDIS_PASSWORD,
+    socket: {
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT
+    }
+});
+const subscriber = client.duplicate(); // Configure duplicate Redis client for subscribing to channels
+module.exports = {
+    client,
+    subscriber
+};
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -140,6 +154,8 @@ app.use('/api', chatRoutes);
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
+    await client.connect(); // Connect to Redis server
+    await subscriber.connect(); 
     let firstLoad = null;
     
     try { // Load administrators from database into memory
