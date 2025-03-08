@@ -253,9 +253,9 @@ server.listen(PORT, async () => {
 
         // Subscribe to agentMessages channel to receive messages from agents
         await subscriber.subscribe('agentMessages', (message) => { // Decrypt new message
-            const { ticketID, agentID, message, created_at } = JSON.parse(message);
+            const { ticketID, agentID, encryptedMessage, created_at } = JSON.parse(message);
             const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-            let decryptedMessage = decipher.update(message, 'hex', 'utf8');
+            let decryptedMessage = decipher.update(encryptedMessage, 'hex', 'utf8');
             decryptedMessage += decipher.final('utf8');
 
             const finalMessage = JSON.stringify({ ticketID, agentID, message: decryptedMessage, created_at });
