@@ -72,13 +72,14 @@ router.post('/send-message', async (req, res) => { // Needs patch
             'INSERT INTO messages (ticket_id, agent_id, message, created_at) VALUES (?, ?, ?, ?)',
             [ticketID, agentID, encryptedMessage, new Date()]
         );
-        const finalMessage = JSON.stringify({ ticketID, agentID, message: validatedMessage.value, created_at: new Date() });
+        const unencryptedMessage = JSON.stringify({ ticketID, agent_id: agentID, message: validatedMessage.value, created_at: new Date() });
+        const finalMessage = JSON.stringify({ ticketID, agent_id: agentID, encryptedMessage, created_at: new Date() });
 
         // Publish the message to Redis
         await client.publish('agentMessages', finalMessage);
         
         // Emit the message to the room
-        req.app.get('io').to(ticketID).emit('receiveMessage', finalMessage);
+        req.app.get('io').to(ticketID).emit('receiveMessage', unencryptedMessage);
         res.status(200).json({ success: true, message: 'Message sent successfully' });
     } catch (error) {
         console.error('Error sending message:', error);

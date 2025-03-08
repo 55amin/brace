@@ -106,7 +106,7 @@ app.post('/api/send-message', async (req, res) => {
     try { // Encrypt and insert message into database with relevant details
         const customerID = req.session.user.customerID;
         const ticketID = req.session.user.ticketID;
-        const finalMessage = JSON.stringify({ ticketID, customerID, message: validatedMessage.value, created_at: new Date() });
+        const unencryptedMessage = JSON.stringify({ ticketID, customerID, message: validatedMessage.value, created_at: new Date() });
 
         const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
         let encryptedMessage = cipher.update(validatedMessage.value, 'utf8', 'hex');
@@ -115,12 +115,13 @@ app.post('/api/send-message', async (req, res) => {
             'INSERT INTO messages (ticket_id, customer_id, message, created_at) VALUES (?, ?, ?, ?)',
             [ticketID, customerID, encryptedMessage, new Date()]
         );
+        const finalMessage = JSON.stringify({ ticketID, customerID, encryptedMessage, created_at: new Date() });
     
         // Publish the message to Redis
         await client.publish('customerMessages', finalMessage);
 
         // Emit the message to the room
-        io.to(ticketID).emit('receiveMessage', finalMessage);
+        io.to(ticketID).emit('receiveMessage', unencryptedMessage);
         res.status(200).json({ success: true, message: 'Message sent successfully' });
     } catch (error) {
         console.error('Error sending message:', error);
@@ -253,12 +254,12 @@ server.listen(PORT, async () => {
 
         // Subscribe to agentMessages channel to receive messages from agents
         await subscriber.subscribe('agentMessages', (message) => { // Decrypt new message
-            const { ticketID, agentID, encryptedMessage, created_at } = JSON.parse(message);
+            const { ticketID, agent_id, encryptedMessage, created_at } = JSON.parse(message);
             const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
             let decryptedMessage = decipher.update(encryptedMessage, 'hex', 'utf8');
             decryptedMessage += decipher.final('utf8');
 
-            const finalMessage = JSON.stringify({ ticketID, agentID, message: decryptedMessage, created_at });
+            const finalMessage = JSON.stringify({ ticketID, agent_id, message: decryptedMessage, created_at });
             io.to(ticketID).emit('receiveMessage', finalMessage); // Send message to chat room
         });
 
