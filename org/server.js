@@ -150,13 +150,13 @@ server.listen(PORT, async () => {
 
         // Subscribe to customerMessages channel to receive messages from customers
         await subscriber.subscribe('customerMessages', (message) => { // Decrypt new message
-            const { ticketID, customerID, message: encryptedMessage, created_at } = JSON.parse(message);
+            const data = JSON.parse(message);
             const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-            let decryptedMessage = decipher.update(encryptedMessage, 'hex', 'utf8');
+            let decryptedMessage = decipher.update(data.encryptedMessage, 'hex', 'utf8');
             decryptedMessage += decipher.final('utf8');
 
-            const finalMessage = JSON.stringify({ ticketID, customerID, message: decryptedMessage, created_at });
-            io.to(ticketID).emit('receiveMessage', finalMessage); // Send message to chat room
+            const newData = { customerID: data.customerID, message: decryptedMessage, created_at: data.created_at };
+            io.to(data.ticketID).emit('receiveMessage', newData); // Send message to chat room
         });
 
         console.log('Successfully connected to Redis and subscribed to customerMessages channel');
