@@ -33,9 +33,14 @@ const io = socketIo(server, {
     transports: ['websocket', 'polling']
 });
 
+
 const redisClient = redis.createClient({ // Configure Redis client
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
+    username: 'default',
+    password: process.env.REDIS_PASSWORD,
+    socket: {
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT
+    }
 });
 
 const key = crypto.scryptSync(process.env.ENCRYPTION_KEY, 'salt', 32);
@@ -120,7 +125,7 @@ app.post('/api/send-message', async (req, res) => {
         );
         
         // Publish the message to Redis
-        redisClient.publish('customerMessages', JSON.stringify({ ticketID, customerID, message: encryptedMessage }));
+        await redisClient.publish('customerMessages', JSON.stringify({ ticketID, customerID, message: encryptedMessage }));
 
         // Emit the message to the room
         io.to(ticketID).emit('receiveMessage', { customerID, message: encryptedMessage });
@@ -263,6 +268,7 @@ app.post('/api/create-ticket', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
+    await redisClient.connect(); // Connect to Redis
 
     setInterval(async () => { // // Execute every minute to sync with database and organisation-facing website
         try { // Load customers and tickets from database into memory
