@@ -90,7 +90,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (result.success) {
                 document.getElementById('newMessage').value = '';
-                await fetchMessages();
             } else {
                 alert(result.message);
             }

@@ -72,7 +72,7 @@ router.post('/send-message', async (req, res) => { // Needs patch
             'INSERT INTO messages (ticket_id, agent_id, message, created_at) VALUES (?, ?, ?, ?)',
             [ticketID, agentID, encryptedMessage, new Date()]
         );
-        const decryptedMessage = JSON.stringify({ ticketID, agentID, message: validatedMessage.value });
+        const decryptedMessage = JSON.stringify({ ticketID, agentID, message: validatedMessage.value, created_at: new Date() });
 
         // Publish the message to Redis
         await client.publish('agentMessages', JSON.stringify({ ticketID, agentID, message: encryptedMessage, created_at: new Date() }));
@@ -84,20 +84,6 @@ router.post('/send-message', async (req, res) => { // Needs patch
         console.error('Error sending message:', error);
         res.status(500).json({ success: false, message: 'Failed to send message' });
     }
-});
-
-// Subscribe to customerMessages channel to receive messages from agents
-subscriber.subscribe('customerMessages');
-subscriber.on('message', (channel, message) => {
-    const { ticketID, customerID, message: encryptedMessage, created_at } = JSON.parse(message);
-
-    // Decrypt the message
-    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-    let decryptedMessage = decipher.update(encryptedMessage, 'hex', 'utf8');
-    decryptedMessage += decipher.final('utf8');
-
-    // Broadcast the message to the customer's chat room using Socket.IO
-    io.to(ticketID).emit('receiveMessage', { customerID, message: decryptedMessage, created_at });
 });
 
 module.exports = router;

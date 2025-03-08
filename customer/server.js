@@ -109,36 +109,23 @@ app.post('/api/send-message', async (req, res) => {
         const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
         let encryptedMessage = cipher.update(validatedMessage.value, 'utf8', 'hex');
         encryptedMessage += cipher.final('hex');
+        const finalMessage = JSON.stringify({ ticketID, customerID, message: validatedMessage.value, created_at: new Date() });
         await pool.promise().query(
             'INSERT INTO messages (ticket_id, customer_id, message, created_at) VALUES (?, ?, ?, ?)',
             [ticketID, customerID, encryptedMessage, new Date()]
         );
-        const decryptedMessage = JSON.stringify({ ticketID, customerID, message: validatedMessage.value });
+        const decryptedMessage = JSON.stringify({ ticketID, customerID, message: validatedMessage.value, created_at: new Date() });
         
         // Publish the message to Redis
-        await client.publish('customerMessages', JSON.stringify({ ticketID, customerID, message: encryptedMessage }));
+        await client.publish('customerMessages', finalMessage);
 
         // Emit the message to the room
-        io.to(ticketID).emit('receiveMessage', { customerID, message: decryptedMessage, created_at: new Date() });
+        io.to(ticketID).emit('receiveMessage', { customerID, message: decryptedMessage });
         res.status(200).json({ success: true, message: 'Message sent successfully' });
     } catch (error) {
         console.error('Error sending message:', error);
         res.status(500).json({ success: false, message: 'Failed to send message' });
     }
-});
-
-// Subscribe to agentMessages channel to receive messages from agents
-subscriber.subscribe('agentMessages');
-subscriber.on('message', (channel, message) => {
-    const { ticketID, agentID, message: encryptedMessage, created_at } = JSON.parse(message);
-
-    // Decrypt the message
-    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-    let decryptedMessage = decipher.update(encryptedMessage, 'hex', 'utf8');
-    decryptedMessage += decipher.final('utf8');
-
-    // Broadcast the message to the customer's chat room using Socket.IO
-    io.to(ticketID).emit('receiveMessage', { agentID, message: decryptedMessage, created_at });
 });
 
 app.get('/', (req, res) => {
@@ -259,8 +246,25 @@ app.post('/api/create-ticket', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
-    await client.connect(); // Connect to Redis server
-    await subscriber.connect(); 
+    
+    try {
+        await client.connect(); // Connect to Redis server
+        await subscriber.connect();
+
+        // Subscribe to agentMessages channel to receive messages from agents
+        await subscriber.subscribe('agentMessages', (message) => { // Decrypt new message
+            const { ticketID, agentID, message: encryptedMessage, created_at } = JSON.parse(message);
+            const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+            let decryptedMessage = decipher.update(encryptedMessage, 'hex', 'utf8');
+            decryptedMessage += decipher.final('utf8');
+            finalMessage = JSON.stringify({ ticketID, agentID, message: decryptedMessage, created_at });
+            io.to(ticketID).emit('receiveMessage', { finalMessage }); // Send message to chat room
+        });
+
+        console.log('Successfully connected to Redis and subscribed to agentMessages channel');
+    } catch (error) {
+        console.error('Redis connection error:', error);
+    }
 
     setInterval(async () => { // // Execute every minute to sync with database and organisation-facing website
         try { // Load customers and tickets from database into memory

@@ -11,7 +11,7 @@ const Agent = require('./public/models/agent');
 const Task = require('./public/models/task');
 const Customer = require('./public/models/customer');
 const Ticket = require('./public/models/ticket');
-const { redisConnect } = require('./utils/redis');
+const { redisConnect, subscriber } = require('./utils/redis');
 const pool = require('./utils/db');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -144,7 +144,25 @@ app.use('/api', chatRoutes);
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
-    await redisConnect(); // Connect to Redis server
+
+    try {
+        await redisConnect(); // Connect to Redis server
+
+        // Subscribe to customerMessages channel to receive messages from customers
+        await subscriber.subscribe('customerMessages', (message) => { // Decrypt new message
+            const { ticketID, customerID, message: encryptedMessage, created_at } = JSON.parse(message);
+            const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+            let decryptedMessage = decipher.update(encryptedMessage, 'hex', 'utf8');
+            decryptedMessage += decipher.final('utf8');
+            finalMessage = JSON.stringify({ ticketID, customerID, message: decryptedMessage, created_at });
+            io.to(ticketID).emit('receiveMessage', { finalMessage }); // Send message to chat room
+        });
+
+        console.log('Successfully connected to Redis and subscribed to customerMessages channel');
+    } catch (error) {
+        console.error('Redis connection error:', error);
+    }
+    
     let firstLoad = null;
     
     try { // Load administrators from database into memory
