@@ -79,7 +79,7 @@ app.use(session({ // Configure user session
 const customers = [];
 const tickets = [];
 
-// Create chat room
+// Return ticket ID to allow user to join chat room
 app.post('/api/create-chat', (req, res) => {
     try {
         const customerID = req.session.user.customerID;
@@ -88,9 +88,7 @@ app.post('/api/create-chat', (req, res) => {
             return res.status(400).json({ success: false, message: 'Customer or ticket ID not found in session' });
         }
 
-        // Add the customer to the chat room
-        io.to(ticketID).emit('joinRoom', { ticketID });
-        res.status(200).json({ success: true, message: `Joined chat room ${ticketID} successfully`, ticketID });
+        res.status(200).json({ success: true, ticketID }); // Return the customer's ticket ID
     } catch (error) {
         console.error('Error creating chat room:', error);
         res.status(500).json({ success: false, message: 'Failed to create chat room' });
@@ -351,6 +349,11 @@ server.listen(PORT, async () => {
 });
 
 io.on('connection', (socket) => {
+    socket.on('joinRoom', (ticketID) => { // Listen for joinRoom event
+        socket.join(ticketID); // Add client to room
+        console.log(`Client joined room ${ticketID}`);
+    });
+
     socket.on('fetchMessages', async (ticketID) => { // Listen for fetchMessages event
         try {
             const [rows] = await pool.promise().query('SELECT * FROM messages WHERE ticket_id = ?', [ticketID]);

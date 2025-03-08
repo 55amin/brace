@@ -4,6 +4,7 @@ const socketIo = require('socket.io');
 const path = require('path');
 const cors = require('cors');
 const session = require('express-session');
+const crypto = require('crypto');
 const MySQLStore = require('express-mysql-session')(session);
 const Administrator = require('./public/models/administrator');
 const Agent = require('./public/models/agent');
@@ -27,6 +28,8 @@ const io = socketIo(server, {
     transports: ['websocket', 'polling']
 });
 
+const key = crypto.scryptSync(process.env.ENCRYPTION_KEY, 'salt', 32);
+const iv = Buffer.alloc(16, 0); 
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -337,6 +340,11 @@ server.listen(PORT, async () => {
 });
 
 io.on('connection', (socket) => {
+    socket.on('joinRoom', (ticketID) => { // Listen for joinRoom event
+        socket.join(ticketID); // Add client to room
+        console.log(`Client joined room ${ticketID}`);
+    });
+
     socket.on('fetchMessages', async (ticketID) => { // Listen for fetchMessages event
         try {
             const [rows] = await pool.query('SELECT * FROM messages WHERE ticket_id = ?', [ticketID]);
@@ -347,8 +355,7 @@ io.on('connection', (socket) => {
                 row.message = decryptedMessage;
             });
 
-            // Emit all messages to client
-            socket.emit('receiveMessages', rows);
+            socket.emit('receiveMessages', rows); // Send all messages to client
         } catch (error) {
             console.error('Error fetching messages:', error);
         }

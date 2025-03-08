@@ -10,7 +10,7 @@ const { validateMessage } = require('../utils/validation');
 const { admins, agents } = require('../server');
 const { client, subscriber } = require('../utils/redis');
 
-// Create chat room
+// Return ticket ID to allow user to join chat room
 router.post('/create-chat', (req, res) => { 
     let ticketID;
     if (req.session.user.agentID) {
@@ -33,9 +33,7 @@ router.post('/create-chat', (req, res) => {
         return res.status(400).json({ success: false, message: 'Ticket not found' });
     }
 
-    // Add the agent to the chat room
-    req.app.get('io').to(ticketID).emit('joinRoom', { ticketID });
-    res.status(200).json({ success: true, message: `Joined chat room ${ticketID} successfully`, ticketID });
+    res.status(200).json({ success: true, ticketID }); // Return the agent's assigned ticket ID
 });
 
 // Send message

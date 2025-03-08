@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (result.success) {
             console.log(result.message);
             ticketID = result.ticketID;
+            socket.emit('joinRoom', ticketID); // Send joinRoom event to server
         } else {
             alert(result.message);
         }

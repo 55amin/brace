@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
     let ticketID;
-    
+
     try { // Add customer to chatroom
         const response = await fetch(`${baseUrl}/api/create-chat`, {
             method: 'POST',
@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (result.success) {
             console.log(result.message);
             ticketID = result.ticketID;
+            socket.emit('joinRoom', ticketID); // Send joinRoom event to server
         } else {
             alert(result.message);
         }
