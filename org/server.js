@@ -334,14 +334,6 @@ server.listen(PORT, async () => {
     }, 60 * 1000); 
 });
 
-io.on('connection', (socket) => { // Check for new client connections
-    console.log('New client connected');
-
-    socket.on('disconnect', () => {
-        console.log('Client disconnected');
-    });
-});
-
 // Close database connection
 process.on('SIGINT', () => {
     pool.end();

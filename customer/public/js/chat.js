@@ -1,46 +1,22 @@
 const baseUrl = window.location.origin;
 const socket = io(baseUrl);
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const chatMessages = document.getElementById('chatMessages');
-    const chatInput = document.getElementById('chatInput');
-
-    async function fetchMessages() {
-        try {
-            const response = await fetch(`${baseUrl}/api/get-messages`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-            const result = await response.json();
-    
-            if (result.success) { // Display all messages
-                chatMessages.innerHTML = '';
-                result.messages.forEach(message => { // Check who sent message
-                    const sender = message.agent_id ? 'Agent' : 'Customer';
-                    const messageRow = document.createElement('div');
-                    messageRow.className = `message ${sender.toLowerCase()}`;
-                    messageRow.innerHTML = `
-                        <div class="message-header">
-                            <span class="message-sender ${sender.toLowerCase()}">${sender}</span>
-                            <span class="message-time ${sender.toLowerCase()}">${new Date(message.created_at).toLocaleString()}</span>
-                        </div>
-                        <p>${message.message}</p>
-                    `;
-                    chatMessages.appendChild(messageRow);
-                });
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            } else {
-                alert(result.message);
-            }
-        } catch (error) {
-            console.error('Error fetching messages:', error);
-            alert('Failed to fetch messages');
-        }
-    }
-
+function displayMessage(message) { // Display message with sender and time
+    const sender = message.agent_id ? 'Agent' : 'Customer';
+    const messageRow = document.createElement('div');
+    messageRow.className = `message ${sender.toLowerCase()}`;
+    messageRow.innerHTML = `
+        <div class="message-header">
+            <span class="message-sender ${sender.toLowerCase()}">${sender}</span>
+            <span class="message-time ${sender.toLowerCase()}">${new Date(message.created_at).toLocaleString()}</span>
+        </div>
+        <p>${message.message}</p>
+    `;
+    chatMessages.appendChild(messageRow);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
     try { // Add customer to chatroom
         const response = await fetch(`${baseUrl}/api/create-chat`, {
             method: 'POST',
@@ -52,6 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         if (result.success) {
             console.log(result.message);
+            ticketID = result.ticketID;
         } else {
             alert(result.message);
         }
@@ -59,10 +36,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error creating chatroom:', error);
         alert('Failed to create chatroom');
     }
-    await fetchMessages();
 
-    socket.on('receiveMessage', async () => { // Listen for new messages
-        await fetchMessages();
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    let ticketID;
+    socket.emit('fetchMessages', ticketID); // Send fetchMessages event to server
+
+    socket.on('receiveMessages', (messages) => { // Load all messages when joining chat
+        chatMessages.innerHTML = ''; // Clear existing messages
+        messages.forEach(message => {
+            displayMessage(message);
+        });
+    });
+
+    socket.on('receiveMessage', (message) => { // Load new messages
+        displayMessage(message);
     });
     
     // Send a message
@@ -83,7 +71,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (result.success) {
                 document.getElementById('newMessage').value = '';
-                await fetchMessages();
             } else {
                 alert(result.message);
             }

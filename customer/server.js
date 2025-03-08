@@ -16,6 +16,7 @@ const nodemailer = require('nodemailer');
 const mysql = require('mysql2');
 const http = require('http');
 const socketIo = require('socket.io');
+const redis = require('redis');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -30,6 +31,11 @@ const io = socketIo(server, {
     },
     path: "/socket.io/",
     transports: ['websocket', 'polling']
+});
+
+const redisClient = redis.createClient({ // Configure Redis client
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
 });
 
 const key = crypto.scryptSync(process.env.ENCRYPTION_KEY, 'salt', 32);
@@ -102,7 +108,7 @@ app.post('/api/send-message', async (req, res) => {
         return res.status(400).json({ success: false, message: validatedMessage.error });
     }
 
-    try {
+    try { // Encrypt and insert message into database with relevant details
         const customerID = req.session.user.customerID;
         const ticketID = req.session.user.ticketID;
         const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
@@ -113,6 +119,9 @@ app.post('/api/send-message', async (req, res) => {
             [ticketID, customerID, encryptedMessage, new Date()]
         );
         
+        // Publish the message to Redis
+        redisClient.publish('customerMessages', JSON.stringify({ ticketID, customerID, message: encryptedMessage }));
+
         // Emit the message to the room
         io.to(ticketID).emit('receiveMessage', { customerID, message: encryptedMessage });
         res.status(200).json({ success: true, message: 'Message sent successfully' });
@@ -122,22 +131,18 @@ app.post('/api/send-message', async (req, res) => {
     }
 });
 
-// Return all messages
-app.post('/api/get-messages', async (req, res) => {
-    try {
-        const ticketID = req.session.user.ticketID;
-        const [rows] = await pool.promise().query('SELECT * FROM messages WHERE ticket_id = ?', [ticketID]);
-        rows.forEach(row => {
-            const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-            let decryptedMessage = decipher.update(row.message, 'hex', 'utf8');
-            decryptedMessage += decipher.final('utf8');
-            row.message = decryptedMessage;
-        });
-        res.status(200).json({ success: true, messages: rows });
-    } catch (error) {
-        console.error('Error fetching messages:', error);
-        res.status(500).json({ success: false, message: 'Failed to fetch messages' });
-    }
+// Subscribe to agentMessages channel to receive messages from agents
+redisClient.subscribe('agentMessages');
+redisClient.on('message', (channel, message) => {
+    const { ticketID, agentID, message: encryptedMessage } = JSON.parse(message);
+
+    // Decrypt the message
+    const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+    let decryptedMessage = decipher.update(encryptedMessage, 'hex', 'utf8');
+    decryptedMessage += decipher.final('utf8');
+
+    // Broadcast the message to the customer's chat room using Socket.IO
+    io.to(ticketID).emit('receiveMessage', { agentID, message: decryptedMessage });
 });
 
 app.get('/', (req, res) => {
@@ -345,10 +350,21 @@ server.listen(PORT, async () => {
     }, 60 * 1000); 
 });
 
-io.on('connection', (socket) => { // Check for new client connections
-    console.log('New client connected');
+io.on('connection', (socket) => {
+    socket.on('fetchMessages', async (ticketID) => { // Listen for fetchMessages event
+        try {
+            const [rows] = await pool.promise().query('SELECT * FROM messages WHERE ticket_id = ?', [ticketID]);
+            rows.forEach(row => {
+                const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+                let decryptedMessage = decipher.update(row.message, 'hex', 'utf8');
+                decryptedMessage += decipher.final('utf8');
+                row.message = decryptedMessage;
+            });
 
-    socket.on('disconnect', () => {
-        console.log('Client disconnected');
+            // Emit all messages to client
+            socket.emit('receiveMessages', rows);
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
     });
 });
