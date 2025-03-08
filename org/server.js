@@ -4,13 +4,13 @@ const socketIo = require('socket.io');
 const path = require('path');
 const cors = require('cors');
 const session = require('express-session');
-const redis = require('redis');
 const MySQLStore = require('express-mysql-session')(session);
 const Administrator = require('./public/models/administrator');
 const Agent = require('./public/models/agent');
 const Task = require('./public/models/task');
 const Customer = require('./public/models/customer');
 const Ticket = require('./public/models/ticket');
+const { redisConnect } = require('./utils/redis');
 const pool = require('./utils/db');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -26,20 +26,6 @@ const io = socketIo(server, {
     path: "/socket.io/",
     transports: ['websocket', 'polling']
 });
-
-const client = redis.createClient({ // Configure Redis client
-    username: 'default',
-    password: process.env.REDIS_PASSWORD,
-    socket: {
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT
-    }
-});
-const subscriber = client.duplicate(); // Configure duplicate Redis client for subscribing to channels
-module.exports = {
-    client,
-    subscriber
-};
 
 app.use(cors());
 app.use(express.json());
@@ -155,8 +141,7 @@ app.use('/api', chatRoutes);
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, async () => {
     console.log(`Server is running on port ${PORT}`);
-    await client.connect(); // Connect to Redis server
-    await subscriber.connect(); 
+    await redisConnect(); // Connect to Redis server
     let firstLoad = null;
     
     try { // Load administrators from database into memory
@@ -349,6 +334,25 @@ server.listen(PORT, async () => {
             console.error('Error loading customers and tickets from database:', err);
         }
     }, 60 * 1000); 
+});
+
+io.on('connection', (socket) => {
+    socket.on('fetchMessages', async (ticketID) => { // Listen for fetchMessages event
+        try {
+            const [rows] = await pool.promise().query('SELECT * FROM messages WHERE ticket_id = ?', [ticketID]);
+            rows.forEach(row => {
+                const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+                let decryptedMessage = decipher.update(row.message, 'hex', 'utf8');
+                decryptedMessage += decipher.final('utf8');
+                row.message = decryptedMessage;
+            });
+
+            // Emit all messages to client
+            socket.emit('receiveMessages', rows);
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    });
 });
 
 // Close database connection

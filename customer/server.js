@@ -115,12 +115,13 @@ app.post('/api/send-message', async (req, res) => {
             'INSERT INTO messages (ticket_id, customer_id, message, created_at) VALUES (?, ?, ?, ?)',
             [ticketID, customerID, encryptedMessage, new Date()]
         );
+        let decryptedMessage = JSON.stringify({ ticketID, customerID, message: validatedMessage.value });
         
         // Publish the message to Redis
         await client.publish('customerMessages', JSON.stringify({ ticketID, customerID, message: encryptedMessage }));
 
         // Emit the message to the room
-        io.to(ticketID).emit('receiveMessage', { customerID, message: encryptedMessage });
+        io.to(ticketID).emit('receiveMessage', { customerID, message: decryptedMessage });
         res.status(200).json({ success: true, message: 'Message sent successfully' });
     } catch (error) {
         console.error('Error sending message:', error);

@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const redis = require('redis');
 const pool = require('../utils/db');
 const crypto = require('crypto');
 const dotenv = require('dotenv');
@@ -8,7 +7,8 @@ dotenv.config();
 const key = crypto.scryptSync(process.env.ENCRYPTION_KEY, 'salt', 32);
 const iv = Buffer.alloc(16, 0); 
 const { validateMessage } = require('../utils/validation');
-const { admins, agents, client, subscriber } = require('../server');
+const { admins, agents } = require('../server');
+const { client, subscriber } = require('../utils/redis');
 
 // Create chat room
 router.post('/create-chat', (req, res) => { 
