@@ -1,4 +1,13 @@
 // Validation functions
+function escapeChar(text) {
+    return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 function validateUsername(username) {
     const regex = /^[A-Za-z0-9_]{6,20}$/; 
     if (!regex.test(username)) {
@@ -7,12 +16,11 @@ function validateUsername(username) {
             error: "Invalid username. Please enter a username between 6 and 20 characters, containing only letters, numbers and underscores."
         };
     }
-    return { isValid: true, value: username };
+    return { isValid: true, value: escapeChar(username) };
 }
 
 function validateEmail(email) {
     const normalised = email.toLowerCase(); 
-    
     if (normalised.length > 320) {
         return {
             isValid: false,
@@ -27,29 +35,29 @@ function validateEmail(email) {
             error: "Invalid email address. Please enter an email address in valid format (e.g., example@domain.com)."
         };
     }
-    return { isValid: true, value: normalised };
+    return { isValid: true, value: escapeChar(normalised) };
 }
 
 function validateTitle(title) {
-    const regex = /^[A-Za-z0-9\s.,'"\-:;&£$(){}[\]+=@!?*%\/|]{1,200}$/;
+    const regex = /^[\s\S]{1,200}$/; 
     if (!regex.test(title)) {
         return {
             isValid: false,
             error: "Invalid title. Title must be 1-200 characters long."
         };
     }
-    return { isValid: true, value: title };
+    return { isValid: true, value: escapeChar(title) };
 }
 
 function validateDesc(desc) {
-    const regex = /^[A-Za-z0-9\s.,'"\-:;&£$(){}[\]+=@!?*%\/|]{1,2000}$/;
+    const regex = /^[\s\S]{1,2000}$/; 
     if (!regex.test(desc)) {
         return {
             isValid: false,
             error: "Invalid description. Description must be 1-2000 characters long."
         };
     }
-    return { isValid: true, value: desc };
+    return { isValid: true, value: escapeChar(desc) };
 }
 
 function validateMessage(message) {
@@ -60,7 +68,7 @@ function validateMessage(message) {
             error: "Invalid message. Message must be 1-1000 characters long."
         };
     }
-    return { isValid: true, value: message };
+    return { isValid: true, value: escapeChar(message) };
 }
 
 module.exports = {
