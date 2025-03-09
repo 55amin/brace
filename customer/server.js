@@ -32,7 +32,6 @@ const io = socketIo(server, {
     transports: ['websocket', 'polling']
 });
 
-
 const client = redis.createClient({ // Configure Redis client
     username: 'default',
     password: process.env.REDIS_PASSWORD,

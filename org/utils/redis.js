@@ -2,7 +2,7 @@ const redis = require('redis');
 const dotenv = require('dotenv');
 dotenv.config();
 
-const client = redis.createClient({
+const client = redis.createClient({ // Configure Redis client
     username: 'default',
     password: process.env.REDIS_PASSWORD,
     socket: {
@@ -11,7 +11,7 @@ const client = redis.createClient({
     }
 });
 
-const subscriber = client.duplicate();
+const subscriber = client.duplicate(); // Configure duplicate Redis client for subscribing to channels
 
 const redisConnect = async () => {
     await client.connect();
