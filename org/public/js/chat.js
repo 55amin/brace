@@ -107,11 +107,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     const closeTicket = document.getElementById('close');
     const minimise = document.getElementById('exit');
 
-    options.addEventListener('click', async () => {
-        optionContainer.display = 'flex';
+    options.addEventListener('click', () => {
+        optionContainer.style.display = 'flex';
     });
 
-    minimise.addEventListener('click', async () => {
-        optionContainer.display = 'none';
+    viewDetails.addEventListener('click', async () => {
+        
+    });
+
+    triageTicket.addEventListener('click', async () => {
+        
+    });
+
+    extendDuration.addEventListener('click', async () => {
+        
+    });
+
+    closeTicket.addEventListener('click', async () => {
+        
+    });
+
+    minimise.addEventListener('click', () => {
+        optionContainer.style.display = 'none';
     });
 });
