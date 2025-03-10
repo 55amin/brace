@@ -496,4 +496,6 @@ input:checked + .slider:before {
   background-color: #452fd0;
 }
 
-
+#options {
+    margin: 5px 45px 0 0;
+}
