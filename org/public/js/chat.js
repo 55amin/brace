@@ -98,4 +98,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert('Failed to send message');
         }
     });
+
+    const optionContainer = document.getElementById('option-container');
+    const options = document.getElementById('options');
+    const viewDetails = document.getElementById('details');
+    const triageTicket = document.getElementById('triage');
+    const extendDuration = document.getElementById('extend');
+    const closeTicket = document.getElementById('close');
+    const minimise = document.getElementById('exit');
+
+    options.addEventListener('click', async () => {
+        optionContainer.display = 'flex';
+    });
+
+    minimise.addEventListener('click', async () => {
+        optionContainer.display = 'none';
+    });
 });
