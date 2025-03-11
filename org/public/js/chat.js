@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const chatInput = document.getElementById('chatInput');
     let ticketID;
     const backButton = document.getElementById('backChat');
+    let role;
+    
     try {
         const response = await fetch(`${baseUrl}/api/get-role`, {
             method: 'GET',
@@ -32,8 +34,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const result = await response.json();
 
         if (result.admin) {
+            role = 'admin';
             backButton.href = '../admin/adminscreen.html';
         } else if (result.agent) {
+            role = 'agent';
             backButton.href = '../agent/agentscreen.html';
         }
     } catch (error) {
@@ -104,7 +108,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const options = document.getElementById('options');
     const viewDetails = document.getElementById('details');
     const triageTicket = document.getElementById('triage');
-    const extendDuration = document.getElementById('extend');
     const closeTicket = document.getElementById('close');
     const minimise = document.getElementById('exit');
 
@@ -117,15 +120,59 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     triageTicket.addEventListener('click', async () => {
-        
-    });
-
-    extendDuration.addEventListener('click', async () => {
-        
+        try {
+            const response = await fetch(`${baseUrl}/api/triage-ticket`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                showError(result.message, 'neutral');
+                setTimeout(async () => {
+                    if (role === 'agent') {
+                        window.location.href = '../agent/agebtscreen.html';
+                    } else if (role === 'admin') {
+                        window.location.href = '../admin/adminscreen.html';
+                    }
+                }, 4000);
+            } else {
+                showError(result.message);
+            }
+        } catch (error) {
+            console.error('Error triaging ticket:', error);
+            showError('Failed to triage ticket');
+        }
     });
 
     closeTicket.addEventListener('click', async () => {
-        
+        try {
+            const response = await fetch(`${baseUrl}/api/close-ticket`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                showError(result.message, 'neutral');
+                setTimeout(async () => {
+                    if (role === 'agent') {
+                        window.location.href = '../agent/agebtscreen.html';
+                    } else if (role === 'admin') {
+                        window.location.href = '../admin/adminscreen.html';
+                    }
+                }, 4000);
+            } else {
+                showError(result.message);
+            }
+        } catch (error) {
+            console.error('Error closing ticket:', error);
+            showError('Failed to close ticket');
+        }
     });
 
     minimise.addEventListener('click', () => {
