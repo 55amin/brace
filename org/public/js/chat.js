@@ -1,4 +1,5 @@
 const baseUrl = window.location.origin;
+import { showError } from '../helpers/showError.js';
 const socket = io(baseUrl);
 
 function displayMessage(message) { // Display message with sender and time
