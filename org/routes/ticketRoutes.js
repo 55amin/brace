@@ -1,33 +1,48 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../utils/db');
-const { admins, agents, tickets, customers } = require('../server');
+const { agents, tickets, customers } = require('../server');
 const mail = require('../utils/mail');
 
 router.post('/close-ticket', async (req, res) => {
     try {
-        const user = req.session.user;
+        const agentID = req.session.user.agentID;
         let ticketID;
-        if (user.agentID) {
-            const agent = agents.find(agent => agent.agentID === user.agentID);
+        let agent;
+        let customer;
+        
+        if (agentID) { // Remove ticket from agent in memory and in database
+            agent = agents.find(agent => agent.agentID === user.agentID);
             ticketID = agent.ticket;
             agent.completeTicket();
-            await pool.query('UPDATE tickets SET status = ?, assigned_to = ? WHERE ticket_id = ?', ['Complete', agent.agentID, ticketID]);
-        } else if (user.adminID) {
-            const admin = admins.find(admin => admin.adminID === user.adminID);
-            ticketID = admin.ticket;
-            admin.completeTicket();
-            await pool.query('UPDATE tickets SET status = ?, assigned_to = ? WHERE ticket_id = ?', ['Complete', admin.adminID, ticketID]);
+            await pool.query('UPDATE tickets SET status = ? WHERE ticket_id = ?', ['Complete', agent.agentID, ticketID]);
+            await pool.query('UPDATE agents SET ticket = null WHERE ticket = ?', ticketID);
         } else {
-            res.status(400).json({ success: false, error: 'Agent/admin or ticket not found' });
+            res.status(400).json({ success: false, error: 'Agent or ticket not found' });
         }
         
-        const ticket = tickets.find(agent => agent.agentID === user.agentID);
-        await mail.sendMail({
-            from: `Brace for Techmedic <${process.env.EMAIL_ADDRESS}>`,
-            to: admin.email,
+        const ticket = tickets.find(ticket => ticket.ticketID === ticketID);
+        if (ticket) {
+            ticket.setStatus('Complete') // Mark ticket as complete
+            customer = customers.find(customer => customer.customerID === ticket.creator);
+            if (customer) { // Remove ticket from customer
+                customer.removeTicket(ticket);
+            } else {
+                res.status(400).json({ success: false, error: 'Customer not found' });
+            }
+        } else {
+            res.status(400).json({ success: false, error: 'Ticket not found' });
+        }
+        
+        await mail.sendMail({ // Send email to customer with relevant ticket details
+            from: `Brace for Techmedic <${proecss.env.EMAIL_ADDRESS}>`,
+            to: customer.email,
             subject: 'Brace: Your ticket has been closed',
-            text: `Hi {`
+            text: `Hi ${customer.username},\n
+                   Your ticket, '${ticket.title}', has been closed.\n
+                   Description: ${ticket.desc}\n
+                   Type: ${ticket.type}\n
+                   Agent: ${agent.username}`
         });
         res.status(200).json({ success: true, message: 'Ticket closed and customer notified successfully' });
     } catch (err) {
