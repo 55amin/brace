@@ -5,6 +5,36 @@ const { agents, tickets, customers } = require('../server');
 const mail = require('../utils/mail');
 
 router.post('/get-ticket', async (req, res) => {
+    try {
+        const agentID = req.session.user.agentID;
+        
+        if (agentID) { // Find ticket from user's session
+            const agent = agents.find(agent => agent.agentID === agentID);
+            const ticketID = agent.ticket;
+            const ticket = tickets.find(ticket => ticket.ticketID === ticketID);
+
+            const customer = customers.find(customer => customer.customerID === ticket.creator);
+            if (customer) {
+                const ticketObj = {
+                    ticketID: ticket.ticketID,
+                    status: ticket.status,
+                    title: ticket.title,
+                    desc: ticket.desc,
+                    type: ticket.type,
+                    deadline: ticket.deadline,
+                    creationDate: ticket.creationDate,
+                    priority: ticket.priority,
+                    triage: ticket.triaged,
+                    customerID: customer.customerID,
+                    customerUsername: customer.username,
+                    customerEmail: customer.email
+                }
+
+                res.status(200).json({ success: true, ticketObj });
+            }
+    } catch (err) {
+        res.status(400).json({ success: false, error: 'User unauthenticated or unauthorised' });
+    }
 });
 
 router.post('/extend-ticket', async (req, res) => {
@@ -25,11 +55,11 @@ router.post('/triage-ticket', async (req, res) => {
             } else {
                 res.status(400).json({ success: false, error: 'Ticket not found' });
             }
+
+            res.status(200).json({ success: true, message: 'Ticket triaged successfully' });
         } else {
             res.status(400).json({ success: false, error: 'Agent or ticket not found' });
         }
-
-        res.status(200).json({ success: true, message: 'Ticket triaged successfully' });
     } catch (err) {
         res.status(400).json({ success: false, error: 'User unauthenticated or unauthorised' });
     }
