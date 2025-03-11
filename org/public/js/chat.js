@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const viewDetails = document.getElementById('details');
     const triageTicket = document.getElementById('triage');
     const closeTicket = document.getElementById('close');
+    const dropTicket = document.getElementById('drop');
     const minimise = document.getElementById('exit');
 
     options.addEventListener('click', () => {
@@ -173,6 +174,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error('Error closing ticket:', error);
             showError('Failed to close ticket');
         }
+    });
+
+    dropTicket.addEventListener('click', async () => {
+        
     });
 
     minimise.addEventListener('click', () => {
