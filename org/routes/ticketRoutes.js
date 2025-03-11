@@ -48,13 +48,16 @@ router.post('/triage-ticket', async (req, res) => {
             const agent = agents.find(agent => agent.agentID === agentID);
             const ticketID = agent.ticket;
             const ticket = tickets.find(ticket => ticket.ticketID === ticketID);
+
+            agent.completeTicket(); // Remove ticket from agent in memory and in database and update status
+            agent.setAvailability('Available');
+            await pool.query('UPDATE agents SET ticket = null WHERE ticket = ?', ticketID);
             
-            if (ticket) { // Set ticket to triaged in memory and database
-                ticket.triage();
-                await pool.query('UPDATE tickets SET triage = ?, priority_level = ? WHERE ticket_id = ?', [1, ticket.priority, ticketID]);
-            } else {
-                res.status(400).json({ success: false, error: 'Ticket not found' });
-            }
+            ticket.triage(); // Set ticket to triaged in memory and database
+            ticket.setStatus('Unassigned'); // Mark ticket as unassigned
+            ticket.assignedTo = null; // Unassign agent
+            await pool.query('UPDATE tickets SET triage = ?, priority_level = ?, status = ?, assigned_to = null WHERE ticket_id = ?',
+                             [1, ticket.priority, 'Unassigned', ticketID]);
 
             res.status(200).json({ success: true, message: 'Ticket triaged successfully' });
         } else {
