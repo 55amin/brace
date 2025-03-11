@@ -4,6 +4,37 @@ const pool = require('../utils/db');
 const { agents, tickets, customers } = require('../server');
 const mail = require('../utils/mail');
 
+router.post('/get-ticket', async (req, res) => {
+});
+
+router.post('/extend-ticket', async (req, res) => {
+});
+
+router.post('/triage-ticket', async (req, res) => {
+    try {
+        const agentID = req.session.user.agentID;
+        
+        if (agentID) { // Find ticket from user's session
+            const agent = agents.find(agent => agent.agentID === agentID);
+            const ticketID = agent.ticket;
+            const ticket = tickets.find(ticket => ticket.ticketID === ticketID);
+            
+            if (ticket) { // Set ticket to triaged in memory and database
+                ticket.triage();
+                await pool.query('UPDATE tickets SET triage = ?, priority_level = ? WHERE ticket_id = ?', [1, ticket.priority, ticketID]);
+            } else {
+                res.status(400).json({ success: false, error: 'Ticket not found' });
+            }
+        } else {
+            res.status(400).json({ success: false, error: 'Agent or ticket not found' });
+        }
+
+        res.status(200).json({ success: true, message: 'Ticket triaged successfully' });
+    } catch (err) {
+        res.status(400).json({ success: false, error: 'User unauthenticated or unauthorised' });
+    }
+});
+
 router.post('/drop-ticket', async (req, res) => {
     try {
         const agentID = req.session.user.agentID;
