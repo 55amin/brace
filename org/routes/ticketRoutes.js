@@ -4,6 +4,36 @@ const pool = require('../utils/db');
 const { agents, tickets, customers } = require('../server');
 const mail = require('../utils/mail');
 
+router.post('/drop-ticket', async (req, res) => {
+    try {
+        const agentID = req.session.user.agentID;
+        let ticketID;
+        
+        if (agentID) { // Remove ticket from agent in memory and in database and update status
+            const agent = agents.find(agent => agent.agentID === agentID);
+            ticketID = agent.ticket;
+            agent.completeTicket();
+            agent.setAvailability('Available');
+            await pool.query('UPDATE tickets SET status = ?, assigned_to = null WHERE ticket_id = ?', ['Unassigned', ticketID]);
+            await pool.query('UPDATE agents SET ticket = null WHERE ticket = ?', ticketID);
+        } else {
+            res.status(400).json({ success: false, error: 'Agent or ticket not found' });
+        }
+
+        const ticket = tickets.find(ticket => ticket.ticketID === ticketID);
+        if (ticket) {
+            ticket.setStatus('Unassigned'); // Mark ticket as unassigned
+            ticket.assignedTo = null; // Unassign agent
+        } else {
+            res.status(400).json({ success: false, error: 'Ticket not found' });
+        }
+        
+        res.status(200).json({ success: true, message: 'Ticket dropped successfully' });
+    } catch (err) {
+        res.status(400).json({ success: false, error: 'User unauthenticated or unauthorised' });
+    }
+});
+
 router.post('/close-ticket', async (req, res) => {
     try {
         const agentID = req.session.user.agentID;
@@ -12,10 +42,10 @@ router.post('/close-ticket', async (req, res) => {
         let customer;
         
         if (agentID) { // Remove ticket from agent in memory and in database
-            agent = agents.find(agent => agent.agentID === user.agentID);
+            agent = agents.find(agent => agent.agentID === agentID);
             ticketID = agent.ticket;
             agent.completeTicket();
-            await pool.query('UPDATE tickets SET status = ? WHERE ticket_id = ?', ['Complete', agent.agentID, ticketID]);
+            await pool.query('UPDATE tickets SET status = ? WHERE ticket_id = ?', ['Complete', ticketID]);
             await pool.query('UPDATE agents SET ticket = null WHERE ticket = ?', ticketID);
         } else {
             res.status(400).json({ success: false, error: 'Agent or ticket not found' });
