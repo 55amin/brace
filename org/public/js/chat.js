@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 showError(result.message, 'neutral');
                 setTimeout(async () => {
                     if (role === 'agent') {
-                        window.location.href = '../agent/agebtscreen.html';
+                        window.location.href = '../agent/agentscreen.html';
                     } else if (role === 'admin') {
                         window.location.href = '../admin/adminscreen.html';
                     }
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 showError(result.message, 'neutral');
                 setTimeout(async () => {
                     if (role === 'agent') {
-                        window.location.href = '../agent/agebtscreen.html';
+                        window.location.href = '../agent/agentscreen.html';
                     } else if (role === 'admin') {
                         window.location.href = '../admin/adminscreen.html';
                     }

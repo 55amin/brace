@@ -3,6 +3,8 @@ const router = express.Router();
 const pool = require('../utils/db');
 const { agents, tickets, customers } = require('../server');
 const mail = require('../utils/mail');
+const dotenv = require('dotenv');
+dotenv.config();
 
 router.post('/get-ticket', async (req, res) => {
     try {
@@ -32,6 +34,7 @@ router.post('/get-ticket', async (req, res) => {
 
                 res.status(200).json({ success: true, ticketObj });
             }
+        }
     } catch (err) {
         res.status(400).json({ success: false, error: 'User unauthenticated or unauthorised' });
     }
@@ -131,7 +134,7 @@ router.post('/close-ticket', async (req, res) => {
         }
         
         await mail.sendMail({ // Send email to customer with relevant ticket details
-            from: `Brace for Techmedic <${proecss.env.EMAIL_ADDRESS}>`,
+            from: `Brace for Techmedic <${process.env.EMAIL_ADDRESS}>`,
             to: customer.email,
             subject: 'Brace: Your ticket has been closed',
             text: `Hi ${customer.username},\n
