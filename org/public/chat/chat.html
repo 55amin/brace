@@ -31,6 +31,7 @@
         <button type="button" id="close">Close ticket</button>
         <button type="button" id="drop">Drop ticket</button>
         <button type="button" id="exit">Minimise options</button>
+        <div id="error-container" class="error-container"></div>
     </div>
     <div class="chat-interface">
       <div class="chat-messages" id="chatMessages"></div>
@@ -41,6 +42,6 @@
       </form>
   </div>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-  <script src="../js/chat.js"></script>
+  <script type="module" src="../js/chat.js"></script>
 </body>
 </html>
