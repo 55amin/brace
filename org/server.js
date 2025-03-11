@@ -132,6 +132,7 @@ const updateRoutes = require('./routes/updateRoutes');
 const deleteRoutes = require('./routes/deleteRoutes');
 const actionRoutes = require('./routes/actionRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const ticketRoutes = require('./routes/ticketRoutes');
 
 app.use('/api', getRoutes);
 app.use('/api', createRoutes);
@@ -139,6 +140,7 @@ app.use('/api', updateRoutes);
 app.use('/api', deleteRoutes);
 app.use('/api', actionRoutes);
 app.use('/api', chatRoutes);
+app.use('/api', ticketRoutes);
 
 // Start server
 const PORT = process.env.PORT || 3000;
