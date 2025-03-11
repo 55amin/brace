@@ -43,6 +43,11 @@ router.post('/triage-ticket', async (req, res) => {
         
         if (agentID) { // Find ticket from user's session
             const agent = agents.find(agent => agent.agentID === agentID);
+        
+            if (agent.accessLvl === 3) {
+                res.status(400).json({ success: false, error: 'Level 3 agents cannot triage tickets' });
+            }
+            
             const ticketID = agent.ticket;
             const ticket = tickets.find(ticket => ticket.ticketID === ticketID);
 
