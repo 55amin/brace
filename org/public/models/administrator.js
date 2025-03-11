@@ -30,7 +30,7 @@ class Administrator {
       this.ticket = ticket;
     }
 
-    completeTicket(ticket) {
+    completeTicket() {
       this.ticket = null;
     }
 }
