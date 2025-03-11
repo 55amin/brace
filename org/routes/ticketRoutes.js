@@ -37,9 +37,6 @@ router.post('/get-ticket', async (req, res) => {
     }
 });
 
-router.post('/extend-ticket', async (req, res) => {
-});
-
 router.post('/triage-ticket', async (req, res) => {
     try {
         const agentID = req.session.user.agentID;
