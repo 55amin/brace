@@ -30,8 +30,7 @@ router.post('/get-ticket', async (req, res) => {
                     customerID: customer.customerID,
                     customerUsername: customer.username,
                     customerEmail: customer.email
-                }
-
+                };
                 res.status(200).json({ success: true, ticketObj });
             }
         }
@@ -48,7 +47,7 @@ router.post('/triage-ticket', async (req, res) => {
             const agent = agents.find(agent => agent.agentID === agentID);
         
             if (agent.accessLvl === 3) {
-                res.status(400).json({ success: false, error: 'Level 3 agents cannot triage tickets' });
+                returnres.status(400).json({ success: false, error: 'Level 3 agents cannot triage tickets' });
             }
             
             const ticketID = agent.ticket;
@@ -62,7 +61,7 @@ router.post('/triage-ticket', async (req, res) => {
             ticket.setStatus('Unassigned'); // Mark ticket as unassigned
             ticket.assignedTo = null; // Unassign agent
             await pool.query('UPDATE tickets SET triage = ?, priority_level = ?, status = ?, assigned_to = null WHERE ticket_id = ?',
-                             [1, ticket.priority, 'Unassigned', ticketID]);
+            [1, ticket.priority, 'Unassigned', ticketID]);
 
             res.status(200).json({ success: true, message: 'Ticket triaged successfully' });
         } else {
@@ -86,7 +85,7 @@ router.post('/drop-ticket', async (req, res) => {
             await pool.query('UPDATE tickets SET status = ?, assigned_to = null WHERE ticket_id = ?', ['Unassigned', ticketID]);
             await pool.query('UPDATE agents SET ticket = null WHERE ticket = ?', ticketID);
         } else {
-            res.status(400).json({ success: false, error: 'Agent or ticket not found' });
+            return res.status(400).json({ success: false, error: 'Agent or ticket not found' });
         }
 
         const ticket = tickets.find(ticket => ticket.ticketID === ticketID);
@@ -94,7 +93,7 @@ router.post('/drop-ticket', async (req, res) => {
             ticket.setStatus('Unassigned'); // Mark ticket as unassigned
             ticket.assignedTo = null; // Unassign agent
         } else {
-            res.status(400).json({ success: false, error: 'Ticket not found' });
+            return res.status(400).json({ success: false, error: 'Ticket not found' });
         }
         
         res.status(200).json({ success: true, message: 'Ticket dropped successfully' });
@@ -114,10 +113,10 @@ router.post('/close-ticket', async (req, res) => {
             agent = agents.find(agent => agent.agentID === agentID);
             ticketID = agent.ticket;
             agent.completeTicket();
-            await pool.query('UPDATE tickets SET status = ? WHERE ticket_id = ?', ['Complete', ticketID]);
+            await pool.query('UPDATE tickets SET status = ?, completed_at = ? WHERE ticket_id = ?', ['Completed', new Date(), ticketID]);
             await pool.query('UPDATE agents SET ticket = null WHERE ticket = ?', ticketID);
         } else {
-            res.status(400).json({ success: false, error: 'Agent or ticket not found' });
+            return res.status(400).json({ success: false, error: 'Agent or ticket not found' });
         }
         
         const ticket = tickets.find(ticket => ticket.ticketID === ticketID);
@@ -127,10 +126,10 @@ router.post('/close-ticket', async (req, res) => {
             if (customer) { // Remove ticket from customer
                 customer.removeTicket(ticket);
             } else {
-                res.status(400).json({ success: false, error: 'Customer not found' });
+                return res.status(400).json({ success: false, error: 'Customer not found' });
             }
         } else {
-            res.status(400).json({ success: false, error: 'Ticket not found' });
+            return res.status(400).json({ success: false, error: 'Ticket not found' });
         }
         
         await mail.sendMail({ // Send email to customer with relevant ticket details
@@ -138,14 +137,14 @@ router.post('/close-ticket', async (req, res) => {
             to: customer.email,
             subject: 'Brace: Your ticket has been closed',
             text: `Hi ${customer.username},\n
-                   Your ticket, '${ticket.title}', has been closed.\n
-                   Description: ${ticket.desc}\n
-                   Type: ${ticket.type}\n
-                   Agent: ${agent.username}`
+            Your ticket, '${ticket.title}', has been closed.\n
+            Description: ${ticket.desc}\n
+            Type: ${ticket.type}\n
+            Agent: ${agent.username}`
         });
         res.status(200).json({ success: true, message: 'Ticket closed and customer notified successfully' });
     } catch (err) {
-        res.status(400).json({ success: false, error: 'User unauthenticated or unauthorised' });
+        res.status(400).json({ success: false, error: 'Failed to close ticket' });
     }
 });
 

@@ -117,7 +117,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     viewDetails.addEventListener('click', async () => {
-        
+        try {
+            const response = await fetch(`${baseUrl}/api/get-ticket`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                const ticket = result.ticketObj;
+                const triaged = ticket.triage ? 'Yes' : 'No';
+                const ticketCreation = new Date(ticket.creationDate).toLocaleString();
+                const ticketDeadline = new Date(ticket.deadline).toLocaleString();
+                const ticketBox = document.createElement('div');
+                ticketBox.className = 'ticket-box';
+                ticketBox.innerHTML = `
+                    <p>Ticket ID: ${ticket.ticketID}</p>
+                    <p>Status: ${ticket.status} || Triaged: ${triaged}</p>
+                    <p>Title: ${ticket.title}</p>
+                    <p>Description: ${ticket.desc}</p>
+                    <p>Type: ${ticket.type}</p>
+                    <p>Priority: ${ticket.priority}</p>
+                    <p>Creation date: ${ticketCreation} || Deadline: ${ticketDeadline}</p>
+                    <p>Customer ID: ${ticket.customerID} || Customer username: ${ticket.customerUsername}</p>
+                    <p>Customer email address: ${ticket.customerEmail}</p>
+                    <button id="self-assign-${ticket.ticketID}">Self-assign ticket</button>
+                `;
+                optionContainer.appendChild(ticketBox);
+            } else {
+                showError(result.message);
+            }
+        } catch (error) {
+            console.error('Error fetching ticket details:', error);
+            showError('Failed to fetch ticket details');
+        }
     });
 
     triageTicket.addEventListener('click', async () => {
@@ -138,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     } else if (role === 'admin') {
                         window.location.href = '../admin/adminscreen.html';
                     }
-                }, 4000);
+                }, 3000);
             } else {
                 showError(result.message);
             }
@@ -166,7 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     } else if (role === 'admin') {
                         window.location.href = '../admin/adminscreen.html';
                     }
-                }, 4000);
+                }, 3000);
             } else {
                 showError(result.message);
             }
@@ -177,7 +212,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     dropTicket.addEventListener('click', async () => {
-        
+        try {
+            const response = await fetch(`${baseUrl}/api/drop-ticket`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                showError(result.message, 'neutral');
+                setTimeout(async () => {
+                    if (role === 'agent') {
+                        window.location.href = '../agent/agentscreen.html';
+                    } else if (role === 'admin') {
+                        window.location.href = '../admin/adminscreen.html';
+                    }
+                }, 3000);
+            } else {
+                showError(result.message);
+            }
+        } catch (error) {
+            console.error('Error dropping ticket:', error);
+            showError('Failed to drop ticket');
+        }
     });
 
     minimise.addEventListener('click', () => {
