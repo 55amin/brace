@@ -483,16 +483,16 @@ input:checked + .slider:before {
   transition: background-color 0.3s;
 }
 
-.chat-messages::-webkit-scrollbar, .option-container::-webkit-scrollbar {
+.chat-messages::-webkit-scrollbar, #option-container::-webkit-scrollbar {
   width: 8px;
 }
 
-.chat-messages::-webkit-scrollbar-thumb, .option-container::-webkit-scrollbar-thumb {
+.chat-messages::-webkit-scrollbar-thumb, #option-container::-webkit-scrollbar-thumb {
   background-color: #1600a0;
   border-radius: 10px;
 }
 
-.chat-messages::-webkit-scrollbar-thumb:hover, .option-container::-webkit-scrollbar-thumb:hover {
+.chat-messages::-webkit-scrollbar-thumb:hover, #option-container::-webkit-scrollbar-thumb:hover {
   background-color: #452fd0;
 }
 
