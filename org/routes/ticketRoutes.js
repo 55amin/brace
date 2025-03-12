@@ -17,7 +17,7 @@ router.post('/get-ticket', async (req, res) => {
 
             const customer = customers.find(customer => customer.customerID === ticket.creator);
             if (customer) {
-                const ticketObj = {
+                const ticketObj = { // Return ticket object with all relevant details
                     ticketID: ticket.ticketID,
                     status: ticket.status,
                     title: ticket.title,
