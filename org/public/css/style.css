@@ -517,6 +517,6 @@ input:checked + .slider:before {
   overflow-y: scroll;
 }
 
-#option-container.ticket-box {
+#option-container .ticket-box {
   background-color: #452fd0;
 }
