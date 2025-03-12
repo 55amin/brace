@@ -118,36 +118,38 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     viewDetails.addEventListener('click', async () => {
         try {
-            const response = await fetch(`${baseUrl}/api/get-ticket`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+            const ticketBox = document.querySelector('.ticket-box');
+            if (!ticketBox) {
+                const response = await fetch(`${baseUrl}/api/get-ticket`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    const ticket = result.ticketObj;
+                    const triaged = ticket.triage ? 'Yes' : 'No';
+                    const ticketCreation = new Date(ticket.creationDate).toLocaleString();
+                    const ticketDeadline = new Date(ticket.deadline).toLocaleString();
+                    const ticketBox = document.createElement('div');
+                    ticketBox.className = 'ticket-box';
+                    ticketBox.innerHTML = `
+                        <p>Ticket ID: ${ticket.ticketID}</p>
+                        <p>Status: ${ticket.status} || Triaged: ${triaged}</p>
+                        <p>Title: ${ticket.title}</p>
+                        <p>Description: ${ticket.desc}</p>
+                        <p>Type: ${ticket.type}</p>
+                        <p>Priority: ${ticket.priority}</p>
+                        <p>Creation date: ${ticketCreation} || Deadline: ${ticketDeadline}</p>
+                        <p>Customer ID: ${ticket.customerID} || Customer username: ${ticket.customerUsername}</p>
+                        <p>Customer email address: ${ticket.customerEmail}</p>
+                    `;
+                    optionContainer.appendChild(ticketBox);
+                } else {
+                    showError(result.message);
                 }
-            });
-            const result = await response.json();
-            
-            if (result.success) {
-                const ticket = result.ticketObj;
-                const triaged = ticket.triage ? 'Yes' : 'No';
-                const ticketCreation = new Date(ticket.creationDate).toLocaleString();
-                const ticketDeadline = new Date(ticket.deadline).toLocaleString();
-                const ticketBox = document.createElement('div');
-                ticketBox.className = 'ticket-box';
-                ticketBox.innerHTML = `
-                    <p>Ticket ID: ${ticket.ticketID}</p>
-                    <p>Status: ${ticket.status} || Triaged: ${triaged}</p>
-                    <p>Title: ${ticket.title}</p>
-                    <p>Description: ${ticket.desc}</p>
-                    <p>Type: ${ticket.type}</p>
-                    <p>Priority: ${ticket.priority}</p>
-                    <p>Creation date: ${ticketCreation} || Deadline: ${ticketDeadline}</p>
-                    <p>Customer ID: ${ticket.customerID} || Customer username: ${ticket.customerUsername}</p>
-                    <p>Customer email address: ${ticket.customerEmail}</p>
-                    <button id="self-assign-${ticket.ticketID}">Self-assign ticket</button>
-                `;
-                optionContainer.appendChild(ticketBox);
-            } else {
-                showError(result.message);
             }
         } catch (error) {
             console.error('Error fetching ticket details:', error);
