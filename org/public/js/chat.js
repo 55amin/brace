@@ -112,14 +112,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dropTicket = document.getElementById('drop');
     const minimise = document.getElementById('exit');
 
-    options.addEventListener('click', () => {
+    options.addEventListener('click', () => { // Open the options menu
         optionContainer.style.display = 'flex';
     });
 
     viewDetails.addEventListener('click', async () => {
         try {
             const ticketBox = document.querySelector('.ticket-box');
-            if (!ticketBox) {
+            if (!ticketBox) { // Prevent multiple ticket boxes from being created
                 const response = await fetch(`${baseUrl}/api/get-ticket`, {
                     method: 'POST',
                     headers: {
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
                 const result = await response.json();
                 
-                if (result.success) {
+                if (result.success) { // Display ticket details
                     const ticket = result.ticketObj;
                     const triaged = ticket.triage ? 'Yes' : 'No';
                     const ticketCreation = new Date(ticket.creationDate).toLocaleString();
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     triageTicket.addEventListener('click', async () => {
-        try {
+        try { // Triage and drop ticket
             const response = await fetch(`${baseUrl}/api/triage-ticket`, {
                 method: 'POST',
                 headers: {
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (result.success) {
                 showError(result.message, 'neutral');
-                setTimeout(async () => {
+                setTimeout(async () => { // Redirect user back to main screen after 3 seconds
                     if (role === 'agent') {
                         window.location.href = '../agent/agentscreen.html';
                     } else if (role === 'admin') {
@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     closeTicket.addEventListener('click', async () => {
-        try {
+        try { // Close ticket and notify customer
             const response = await fetch(`${baseUrl}/api/close-ticket`, {
                 method: 'POST',
                 headers: {
@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (result.success) {
                 showError(result.message, 'neutral');
                 setTimeout(async () => {
-                    if (role === 'agent') {
+                    if (role === 'agent') { // Redirect user back to main screen after 3 seconds
                         window.location.href = '../agent/agentscreen.html';
                     } else if (role === 'admin') {
                         window.location.href = '../admin/adminscreen.html';
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     dropTicket.addEventListener('click', async () => {
-        try {
+        try { // Drop ticket
             const response = await fetch(`${baseUrl}/api/drop-ticket`, {
                 method: 'POST',
                 headers: {
@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (result.success) {
                 showError(result.message, 'neutral');
                 setTimeout(async () => {
-                    if (role === 'agent') {
+                    if (role === 'agent') { // Redirect user back to main screen after 3 seconds
                         window.location.href = '../agent/agentscreen.html';
                     } else if (role === 'admin') {
                         window.location.href = '../admin/adminscreen.html';
@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    minimise.addEventListener('click', () => {
+    minimise.addEventListener('click', () => { // Minimise the options menu
         optionContainer.style.display = 'none';
     });
 });
