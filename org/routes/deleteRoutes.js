@@ -19,7 +19,7 @@ router.post('/delete-user', async (req, res) => {
         } else if (role === 'agent') {
             const agent = agents.find(agent => agent.agentID === userId);
             if (agent) {
-                agent.splice(agents.indexOf(agent), 1);
+                agents.splice(agents.indexOf(agent), 1);
                 await pool.query('DELETE FROM agents WHERE agent_id = ?', [userId]);
             }
         }
