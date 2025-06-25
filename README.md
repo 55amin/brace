@@ -23,6 +23,7 @@ A full-stack, multi-role task, ticket & agent management system, developed as pa
 - Role-specific scheduling features for agents and admins
 
 *Automated ticket assignment*
+
 Tickets are automatically assigned to agents based on availability
 
 ## Tech Stack
