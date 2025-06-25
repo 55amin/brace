@@ -1,39 +1,42 @@
 # Brace
-A full-stack, multi-role task, ticket & agent management system, developed as part of my computer science A-Level project. Brace consists of two integrated web applications: one for customers and one for agents/admins.
+Brace is a full-stack, multi-role task, ticket, and agent management system developed as part of my A-level Computer Science NEA project. It consists of two integrated web applications — one for customers and one for support staff (agents and administrators).
+
+Brace streamlines technical support operations by combining ticket tracking, task management, real-time communication, and admin coordination in a single system.
 
 ## Features
 *Customer Portal*
-- Create support tickets through a web interface  
+- Submit support tickets through a web interface  
 - View existing tickets and their statuses  
-- Real-time chat with support agents  
+- Real-time chat with assigned support agents  
 
 *Agent & Admin Portal*
-- Agents can:  
-  - Respond to tickets  
-  - Mark tickets and tasks as completed  
-  - Chat in real-time with customers
-    
-- Admins can:  
-  - Create and assign tasks  
-  - Manage agents and other admins  
-  - View and coordinate via a calendar dashboard  
+Agents can:
+- Respond to assigned customer tickets  
+- Mark tickets and tasks as completed  
+- Communicate with customers in real time  
+
+Admins can:
+- Create and assign tasks to agents  
+- Manage agent and admin accounts  
+- Coordinate workflows through a calendar dashboard  
 
 *Calendar View*
-- Visualize tickets and tasks by date  
-- Role-specific scheduling features for agents and admins
+- Visualise tickets and tasks by date  
+- Role-specific calendar views (agents see assigned tasks; admins see all activity)
 
-*Automated ticket assignment*\
-Tickets are automatically assigned to agents based on availability
+*Automated Ticket Assignment*/
+New tickets are automatically assigned to available agents based on workload
 
 ## Tech Stack
-- Frontend: HTML, CSS, JavaScript  
-- Backend: 
+- Frontend: HTML, CSS, JavaScript (with responsive design)  
+- Backend: Node.js with Express  
 - Database: MySQL  
-- Real-Time Communication:   
-WIP
+- Real-time Communication: WebSockets (`ws`)  
 
 ## Background
-Brace was developed to explore real-world applications of full-stack development, modular architecture, and deployment practices, particularly in the context of user-based permissions and task workflows. WIP
+Brace was built to strengthen my skills in full-stack web development, real-time backend systems, modular design, and cloud deployment. The system is designed to reflect real-world technical support workflows with clear role separation. It was previously deployed on Render, with data stored using alwaysdata and real-time communication powered by Redis, but it is no longer active.
 
 ## Limitations
-WIP
+- No media/file support in ticket chat  
+- Admins cannot directly respond to or manage tickets  
+- Agents are not notified when tickets are automatically assigned to them
